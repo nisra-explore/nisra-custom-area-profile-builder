@@ -1,27 +1,17 @@
 [
   {
-    "further_breakdown_df": "AGE_SYOA",
-    "nested_list_names": "Age (19 Categories)",
-    "Source": "Flexible Table Builder"
-  },
-  {
-    "further_breakdown_df": "AGE_SYOA",
+    "further_breakdown_df": "AGE_BAND_AGG7_A",
     "nested_list_names": "Age (7 Categories)",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "COB_1000",
+    "further_breakdown_df": "COB_AGG3",
     "nested_list_names": "Country of Birth",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "ECONOMIC_ACTIVITY_FTB",
+    "further_breakdown_df": "ECONOMIC_ACTIVITY_AGG9",
     "nested_list_names": "Economic Activity",
-    "Source": "Flexible Table Builder"
-  },
-  {
-    "further_breakdown_df": "ETHNIC_GROUP_INTERMEDIATE",
-    "nested_list_names": "Ethnic Group Label",
     "Source": "Flexible Table Builder"
   },
   {
@@ -35,27 +25,22 @@
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "HEALTH_IN_GENERAL",
+    "further_breakdown_df": "HEALTH_IN_GENERAL_AGG3",
     "nested_list_names": "Health in General",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "HH_FAMILY_COMPOSITION_AGG24_PERS",
+    "further_breakdown_df": "HH_FAMILY_COMPOSITION_AGG6_PERS",
     "nested_list_names": "Household Composition",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "HH_CAR_VAN_TC5_PERS",
+    "further_breakdown_df": "HH_CAR_VAN_TC2_PERS",
     "nested_list_names": "Household Car or Van Availability",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "HH_CENTRAL_HEATING_PERS",
-    "nested_list_names": "Household Central Heating",
-    "Source": "Flexible Table Builder"
-  },
-  {
-    "further_breakdown_df": "HH_DEPENDENT_CHILDREN_AGG12_PERS",
+    "further_breakdown_df": "HH_DEPENDENT_CHILDREN_IND_PERS",
     "nested_list_names": "Household Dependent Children",
     "Source": "Flexible Table Builder"
   },
@@ -65,47 +50,47 @@
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "MAR_CP_STATUS",
+    "further_breakdown_df": "MAR_CP_STATUS_AGG4",
     "nested_list_names": "Marital and Civil Partnership Status",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "OCCUPATION_CURRENT_3DIGIT",
+    "further_breakdown_df": "OCCUPATION_1DIGIT",
     "nested_list_names": "Occupation Current",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "DISTANCE_TO_STUDY_AGG11",
+    "further_breakdown_df": "DISTANCE_TO_STUDY_AGG8",
     "nested_list_names": "Place of Study Distance",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "TRANSPORT_TO_STUDY",
+    "further_breakdown_df": "TRANSPORT_TO_STUDY_AGG5",
     "nested_list_names": "Place of Study Method of Travel",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "DISTANCE_TO_WORK_AGG14_FTB",
+    "further_breakdown_df": "DISTANCE_TO_WORK_AGG8",
     "nested_list_names": "Place of Work Distance",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "TRANSPORT_TO_WORKPLACE_FTB",
+    "further_breakdown_df": "TRANSPORT_TO_WORKPLACE_AGG7",
     "nested_list_names": "Place of Work Method of Travel",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "IS_CARER",
+    "further_breakdown_df": "IS_CARER_AGG5",
     "nested_list_names": "Provision of Unpaid Care",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "HIGHEST_QUALIFICATION",
+    "further_breakdown_df": "HIGHEST_QUALIFICATION_AGG7",
     "nested_list_names": "Qualifications Highest Level",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "RELIGION_BELONG_TO_DVO_1000",
+    "further_breakdown_df": "RELIGION_BELONG_TO_AGG4",
     "nested_list_names": "Religion",
     "Source": "Flexible Table Builder"
   },
@@ -120,12 +105,12 @@
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "HH_TENURE_PERS",
+    "further_breakdown_df": "HH_TENURE_AGG5_PERS",
     "nested_list_names": "Household Tenure",
     "Source": "Flexible Table Builder"
   },
   {
-    "further_breakdown_df": "MAIN_LANGUAGE_1000",
+    "further_breakdown_df": "MAIN_LANGUAGE_AGG3",
     "nested_list_names": "Main Language",
     "Source": "Flexible Table Builder"
   },

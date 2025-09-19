@@ -1,31 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
 const map = new maplibregl.Map({
     container: 'map',
-    style: {
-    version: 8,
-    sources: {
-        osmRaster: {
-        type: 'raster',
-        tiles: [
-            'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-        ],
-        tileSize: 256,
-        attribution:
-            '© OpenStreetMap contributors'
-        }
-    },
-    layers: [
-        {
-        id: 'osm-raster-layer',
-        type: 'raster',
-        source: 'osmRaster'
-        }
-    ]
-    },
+    style: 'https://raw.githubusercontent.com/NISRA-Tech-Lab/map_tiles/main/basemap_styles/style-omt.json',
     center: [-6.8, 54.65],
     zoom: 7.5,
     minZoom: 7.5,
-    maxZoom: 20,
+    maxZoom: 13,
     maxBounds: [[-9.20, 53.58], [-4.53, 55.72]]
 });
 
@@ -68,7 +48,8 @@ function onZoneChange(e) {
   popup.remove();
 
   syncPreviewVisibility();
-  updateSummaryPreview();
+  updateSummaryPreview();  
+  ensureSummaryHero();
 }
 
 // Initial link setup on page load
@@ -83,8 +64,10 @@ const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 const selectedLGDs = new Set();
 
 fetch('./data.json')
+
 .then(response => response.json())
-.then(data => {
+.then(data => {  
+    Year_Data = data 
     sdzData = data["Super Data Zone"] || {};
     dzData = data["Data Zone"] || {};
     deaData = data["District Electoral Area"] || {};
@@ -93,7 +76,7 @@ fetch('./data.json')
     AREA_INDEX.sdz = AREA_INDEX.dz = AREA_INDEX.dea = null;
     ensureIndexFor(activeZone);
     populateDatalist(activeZone);
-    
+decorateCategoryBadges()    
 });
 
 // Function that toggles urban/rural fill based on zone selection
@@ -122,15 +105,28 @@ let previewReady = false;
 let previewActiveZone = null;
 const previewSelectedIds = new Set();
 
-(function ensureSummaryHero(){
-  if (!document.getElementById('summary-hero')) {
-    const host = document.getElementById('output-panel') || document.body;
-    const wrap = document.createElement('div');
-    wrap.id = 'summary-hero';
-    wrap.innerHTML = `<div id="summary-map"></div><div id="summary-card"></div>`;
-    host.insertBefore(wrap, host.firstChild);
-  }
-})();
+function ensureSummaryHero() {
+  const breakdownContainer = document.getElementById('breakdown-container');
+  if (!breakdownContainer || document.getElementById('summary-map')) return;
+
+  const mapDiv = document.createElement('div');
+  mapDiv.id = 'summary-map';
+  mapDiv.style.width = '260px';
+  mapDiv.style.height = '180px';
+  mapDiv.style.borderRadius = '8px';
+  mapDiv.style.overflow = 'hidden';
+  mapDiv.style.border = '1px solid #ccc';
+  mapDiv.style.position = 'absolute'; // for bottom-left positioning
+  mapDiv.style.bottom = '400px';
+  mapDiv.style.left = '20px';
+
+  breakdownContainer.style.position = 'relative'; // required for absolute positioning
+  breakdownContainer.appendChild(mapDiv);
+
+  setTimeout(() => {
+    initSummaryPreviewMap();
+  }, 100);
+}
 
 // Initialize the small preview map
 function initSummaryPreviewMap() {
@@ -284,6 +280,11 @@ function updateSummaryPreview() {
     previewMap.jumpTo({ center: [-6.8, 54.65], zoom: 7.3 });
   }
   previewMap.resize();
+  
+    previewMap.jumpTo({
+    center: map.getCenter(),
+    zoom: map.getZoom()
+    });
 
   waitForPreviewTiles(() => {
     // Prefer source-level query so we get features even if off-screen
@@ -428,7 +429,9 @@ function refreshOutputs() {
   updateTables(arr);
   renderZoneBreakdownTable(arr);
   updateCtaEnabled();
-  updateSummaryPreview();
+  updateSummaryPreview();  
+  ensureSummaryHero(); // <-- Add this here
+
 }
 
 
@@ -839,10 +842,14 @@ map.on('load', () => {
         const { source, sourceLayer, fillLayer } = zoneIds();
 
         const candidates = map.queryRenderedFeatures([sw, ne], { layers: [fillLayer] })
-            .filter(f => {
-            try { return turf.booleanIntersects(f.geometry, feature.geometry); }
-            catch { return false; }
-            });
+        .filter(f => {
+            try {
+            return turf.booleanContains(feature.geometry, f.geometry);
+            } catch {
+            return false;
+            }
+        });
+
 
         if (mode === 'replace') {
             selectedIds.forEach(id => map.setFeatureState({ source, sourceLayer, id }, { hovered: false }));
@@ -893,8 +900,98 @@ map.on('load', () => {
     URL.revokeObjectURL(a.href);
     }
 
-    // Top toolbar
-    function addDrawToolbar() {
+window.createDrawToolbar = function (targetElementId = "draw-toolbar-container") {
+  const target = document.getElementById(targetElementId);
+  if (!target) {
+    console.warn("Target element for draw toolbar not found:", targetElementId);
+    return;
+  }
+
+  // Inject CSS once
+  if (!document.getElementById("draw-toolbar-styles")) {
+    const css = document.createElement("style");
+    css.id = "draw-toolbar-styles";
+    css.textContent = `
+      #draw-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 8px;
+        background: rgba(0,0,0,.78);
+        border-radius: 10px;
+        color: #fff;
+        font: 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin-top: 1rem;
+      }
+      #draw-toolbar .icon-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer;
+      }
+      #draw-toolbar .icon-btn:hover {
+        background: rgba(255,255,255,.12);
+      }
+      #draw-toolbar .icon-btn[data-badge]::after {
+        content: attr(data-badge);
+        position: absolute;
+        right: -60px;
+        bottom: -60px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 3px;
+        background: #1ea672;
+        color: #fff;
+        border-radius: 9px;
+        font: 600 11px/18px system-ui;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,.3);
+      }
+    `;
+    document.head.appendChild(css);
+  }
+
+  // Create toolbar container
+  const bar = document.createElement("div");
+  bar.id = "draw-toolbar";
+
+  // SVG icons
+  const svgs = {
+    circle: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>`,
+    zoomIn: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>`,
+    zoomOut: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg>`,
+    radius: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg>`
+  };
+
+  // Helper to create buttons
+  const makeBtn = (id, title, svg, badge = false) => {
+    const btn = document.createElement("button");
+    btn.className = "icon-btn";
+    btn.id = id;
+    btn.title = title;
+    btn.innerHTML = svg;
+    if (badge) btn.setAttribute("data-badge", "2k");
+    return btn;
+  };
+
+  // Add buttons
+  bar.appendChild(makeBtn("circleSelectBtn", "Circle select", svgs.circle));
+  bar.appendChild(makeBtn("radiusBtn", "Radius (km)", svgs.radius, true));
+  bar.appendChild(makeBtn("zoomInBtn", "Zoom in", svgs.zoomIn));
+  bar.appendChild(makeBtn("zoomOutBtn", "Zoom out", svgs.zoomOut));
+
+  // Append toolbar to target
+  target.appendChild(bar);
+  console.log("Draw toolbar inserted into #draw-toolbar-container");
+};
+
+function addDrawToolbar() {
         const mapEl = map.getContainer();
         if (!mapEl) return;
         if (getComputedStyle(mapEl).position === 'static') {
@@ -906,65 +1003,77 @@ map.on('load', () => {
             const css = document.createElement('style');
             css.id = 'draw-toolbar-styles';
             css.textContent = `
-            #draw-toolbar {
-                position:absolute; left:50%; top:12px; transform:translateX(-50%);
-                z-index:9999; display:flex; align-items:center; gap:6px; padding:6px 8px;
-                background:rgba(0,0,0,.78); border-radius:10px;
-                box-shadow:0 4px 14px rgba(0,0,0,.25);
-                backdrop-filter:saturate(120%) blur(4px);
-                color:#fff; font:14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-            }
-            #draw-toolbar .icon-btn{
-                position:relative; width:36px; height:36px; min-width:36px;
-                display:inline-flex; align-items:center; justify-content:center;
-                background:transparent; border:1px solid rgba(255,255,255,.15);
-                border-radius:8px; color:#fff; cursor:pointer;
-            }
-            #draw-toolbar .icon-btn:hover{ background:rgba(255,255,255,.12); }
-            #draw-toolbar .icon-btn.active{ outline:2px solid rgba(255,255,255,.35); }
-            #draw-toolbar .icon-btn svg,
-            #draw-toolbar .icon-btn svg *{
-                width:18px; height:18px;
-                stroke:currentColor;       
-                fill:none;
-                stroke-width:2;
-            }
-            #draw-toolbar .icon-btn[data-badge]::after{
-                content: attr(data-badge);
-                position:absolute; right:-6px; bottom:-6px;
-                min-width:18px; height:18px; padding:0 3px;
-                background:#1ea672; color:#fff; border-radius:9px;
-                font:600 11px/18px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-                text-align:center; box-shadow:0 2px 6px rgba(0,0,0,.3);
-            }
-            #draw-toolbar .dt-sep { width:1px; height:28px; background:rgba(255,255,255,.15); margin:0 4px; }
-            #draw-toolbar .dt-search { position:relative; display:flex; align-items:center; }
-            #draw-toolbar .dt-search .search-icon {
-                position:absolute; left:10px; width:16px; height:16px; stroke:#666; pointer-events:none;
-            }
-            #draw-toolbar .dt-search input {
-                width:320px; max-width:50vw; height:36px; padding:0 10px 0 30px;
-                color:#111; background:#fff; border-radius:8px; border:none; outline:none;
-            }
-            #draw-toolbar .dt-search { color:#111 !important; }
+#draw-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(0,0,0,.78);
+  border-radius: 10px;
+  color: #fff;
+  font: 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin-top: 1rem;  
+margin: 1rem auto;
+  width: fit-content; /* or max-width: 100%; */
 
-            #draw-toolbar .dt-search .search-icon svg,
-            #draw-toolbar .dt-search .search-icon svg *{
-            stroke:currentColor !important;  /* becomes black */
-            fill:none !important;
-            stroke-width:2;
-            }
-
-            #draw-toolbar .dt-search .search-icon { color:#111 !important; }
-            @media (max-width:700px){ #draw-toolbar .dt-search input{ width:220px; } }
-            `;
+}
+#draw-toolbar .icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
+#draw-toolbar .icon-btn:hover {
+  background: rgba(255,255,255,.12);
+}
+#draw-toolbar .icon-btn.active {
+  outline: 2px solid rgba(255,255,255,.35);
+}
+#draw-toolbar .icon-btn svg,
+#draw-toolbar .icon-btn svg * {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+#draw-toolbar .icon-btn[data-badge]::after {
+  content: attr(data-badge);
+  position: absolute;
+  right: 196px;
+  bottom: 106px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  background: #1ea672;
+  color: #fff;
+  border-radius: 9px;
+  font: 600 11px/18px system-ui;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+}
+`;
             document.head.appendChild(css);
         }
 
-        // Toolbar container
-        const bar = document.createElement('div');
-        bar.id = 'draw-toolbar';
-        mapEl.appendChild(bar);
+
+const bar = document.createElement('div');
+bar.id = 'draw-toolbar';
+
+const container = document.getElementById('draw-toolbar-container');
+if (container) {
+  container.appendChild(bar);
+  console.log("Toolbar added to #draw-toolbar-container");
+} else {
+  mapEl.appendChild(bar);
+  console.log("Toolbar added to map container");
+}
 
         // Icons
         const svgs = {
@@ -1025,41 +1134,44 @@ map.on('load', () => {
 
         // Tool buttons
         const circleBtn = makeBtn('circleSelectBtn', 'Circle select (click map to select)', svgs.circle);
-        const lassoBtn  = makeBtn('lassoSelectBtn',  'Lasso select (drag to sketch polygon)', svgs.lasso);
-        const uploadBtn = makeBtn('uploadGeoBtn',    'Upload GeoJSON', svgs.upload);
-        const exportBtn = makeBtn('exportGeoBtn',    'Export drawn boundary (applies simplify/buffer)', svgs.download);
-        const clearBtn  = makeBtn('clearGeoBtn',     'Clear drawn boundary', svgs.trash);
+        // const lassoBtn  = makeBtn('lassoSelectBtn',  'Lasso select (drag to sketch polygon)', svgs.lasso);
+        // const uploadBtn = makeBtn('uploadGeoBtn',    'Upload GeoJSON', svgs.upload);
+        // const exportBtn = makeBtn('exportGeoBtn',    'Export drawn boundary (applies simplify/buffer)', svgs.download);
+        // const clearBtn  = makeBtn('clearGeoBtn',     'Clear drawn boundary', svgs.trash);
 
         // Parameter buttons (same size with value badge)
         const radiusBtn   = makeBtn('radiusBtn',   'Radius (km): click to cycle, Shift+Click to set', svgs.radius,   true);
-        const simplifyBtn = makeBtn('simplifyBtn', 'Simplify tol (m): click to cycle, Shift+Click to set', svgs.simplify, true);
-        const bufferBtn   = makeBtn('bufferBtn',   'Buffer (m): positive grows, negative shrinks. Click to cycle, Shift+Click to set', svgs.buffer,   true);
+        // const simplifyBtn = makeBtn('simplifyBtn', 'Simplify tol (m): click to cycle, Shift+Click to set', svgs.simplify, true);
+        // const bufferBtn   = makeBtn('bufferBtn',   'Buffer (m): positive grows, negative shrinks. Click to cycle, Shift+Click to set', svgs.buffer,   true);
 
         // Zoom controls
         const zoomOutBtn = makeBtn('dtZoomOut',  'Zoom out',  svgs.zoomOut);
         const zoomInBtn  = makeBtn('dtZoomIn',   'Zoom in',   svgs.zoomIn);
-        const homeBtn    = makeBtn('dtZoomHome', 'Reset view', svgs.home);
+        // const homeBtn    = makeBtn('dtZoomHome', 'Reset view', svgs.home);
 
         // Separator + Search
-        const sepEl = document.createElement('div');
-        sepEl.className = 'dt-sep';
-        bar.appendChild(sepEl);
+        // const sepEl = document.createElement('div');
+        // sepEl.className = 'dt-sep';
+        // bar.appendChild(sepEl);
 
         // Separator + Search
 
-        const searchWrap = document.createElement('div'); searchWrap.className = 'dt-search';
-        searchWrap.innerHTML = `${svgs.search}
-            <input id="dt-search-input" list="apb-area-list" placeholder="Search area or LGD…" autocomplete="off" />
-        `;
-        bar.appendChild(searchWrap);
+// Removed search bar from draw toolbar
+// const searchWrap = document.createElement('div');
+// searchWrap.className = 'dt-search';
+// searchWrap.innerHTML = `${svgs.search}
+//   <input id="dt-search-input" list="apb-area-list" placeholder="Search area or LGD…" autocomplete="off" />
+// `;
+// bar.appendChild(searchWrap);
+
 
         // datalist -create if not there yet
-        let dl = document.getElementById('apb-area-list');
-        if (!dl) {
-            dl = document.createElement('datalist');
-            dl.id = 'apb-area-list';
-            document.body.appendChild(dl);
-        }
+        // let dl = document.getElementById('apb-area-list');
+        // if (!dl) {
+        //     dl = document.createElement('datalist');
+        //     dl.id = 'apb-area-list';
+        //     document.body.appendChild(dl);
+        // }
 
         // Drawing states & params
         let circleMode = false, lassoMode = false, drawing = false;
@@ -1069,8 +1181,8 @@ map.on('load', () => {
         const setBadge = (btn, txt) => btn.setAttribute('data-badge', txt);
         const refreshBadges = () => {
             setBadge(radiusBtn,   `${radiusKm}k`);
-            setBadge(simplifyBtn, `${simplifyTolMeters}m`);
-            setBadge(bufferBtn,   `${bufferMeters}m`);
+            // setBadge(simplifyBtn, `${simplifyTolMeters}m`);
+            // setBadge(bufferBtn,   `${bufferMeters}m`);
         };
         refreshBadges();
 
@@ -1081,23 +1193,33 @@ map.on('load', () => {
         fileInput.style.display = 'none';
         bar.appendChild(fileInput);
 
-        // Mode toggles
+        // // Mode toggles
+        // function setCircleMode(on){
+        //     circleMode = !!on;
+        //     if (circleMode) { lassoMode = false; lassoBtn.classList.remove('active'); }
+        //     circleBtn.classList.toggle('active', circleMode);
+        //     drawToolActive = circleMode || lassoMode;
+        //     map.getCanvas().style.cursor = drawToolActive ? 'crosshair' : '';
+        // }
+        // function setLassoMode(on){
+        //     lassoMode = !!on;
+        //     if (lassoMode) { circleMode = false; circleBtn.classList.remove('active'); }
+        //     lassoBtn.classList.toggle('active', lassoMode);
+        //     drawToolActive = circleMode || lassoMode;
+        //     map.getCanvas().style.cursor = drawToolActive ? 'crosshair' : '';
+        // }
+        // circleBtn.addEventListener('click', () => setCircleMode(!circleMode));
+        // lassoBtn .addEventListener('click', () => setLassoMode(!lassoMode));
+
+        // Mode toggle
         function setCircleMode(on){
             circleMode = !!on;
-            if (circleMode) { lassoMode = false; lassoBtn.classList.remove('active'); }
             circleBtn.classList.toggle('active', circleMode);
-            drawToolActive = circleMode || lassoMode;
+            drawToolActive = circleMode;
             map.getCanvas().style.cursor = drawToolActive ? 'crosshair' : '';
         }
-        function setLassoMode(on){
-            lassoMode = !!on;
-            if (lassoMode) { circleMode = false; circleBtn.classList.remove('active'); }
-            lassoBtn.classList.toggle('active', lassoMode);
-            drawToolActive = circleMode || lassoMode;
-            map.getCanvas().style.cursor = drawToolActive ? 'crosshair' : '';
-        }
+
         circleBtn.addEventListener('click', () => setCircleMode(!circleMode));
-        lassoBtn .addEventListener('click', () => setLassoMode(!lassoMode));
 
         // Circle select
         map.on('click', (e) => {
@@ -1154,7 +1276,7 @@ map.on('load', () => {
         });
 
         // Upload
-        uploadBtn.addEventListener('click', () => fileInput.click());
+        // uploadBtn.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', () => {
             const file = fileInput.files?.[0];
             if (!file) return;
@@ -1193,57 +1315,57 @@ map.on('load', () => {
             }
             refreshBadges();
         });
-        simplifyBtn.addEventListener('click', (e) => {
-            if (e.shiftKey) {
-            const v = prompt('Simplify tolerance (meters):', String(simplifyTolMeters));
-            if (v !== null && !isNaN(+v) && +v >= 0) simplifyTolMeters = +v;
-            } else {
-            const opts = [0, 5, 10, 25, 50, 100];
-            const i = opts.indexOf(simplifyTolMeters);
-            simplifyTolMeters = opts[(i + 1) % opts.length];
-            }
-            refreshBadges();
-        });
-        bufferBtn.addEventListener('click', (e) => {
-            if (e.shiftKey) {
-            const v = prompt('Buffer (meters, negative shrinks):', String(bufferMeters));
-            if (v !== null && !isNaN(+v)) bufferMeters = +v;
-            } else {
-            const opts = [-100, -50, -10, 0, 10, 50, 100];
-            const i = opts.indexOf(bufferMeters);
-            bufferMeters = opts[(i + 1) % opts.length];
-            }
-            refreshBadges();
-        });
+        // simplifyBtn.addEventListener('click', (e) => {
+        //     if (e.shiftKey) {
+        //     const v = prompt('Simplify tolerance (meters):', String(simplifyTolMeters));
+        //     if (v !== null && !isNaN(+v) && +v >= 0) simplifyTolMeters = +v;
+        //     } else {
+        //     const opts = [0, 5, 10, 25, 50, 100];
+        //     const i = opts.indexOf(simplifyTolMeters);
+        //     simplifyTolMeters = opts[(i + 1) % opts.length];
+        //     }
+        //     refreshBadges();
+        // });
+        // bufferBtn.addEventListener('click', (e) => {
+        //     if (e.shiftKey) {
+        //     const v = prompt('Buffer (meters, negative shrinks):', String(bufferMeters));
+        //     if (v !== null && !isNaN(+v)) bufferMeters = +v;
+        //     } else {
+        //     const opts = [-100, -50, -10, 0, 10, 50, 100];
+        //     const i = opts.indexOf(bufferMeters);
+        //     bufferMeters = opts[(i + 1) % opts.length];
+        //     }
+        //     refreshBadges();
+        // });
 
         // Export/Clear
-        exportBtn.addEventListener('click', () => {
-            if (!lastDrawnFeature) { alert('Draw or upload a boundary first.'); return; }
-            let out = lastDrawnFeature;
-            if (bufferMeters !== 0) {
-            try { out = turf.buffer(out, bufferMeters, { units:'meters' }); } catch {}
-            }
-            if (simplifyTolMeters > 0) out = simplifyMeters(out, simplifyTolMeters);
-            const blob = new Blob([JSON.stringify(out)], { type:'application/geo+json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'custom-area.geojson';
-            a.click();
-            URL.revokeObjectURL(a.href);
-        });
-        clearBtn.addEventListener('click', () => {
-            map.getSource('draw-geom').setData({ type:'FeatureCollection', features: [] });
-            lastDrawnFeature = null;
-        });
+        // exportBtn.addEventListener('click', () => {
+        //     if (!lastDrawnFeature) { alert('Draw or upload a boundary first.'); return; }
+        //     let out = lastDrawnFeature;
+        //     if (bufferMeters !== 0) {
+        //     try { out = turf.buffer(out, bufferMeters, { units:'meters' }); } catch {}
+        //     }
+        //     if (simplifyTolMeters > 0) out = simplifyMeters(out, simplifyTolMeters);
+        //     const blob = new Blob([JSON.stringify(out)], { type:'application/geo+json' });
+        //     const a = document.createElement('a');
+        //     a.href = URL.createObjectURL(blob);
+        //     a.download = 'custom-area.geojson';
+        //     a.click();
+        //     URL.revokeObjectURL(a.href);
+        // });
+        // clearBtn.addEventListener('click', () => {
+        //     map.getSource('draw-geom').setData({ type:'FeatureCollection', features: [] });
+        //     lastDrawnFeature = null;
+        // });
 
         zoomInBtn.addEventListener('click',  () => map.zoomIn({ duration: 250 }));
         zoomOutBtn.addEventListener('click', () => map.zoomOut({ duration: 250 }));
-        homeBtn.addEventListener('click',    () => {
-            map.easeTo({ center: [-6.8, 54.65], zoom: 7.5, duration: 600 });
-        });
+        // homeBtn.addEventListener('click',    () => {
+        //     map.easeTo({ center: [-6.8, 54.65], zoom: 7.5, duration: 600 });
+        // });
 
         // SEARCH WIRING
-        const input = document.getElementById('dt-search-input');
+        // const input = document.getElementById('dt-search-input');
 
         // Guard so we don't double-wire if toolbar is re-inited
         if (!window.__apbSearchWired) {
@@ -1340,13 +1462,12 @@ map.on('load', () => {
             refreshOutputs();
             input.blur();
             }
-            input.addEventListener('change', handleSearchCommit);
-            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSearchCommit(); });
+            // input.addEventListener('change', handleSearchCommit);
+            // input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSearchCommit(); });
     }
 
-
     const buildBtn = document.getElementById("build-profile-btn");
-    const changeBtn = document.getElementById("change-selection-btn");
+    const changeBtn = document.getElementById("change-selection");
     const outputContent = document.getElementById("output-content");
     const mapContent = document.getElementById("map-content");
 
@@ -1429,9 +1550,13 @@ async function updateSourceLink() {
     const categoryCode = labelToCode[label];
     let fullUrl = '';
 
-    console.log("fsda", label)
+    window.urlZoneType = ZoneType;
+    window.urlcategoryCode = categoryCode;
+    window.urllabel = label;
+    window.urlsource = source;
+
     if (source === "Flexible Table Builder" && categoryCode) {
-    fullUrl = `https://build.nisra.gov.uk/en/custom/variables/${categoryCode}?d=PEOPLE&v=${zoneType}21&r=variables`;
+    fullUrl = `https://build.nisra.gov.uk/en/custom/data?d=PEOPLE&v=${zoneType}21&v=${categoryCode}`;
     } else if (source === "Data Portal") {
     if (label === "Benefits Statistics" && zoneType === "dz") {
     fullUrl = "https://data.nisra.gov.uk/table/BSDZ";
@@ -1653,55 +1778,55 @@ function updateTables(selectedIdsArray) {
 }
 
 function renderZoneBreakdownTable(selectedIdsArray) {
-    const container = document.getElementById("breakdown-container");
+  const container = document.getElementById("breakdown-container");
+  const titleEl = document.getElementById("areaProfileTitle");
+  const summaryList = document.getElementById("summaryList");
+  const populationEl = document.getElementById("totalPopulation");
 
-    if (!selectedIdsArray.length) {
-    container.innerHTML = "";
+  if (!selectedIdsArray.length) {
     container.style.display = "none";
+    summaryList.innerHTML = "";
+    populationEl.textContent = "0";
     window.areaProfileTitle = undefined;
     window.lastSelectionHash = undefined;
     return;
-    }
+  }
 
-    container.innerHTML = "";
-    container.style.display = "block";
+  container.style.display = "block";
+  summaryList.innerHTML = "";
 
-    const dataSource =
-        currentZoneType === 'dz'  ? dzData  :
-        currentZoneType === 'dea' ? deaData :
-                                    sdzData;
-    const labelKey =
-        currentZoneType === 'dz'  ? "Census 2021 Data Zone Label" :
-        currentZoneType === 'dea' ? "District Electoral Area 2014 Label" : "Census 2021 Super Data Zone Label";
+  const dataSource =
+    currentZoneType === 'dz' ? dzData :
+    currentZoneType === 'dea' ? deaData :
+    sdzData;
 
-    const lgdStats = {};
-    const lgdTotals = {};
-    let totalPopulation = 0;
+  const labelKey =
+    currentZoneType === 'dz' ? "Census 2021 Data Zone Label" :
+    currentZoneType === 'dea' ? "District Electoral Area 2014 Label" :
+    "Census 2021 Super Data Zone Label";
 
-    const currentSelectionHash = selectedIdsArray.slice().sort().join(",");
-    const isSameSelection = currentSelectionHash === window.lastSelectionHash;
+  const lgdStats = {};
+  const lgdTotals = {};
+  let totalPopulation = 0;
+  const currentSelectionHash = selectedIdsArray.slice().sort().join(",");
+  const isSameSelection = currentSelectionHash === window.lastSelectionHash;
+  window.lastSelectionHash = currentSelectionHash;
 
-    window.lastSelectionHash = currentSelectionHash;
-
-    // Setup or reset title if selection changed
-    if (!isSameSelection) {
+  if (!isSameSelection) {
     window.areaProfileTitle = undefined;
-    }
+  }
 
-    // Total zones per LGD
-    for (const id in dataSource) {
+  for (const id in dataSource) {
     const mapData = dataSource[id];
     const lgd = mapData?.["LGD"];
     if (lgd) {
-        lgdTotals[lgd] = (lgdTotals[lgd] || 0) + 1;
+      lgdTotals[lgd] = (lgdTotals[lgd] || 0) + 1;
     }
-    }
+  }
 
-    // selected zones
-    selectedIdsArray.forEach(id => {
+  selectedIdsArray.forEach(id => {
     const mapData = dataSource[id];
     if (!mapData) return;
-
     const lgd = mapData["LGD"];
     const status = mapData["Urban_mixed_rural_status"];
     const labelObj = mapData[labelKey];
@@ -1712,112 +1837,51 @@ function renderZoneBreakdownTable(selectedIdsArray) {
     if (zoneName) window.zoneNames.push(zoneName);
 
     if (!lgdStats[lgd]) {
-        lgdStats[lgd] = { total: 0, Urban: 0, Rural: 0, Mixed: 0 };
+      lgdStats[lgd] = { total: 0, Urban: 0, Rural: 0, Mixed: 0 };
     }
 
     lgdStats[lgd].total++;
     if (status && lgdStats[lgd][status] !== undefined) {
-        lgdStats[lgd][status]++;
+      lgdStats[lgd][status]++;
     }
 
     totalPopulation += typeof population === "number" ? population : 0;
-    
+
     if (!window.selectedZoneDetails) window.selectedZoneDetails = {};
     window.selectedZoneDetails[id] = mapData;
+  });
 
-    });
+  const savedTitle = window.areaProfileTitle || "Click to edit title for area profile";
+  titleEl.textContent = savedTitle;
+  titleEl.addEventListener("blur", () => {
+    window.areaProfileTitle = titleEl.textContent.trim();
+  });
 
-    // previous title for same selection, or fallback
-    const savedTitle = window.areaProfileTitle || "Click to edit title for area profile";
-
-    const layout = document.createElement("div");
-    layout.className = "summary-row";
-
-    // left side
-    const left = document.createElement("div");
-    left.className = "summary-left";
-
-    // Editable Maintitle
-    const editableTitle = document.createElement("h2");
-    editableTitle.textContent = savedTitle;
-    editableTitle.contentEditable = true;
-    editableTitle.spellcheck = false;
-    editableTitle.title = "Click to edit title";
-    editableTitle.style.textAlign = "left";
-    editableTitle.style.marginBottom = "1rem";
-    editableTitle.style.outline = "none";
-
-    editableTitle.addEventListener("blur", () => {
-    window.areaProfileTitle = editableTitle.textContent.trim();
-    });
-
-    left.appendChild(editableTitle);
-
-    const heading = document.createElement("h4");
-    heading.textContent = "Summary of Areas Selected:";
-    heading.style.marginTop = "0.5rem";
-    heading.style.marginBottom = "1rem";
-    left.appendChild(heading);
-
-    // Summary List
-    const summaryList = document.createElement("ul");
-    summaryList.style.listStyleType = "none";
-    summaryList.style.paddingLeft = "0";
-    summaryList.style.textAlign = "left";
-
-    const sortedLGDs = Object.keys(lgdStats).sort((a, b) =>
+  const sortedLGDs = Object.keys(lgdStats).sort((a, b) =>
     a.localeCompare(b, undefined, { sensitivity: 'base' })
-    );
+  );
 
-    let totalZonesSelected = 0; // Accumulator
-
-    sortedLGDs.forEach(lgd => {
+  let totalZonesSelected = 0;
+  sortedLGDs.forEach(lgd => {
     const stats = lgdStats[lgd];
     const totalInLGD = lgdTotals[lgd] || stats.total;
     const parts = [];
-
     if (stats.Urban) parts.push(`${stats.Urban} urban`);
     if (stats.Rural) parts.push(`${stats.Rural} rural`);
     if (stats.Mixed) parts.push(`${stats.Mixed} mixed`);
-    
-    totalZonesSelected += stats.total; // Add to total
+    totalZonesSelected += stats.total;
 
     const li = document.createElement("li");
     li.innerHTML = `${lgd}: <strong>${stats.total} of ${totalInLGD}</strong> zones selected (${parts.join(", ")})`;
     summaryList.appendChild(li);
+  });
 
-    });
+  window.totalZonesSelected = totalZonesSelected;
+  populationEl.textContent = totalPopulation.toLocaleString();
 
-    window.totalZonesSelected = totalZonesSelected;
-
-    left.appendChild(summaryList);
-
-    // right side
-    const right = document.createElement("div");
-    right.className = "summary-right";
-
-    const card = document.createElement("div");
-    card.className = "population-card";
-
-    const label = document.createElement("div");
-    label.className = "population-label";
-    label.textContent = "Population selected";
-
-    const value = document.createElement("div");
-    value.className = "population-value";
-    value.id = "totalPopulation";
-    value.textContent = totalPopulation.toLocaleString();
-
-    card.appendChild(label);
-    card.appendChild(value);
-    right.appendChild(card);
-
-    layout.appendChild(left);
-    layout.appendChild(right);
-    container.appendChild(layout);
+  updateSummaryPreview();
+  ensureSummaryHero();
 }
-
-
 
 // document.getElementById("urban-rural-btn").addEventListener("click", () => {
 //   const tablesContainer = document.getElementById("tables-container");
@@ -1885,7 +1949,6 @@ tabButtons.forEach(tab => {
     });
 });
 
-
 function renderAggregatedTables(aggregatedData, selectedCategories = []) {
     if (!aggregatedData || Object.keys(aggregatedData).length === 0) return;
 
@@ -1907,7 +1970,7 @@ function renderAggregatedTables(aggregatedData, selectedCategories = []) {
     selectedCategories.length === 0 || selectedCategories.includes(key)
     );
 
-    entries.forEach(([category, values]) => {
+  entries.forEach(([category, values]) => {
     const wrapper = document.createElement("div");
     wrapper.className = "table-wrapper";
     wrapper.style.flex = "0 0 calc(50% - 1rem)";
@@ -1919,6 +1982,20 @@ function renderAggregatedTables(aggregatedData, selectedCategories = []) {
 
     const title = document.createElement("h3");
     title.textContent = category;
+
+    const year = Year_Data?.Year?.[category];
+
+    if (year) {
+        const yearEl = document.createElement("div");
+        yearEl.textContent = `Year: ${year}`;
+        yearEl.style.marginTop = "4px";
+        yearEl.style.fontSize = "0.9rem";
+        yearEl.style.color = "#555";
+        title.appendChild(document.createElement("br")); // optional line break
+        title.appendChild(yearEl);
+    }
+
+    wrapper.appendChild(title);
 
     const src = (window.labelToSource || {})[category];
     if (src) {
@@ -1983,17 +2060,56 @@ function renderAggregatedTables(aggregatedData, selectedCategories = []) {
 
 //Chart.register(ChartDataLabels);
 
+let labelToCode = {};
+let labelToSource = {};
+
+async function loadLookupData() {
+    const response = await fetch('category_lookup.json');
+    const lookup = await response.json();
+
+    lookup.forEach(item => {
+        labelToCode[item.nested_list_names] = item.further_breakdown_df;
+        labelToSource[item.nested_list_names] = item.Source;
+    });
+
+    window.labelToCode = labelToCode;
+    window.labelToSource = labelToSource;
+}
+
+loadLookupData().then(() => {
+    renderAggregatedCharts(data, selectedCategories);
+});
+
+function getCategoryURL(label, zoneType = 'sdz') {
+
+  const source = window.labelToSource?.[label];
+  const categoryCode = window.labelToCode?.[label];
+ 
+  if (source === "Flexible Table Builder" && categoryCode) {
+    return `https://build.nisra.gov.uk/en/custom/data?d=PEOPLE&v=${zoneType}21&v=${categoryCode}`;
+  } else if (source === "Data Portal") {
+    if (label === "Benefits Statistics" && zoneType === "dz") {
+      return "https://data.nisra.gov.uk/table/BSDZ";
+    } else if (label === "Benefits Statistics" && zoneType === "sdz") {
+      return "https://data.nisra.gov.uk/table/BSSDZ";
+    } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "sdz") {
+      return "https://data.nisra.gov.uk/table/MYE01T012";
+    }
+  }
+  return null;
+}
+
 function renderAggregatedCharts(data, selectedCategories = []) {
     // wait until element has a real width 
     function whenVisible(el, cb) {
-    if (el.offsetParent !== null && el.clientWidth > 0) return cb();
-    const ro = new ResizeObserver(() => {
-        if (el.clientWidth > 0) {
-        ro.disconnect();
-        cb();
-        }
-    });
-    ro.observe(el);
+        if (el.offsetParent !== null && el.clientWidth > 0) return cb();
+        const ro = new ResizeObserver(() => {
+            if (el.clientWidth > 0) {
+            ro.disconnect();
+            cb();
+            }
+        });
+        ro.observe(el);
     }
 
     if (!data || Object.keys(data).length === 0) return;
@@ -2018,7 +2134,7 @@ function renderAggregatedCharts(data, selectedCategories = []) {
     window.chartInstances = [];
 
     // ---- constants  ----
-    const FONT               = "bold 12px sans-serif";
+    const FONT               = "14px sans-serif";
     const LINE_HEIGHT        = 16;
     const BAR_HEIGHT         = 32;
     const BAR_SPACING        = 4;
@@ -2036,38 +2152,151 @@ function renderAggregatedCharts(data, selectedCategories = []) {
     });
     container.appendChild(grid);
 
-    categories.forEach(category => {
+categories.forEach(category => {
     const values = data[category];
     if (!values) return;
 
-    // card
-    const wrapper = document.createElement("div");
-    Object.assign(wrapper.style, {
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        background: "#fff",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        padding: "16px",
-        borderRadius: "8px",
-        boxSizing: "border-box",
-        width: "100%"
-    });
+const wrapper = document.createElement("div");
+Object.assign(wrapper.style, {
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    background: "#fff",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    padding: "16px",
+    borderRadius: "8px",
+    boxSizing: "border-box",
+    width: "100%"
+});
 
-    const h3 = document.createElement("h3");
-    h3.textContent = category;
+// Create a container for title and info button
+const titleWrapper = document.createElement("div");
+titleWrapper.style.display = "flex";
+titleWrapper.style.alignItems = "center";
+titleWrapper.style.justifyContent = "space-between";
 
-    const src = (window.labelToSource || {})[category];
-    if (src) {
+// Create the title element
+const title = document.createElement("h3");
+title.textContent = category;
+title.style.margin = "0";
+
+// Create a wrapper for the info button and tooltip
+const infoWrapper = document.createElement("div");
+infoWrapper.style.position = "relative";
+infoWrapper.style.display = "inline-block";
+
+// Create the info button (SVG)
+const infoButton = document.createElement("img");
+infoButton.src = "img/i-button.svg";
+infoButton.alt = "Information";
+infoButton.title = "More information";
+infoButton.style.width = "20px";
+infoButton.style.height = "20px";
+infoButton.style.cursor = "pointer";
+
+// Create the tooltip
+const tooltip = document.createElement("div");
+
+const zoneType = window.selectedZoneType || 'sdz';
+const url = getCategoryURL(category, zoneType);
+
+if (url) {
+  tooltip.innerHTML = `<strong>Source:</strong> <a href="${url}" target="_blank" style="
+    color: #fff;
+    text-decoration: underline;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  ">${url}</a>`;
+} else {
+  tooltip.textContent = `More info about ${category}`;
+}
+
+tooltip.style.position = "absolute";
+tooltip.style.bottom = "125%";
+tooltip.style.left = "50%";
+tooltip.style.transform = "translateX(-50%)";
+tooltip.style.backgroundColor = "#333";
+tooltip.style.color = "#fff";
+tooltip.style.padding = "6px 8px";
+tooltip.style.borderRadius = "4px";
+tooltip.style.fontSize = "0.8rem";
+tooltip.style.whiteSpace = "nowrap";
+tooltip.style.visibility = "hidden";
+tooltip.style.opacity = "0";
+tooltip.style.transition = "opacity 0.3s";
+tooltip.style.pointerEvents = "auto"; // ensure it can receive hover
+tooltip.style.zIndex = "1000"; // make sure it's above other elements
+
+let tooltipTimeout;
+
+infoWrapper.addEventListener("mouseenter", () => {
+  clearTimeout(tooltipTimeout);
+  tooltip.style.visibility = "visible";
+  tooltip.style.opacity = "1";
+});
+
+infoWrapper.addEventListener("mouseleave", () => {
+  tooltipTimeout = setTimeout(() => {
+    tooltip.style.visibility = "hidden";
+    tooltip.style.opacity = "0";
+  }, 200); // slight delay to allow hover into tooltip
+});
+
+tooltip.addEventListener("mouseenter", () => {
+  clearTimeout(tooltipTimeout);
+  tooltip.style.visibility = "visible";
+  tooltip.style.opacity = "1";
+});
+
+tooltip.addEventListener("mouseleave", () => {
+  tooltipTimeout = setTimeout(() => {
+    tooltip.style.visibility = "hidden";
+    tooltip.style.opacity = "0";
+  }, 200);
+});
+
+// Assemble the info button and tooltip
+infoWrapper.appendChild(infoButton);
+infoWrapper.appendChild(tooltip);
+
+// Assemble the title and info button
+const titleContent = document.createElement("div");
+titleContent.style.display = "flex";
+titleContent.style.alignItems = "center";
+titleContent.style.gap = "8px";
+titleContent.appendChild(title);
+titleContent.appendChild(infoWrapper);
+
+// Add to wrapper
+titleWrapper.appendChild(titleContent);
+wrapper.appendChild(titleWrapper);
+
+// Add year info if available
+const year = Year_Data?.Year?.[category];
+if (year) {
+    const yearEl = document.createElement("div");
+    yearEl.textContent = `Year: ${year}`;
+    yearEl.style.marginTop = "4px";
+    yearEl.style.fontSize = "0.9rem";
+    yearEl.style.color = "#555";
+    title.appendChild(document.createElement("br"));
+    title.appendChild(yearEl);
+}
+
+// Add source badge if available
+const src = (window.labelToSource || {})[category];
+if (src) {
     const badge = document.createElement('span');
     const isPortal = src === 'Data Portal';
     badge.className = 'source-badge ' + (isPortal ? 'badge-portal' : 'badge-ftb');
     badge.textContent = isPortal ? 'Data Portal' : 'Flexible Table Builder';
     badge.style.marginLeft = '8px';
     badge.title = src;
-    h3.appendChild(badge);
-    }
-    wrapper.appendChild(h3);
+    title.appendChild(badge);
+}
+
+// Append title wrapper to main wrapper
+wrapper.appendChild(titleWrapper);
 
     const labels = Object.keys(values);
     const total  = Object.values(values).reduce((a, v) => a + v, 0);
@@ -2276,7 +2505,6 @@ function renderAggregatedCharts(data, selectedCategories = []) {
     });
 }
 
-
 function clearSelections() {
     selectedIds.forEach(id => {
     if (sdzData[id]) {
@@ -2353,6 +2581,9 @@ document.getElementById("clear-selection-btn").addEventListener("click", functio
     e.preventDefault(); 
     this.blur(); 
     clearSelections(); 
+
+    map.getSource('draw-geom').setData({ type:'FeatureCollection', features: [] });
+    lastDrawnFeature = null;
 });
 
 document.querySelectorAll('#lgd-buttons input[type="checkbox"]').forEach(checkbox => {
@@ -2408,6 +2639,7 @@ document.querySelectorAll('#lgd-buttons input[type="checkbox"]').forEach(checkbo
     updateTables(selectedArray);
     renderZoneBreakdownTable(selectedArray);
     updateCtaEnabled();
+    
   });
 });
 
@@ -2932,12 +3164,11 @@ function renderUrbanRuralCharts(selectedIdsArray) {
     });
 }
 
-
 document.querySelectorAll(".group-toggle").forEach((button) => {
     const content = button.nextElementSibling;
     const label = button.textContent.trim();
 
-    if (label.startsWith("Demography")) {
+    if (label.startsWith("People and communities")) {
     content.style.display = "block";
     button.innerHTML = label.replace("▼", "▲");
     } else {

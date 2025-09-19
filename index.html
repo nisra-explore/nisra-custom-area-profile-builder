@@ -30,46 +30,29 @@
     <div class="wrapper">
           
       <div class="content-wrapper">
-        <!-- <nav class="warning">
-          <div class="col-wide middle" style=" text-align: center;">
-            <p style="margin-bottom: 0px;">This prototype application will be enhanced as further rural data is released.</p>
-            <p style="margin-bottom: 0px;">We welcome feedback from users through our 
-              <a class="survey-link" href="" target="_blank"><span style="color: white;">short survey</span>
-                <img class = "new-tab" src = "img/opens-new-tab.svg"></a></p>
-            
-            </div>
-        </nav> -->
 
+      <nav class="navbar py-3" style="background-color:#00205b;">
+        <div class="container-fluid d-flex align-items-center">
 
-      <div id="top-container">
-        <div id="top-menu" class="grid" style="margin: 0;">
-          <div class="logo-container">
-              <a href="https://www.nisra.gov.uk/" target="_blank"><img id="top-menu-nisra-logo" src="img/nisra-logo-full-name-stack.svg" alt="NISRA logo. Clicking image takes user to NISRA website"></a>
-          </div>
+          <!-- Logo (left) -->
+          <a class="navbar-brand ps-2 d-flex align-items-center me-auto" href="#">
+            <img src="img/nisra-logo-unstacked-white.svg" alt="NISRA logo" height="60" class="me-3">
+          </a>
 
-          <div id="dashboard-title-container">
-            <h1 id="dashboard-title">NISRA Custom Area Profile Builder</h1>
-            <!-- <span id="dashboard-subtitle">Access urban rural data across a range of <br>areas for Northern Ireland</span> -->
-          </div>
-          <div class="logo-container">
-            
-          </div>
+          <!-- Heading (right) -->
+          <h1 class="mb-0 pe-2 text-white fs-2 app-title ms-2">NISRA Profile Builder</h1>
+
         </div>
-      </div>
+      </nav>
 
-      <hr style="border-top: 10px solid #3878c5; margin: 0">
+      <hr style="border-top: 4px solid #3878c5; margin: 0">
 
       <div id="main-container">
 
-        <div id="map-content" class="screen">           
-       
-            
-
+        <div id="map-content" class="screen">                  
             <div class="div-style-bar">
               <div class="map-and-controls">
-                <!--category selector -->
-                
-
+                <!--category selector -->                
                 <div id="map-wrapper">
                   <div id="lgd-selector" class="lgd-selector">
                     <div class="zone-selector-box">
@@ -81,10 +64,23 @@
                       </select>
                     </div>
                     <br>
-                  <h5>Then add areas to your custom area profile by:<br><br> <b>Selecting individually on the map</b> <br></b>or<br> <b>Use the multi-area selector below to make grouped selections for predefined areas:</b>
+                    
+                                        <div id="toolbar-insertion-point">
+
+                  <h5>Then add areas to your custom area profile by:<br><br> <b>Selecting individual areas on the map</b> <br></b>or<br> <b>Select using the radius selector</b>
                   </h5>
 
-                  <div class="category-group">
+  <div id="draw-toolbar-container"></div>
+
+<div class="nav-button-container cta">
+  <div class="center-wrapper">
+    <button id="build-profile-btn" class="nav-button">Go to Area Profile</button>
+  </div>
+</div>
+</div>
+            
+
+                  <!-- <div class="category-group">
                     <button type="button" class="group-toggle">Local Government Districts ▼</button>
                     <div class="group-content" id="lgd-buttons">
                       <div class="lgd-option">
@@ -141,17 +137,19 @@
                         <input type="checkbox" id="lgd-newry" value="Newry, Mourne and Down">
                         <label class="lgd-btn" data-lgd="Newry, Mourne and Down" for="lgd-newry">Newry, Mourne and Down</label>
                       </div>
-                    </div>
+                    </div> -->
+                  <!-- </div> -->
+                   
                   </div>
-                  </div>
+                  
                   <div id="map"></div>
 
                   <div class="map-rail" aria-label="Map controls">
-                    
-                    <button id="howto-rail-btn"
-                      class="nav-button"
-                      data-nav="howto">How to use this profile builder</button>
 
+                  <div class="about-button-pair">
+                    <button id="howto-rail-btn" class="nav-button" data-nav="howto">About</button>
+                    <button id="howto-rail-btn-2" class="nav-button">Share</button>
+                  </div>
                     <div class="cntrl-button-wrapper rail-card">
                       <h4>Map Controls</h4>
                       
@@ -160,15 +158,9 @@
                     </div>
 
 
-                    <div class="nav-button-container cta">
-                      <button id="build-profile-btn" class="nav-button">Go to Area Profile</button>
-                    </div>
                   </div>
 
-                </div>
-
-                
-
+                </div>               
               </div>
 
             </div>
@@ -192,10 +184,9 @@
                     <form id="category-form">
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Demography ▼</button>
+                        <button type="button" class="group-toggle">People and communities ▼</button>
                         <div class="group-content">
-                          <label><input type="checkbox" value="Age (7 Categories)" checked> Age (7 Categories)</label>
-                          <label><input type="checkbox" value="Age (19 Categories)"> Age (19 Categories)</label>
+                          <label><input type="checkbox" value="Age (7 Categories)" checked> Age</label>
                           <label><input type="checkbox" value="Sex Label" checked> Sex</label>
                           <label><input type="checkbox" value="Age (MYE)"> Age (MYE)</label>
                           <label><input type="checkbox" value="Sex (MYE)"> Sex (MYE)</label>
@@ -204,7 +195,6 @@
                           <label><input type="checkbox" value="Country of Birth"> Country of Birth</label>
                           <label><input type="checkbox" value="Main Language"> Main Language</label>
                           <label><input type="checkbox" value="Sexual Orientation Label"> Sexual Orientation</label>
-                          <label><input type="checkbox" value="Ethnic Group Label"> Ethnic Group</label>
                           <label><input type="checkbox" value="Household Dependant Children"> Dependant Children</label>
                           <label><input type="checkbox" value="Household Tenure"> Tenure</label>
                           <label><input type="checkbox" value="Martial and Civil Partnership Status"> Martial and Civil Partnership Status</label> 
@@ -212,7 +202,7 @@
                       </div>
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Education ▼</button>
+                        <button type="button" class="group-toggle">Education and skills ▼</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="Qualifications Highest Level"> Qualifications Highest Level</label>
                           <label><input type="checkbox" value="Place of Study Method of Travel"> Place of Study (Method of Travel)</label> 
@@ -221,21 +211,18 @@
                       </div>
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Economy ▼</button>
+                        <button type="button" class="group-toggle">Work, pay and benefits ▼</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="Economic Activity"> Economic Activity</label>
-                          <label><input type="checkbox" value="Household Car or Van Availability"> Household Car or Van Availability</label>
-                          <label><input type="checkbox" value="Household Central Heating"> Central Heating</label>
                           <label><input type="checkbox" value="Place of Work Distance"> Place of Work (Distance)</label> 
                           <label><input type="checkbox" value="Place of Work Method of Travel"> Place of Work (Method of Travel)</label> 
                           <label><input type="checkbox" value="Occupation Current"> Current Occupation</label> 
-                          <label><input type="checkbox" value="Household Renewable Energy Systems Label"> Renewable Energy Systems</label>
                           <label><input type="checkbox" value="Benefits Statistics" checked> Benefits Recipients</label>
                         </div>
                       </div>
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Health ▼</button>
+                        <button type="button" class="group-toggle">Health and social care ▼</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="Health Condition Emotional or Mental Health Label"> Emotional or Mental Health Condition</label>
                           <label><input type="checkbox" value="Health Problem or Disability Long term Label"> Health Problem or Disability (Long-term)</label>
@@ -244,38 +231,100 @@
                         </div>
                       </div>
 
+                      <div class="category-group">
+                        <button type="button" class="group-toggle">Transport, environment and climate change ▼</button>
+                        <div class="group-content">
+                          <label><input type="checkbox" value="Household Car or Van Availability"> Household Car or Van Availability</label>
+                          <label><input type="checkbox" value="Household Renewable Energy Systems Label"> Household Renewable Energy Systems</label>                          
+                        </div>
+                      </div>
+
+                      <div class="category-group">
+                        <button type="button" class="group-toggle">Business, economy and trade ▼</button>
+                        <div class="group-content"> 
+                        </div>
+                      </div>
+
+                      <div class="category-group">
+                        <button type="button" class="group-toggle">Crime and justice ▼</button>
+                        <div class="group-content">
+                        </div>
+                      </div>
+
                     </form>
               </div>
               
               <br>
               
-              <div id="output-panel" style="flex: 1;">
-                <div class="breakdown-row">
-                  <div id="breakdown-container"></div>
-                
-                  <div class="button-wrapper">
-                      <button id="howto-output-btn"
-                        class="nav-button nav-button--25"
-                        type="button"
-                        data-nav="howto">How to use this profile builder</button>
 
-                      <button id="change-selection-btn" class="nav-button nav-button--75" type="button">
-                        Change Selections
-                      </button>
-                  </div>
-                </div>
+<div id="output-panel" style="flex: 1;">
+  <div class="breakdown-row">
 
-                <div id="summary-hero">
+<div id="breakdown-container">
+
+  <div id="summary-hero" class="summary-flex">
+  <div class="summary-top">
+    <div class="title-box">
+      <h2 id="areaProfileTitle" contenteditable="true">Click to edit title for area profile</h2>
+    </div>
+    <div class="summary-box">
+      <div class="summary-content">
+          <h4 style = "margin-top: -49px;">Summary of Areas Selected:</h4>
+          <ul id="summaryList"></ul>
+        </div>
+    </div>
+  </div>
+
+  <div class="summary-bottom">
+    <div class="population-box">
+      <div class="population-label">Population selected</div>
+      <div class="population-value" id="totalPopulation">0</div>
+    </div>
+    <div class="map-box">
+      <div id="summary-map"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="button-wrapper">
+  <div class="button-row">
+    <button id="about-btn" class="nav-button uniform-button">About</button>
+    <button id="share-btn" class="nav-button uniform-button">Share</button>
+
+    <div class="dropdown">
+      <button
+        class="nav-button uniform-button dropdown-toggle"
+        type="button"
+        id="downloadDropdown"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        Download
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
+        <li><button class="dropdown-item" onclick="downloadExcel()">Download Excel File</button></li>
+        <li><button class="dropdown-item" onclick="downloadSummaryImage()">Download Summary Image</button></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="change-selection-wrapper">
+    <button id="change-selection" class="nav-button uniform-button">Change Selections</button>
+  </div>
+</div>
+  </div>
+
+                <!-- <div id="summary-hero">
                     <div id="summary-map"></div>
                     <div id="summary-card"></div>
-                </div>
+                </div> -->
 
                 <!-- View Tabs -->
                 <div style="display: flex; align-items: stretch; margin-bottom: 1rem;">
                   <button class="view-tab selected" data-view="charts">Charts</button>
                   <button class="view-tab" data-view="tables">Tables</button>
-                  <button class="view-tab" data-view="tableComparison">Tables<br><span style="font-size: 12px; font-weight: normal;">Urban/Rural/Mixed</span></button>
-                  <button class="view-tab" data-view="chartComparison">Charts<br><span style="font-size: 12px; font-weight: normal;">Urban/Rural/Mixed</span></button>
                 </div>
 
                 <div id="charts-container"></div>
@@ -314,48 +363,67 @@
             </p>
           
           </div> <!--closes profile content div-->
-        <footer>
-          <div id="footer-container">
-            <div class="row">
-              <div style="height: 170px; width: 350px; margin: 10px;">
-                <h3 style="font-weight: 700; font-size: 18px; color: #ffffff">Links</h3>
-                <a href="https://data.nisra.gov.uk/" target="_blank" rel="noopener noreferrer">NISRA Data
-                  Portal</a><br>
-                <a href="https://visual.nisra.gov.uk/" target="_blank" rel="noopener noreferrer">NISRA Interactive
-                  Data Visualisation Hub</a><br>
-                <a href="https://www.opendatani.gov.uk/" target="_blank" rel="noopener noreferrer">OpenDataNI</a><br>
-                <a href="https://www.nidirect.gov.uk" target="_blank" rel="noopener noreferrer">NIDirect</a><br>
-                <a href="https://www.gov.uk/" target="_blank" rel="noopener noreferrer">GOV.UK</a><br>
+        </div>
+
+        <footer class="footer mt-auto py-4 bg-nisra text-white">
+          <div class="container">
+            <!-- 3 column section -->
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <h5 class="footer-headings">Data Tools</h5>
+                <ul class="list-unstyled">
+                  <li><a href="https://explore.nisra.gov.uk/local-stats/">Local Statistics Explorer</a></li>
+                  <li><a href="https://data.nisra.gov.uk">Data Portal</a></li>
+                  <li><a href="https://build.nisra.gov.uk/en/">Census Flexible Table Builder</a></li>
+                </ul>
               </div>
-              <div style="height: 170px; width: 120px; margin: 20px 0px 20px 60px;">
-                <h3 style="font-weight: 700; font-size: 18px; color: #ffffff">Follow NISRA</h3>
-                <i class="fa-brands fa-facebook-f"></i> <a href="https://www.facebook.com/nisra.gov.uk" target="_blank"
-                  rel="noopener noreferrer">Facebook</a><br>
-                <i class="fa-brands fa-x-twitter"></i> <a href="https://twitter.com/NISRA" target="_blank"
-                  rel="noopener noreferrer">Twitter</a><br>
-                <i class="fa-brands fa-youtube"></i> <a href="https://www.youtube.com/user/nisrastats" target="_blank"
-                  rel="noopener noreferrer">YouTube</a><br>
+              <div class="col-md-4">
+                <h5 class="footer-headings">Corporate</h5>
+                <ul class="list-unstyled">
+                  <li><a href="https://www.nisra.gov.uk/">NISRA Website</a></li>
+                  <li><a href="https://www.nisra.gov.uk/statistics/about-nisra/careers">Careers</a></li>
+                  <li><a href="https://www.nisra.gov.uk/contact">Contact</a></li>
+                </ul>
+              </div>
+              <div class="col-md-4">
+                <h5 class="footer-headings">Follow</h5>
+                <ul class="list-inline">
+                  <li class="list-inline-item">
+                    <a href="https://www.facebook.com/nisra.gov.uk">
+                      <img src="img/logo/facebook-brands-solid-full.svg" class="img-50"/>
+                    </a>
+                  </li>
+                  <li class="list-inline-item">
+                    <a href="https://x.com/NISRA/">
+                      <img src="img/logo/x-twitter-brands-solid-full.svg" class="img-50"/>
+                    </a>
+                  </li>
+                  <li class="list-inline-item">
+                    <a href="https://www.youtube.com/user/nisrastats">
+                      <img src="img/logo/youtube-brands-solid-full.svg" class="img-50"/>
+                    </a>
+                  </li>
+                  <li class="list-inline-item">
+                    <a href="https://www.linkedin.com/company/northern-ireland-statistics-and-research-agency/">
+                      <img src="img/logo/linkedin-in-brands-solid-full.svg" class="img-50"/>
+                    </a>
+                  </li>
+                </ul>
               </div>
             </div>
-            <div class="flex-list-footer">
-              <ul
-                style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; margin-left: -1px;">
-                <li class="cc-li" style="border-left:0px;"><a href="https://www.nisra.gov.uk/crown-copyright" target="_blank"
-                    rel="noopener noreferrer">© Crown Copyright</a></li>
-                <!--<li class="cc-li"><a href="https://www.nisra.gov.uk/contacts/programme-government-analytics-executive-office"
-                    target="_blank" rel="noopener noreferrer">Contact us</a></li> --> 
-                <li class="cc-li"><a href="https://consultations.nidirect.gov.uk/teo/d8cf2dfc" target="_blank">Leave
-                    feedback</a></li>
-                <li class="cc-li"><a href="https://www.nisra.gov.uk/terms-and-conditions" target="_blank"
-                    rel="noopener noreferrer">Terms and conditions</a></li>
-                <li class="cc-li"><a href="https://www.nisra.gov.uk/cookies" target="_blank"
-                    rel="noopener noreferrer">Cookies</a></li>
-                <li class="cc-li"><a href="https://www.nisra.gov.uk/nisra-privacy-notice" target="_blank"
-                    rel="noopener noreferrer">Privacy</a></li>
-                <li class="cc-li"><a href="https://www.nisra.gov.uk/accessibility-statement-nisra" target="_blank"
-                    rel="noopener noreferrer">Accessibility Statement</a></li>
-              </ul>
-            </div>
+
+            <!-- Horizontal list with separators -->
+            <ul class="list-inline footer-links text-center mb-0">
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/crown-copyright">© Crown Copyright</a></li>
+              <li class="list-inline-item">|</li>
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/terms-and-conditions">Terms and conditions</a></li>
+              <li class="list-inline-item">|</li>
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/cookies">Cookies</a></li>
+              <li class="list-inline-item">|</li>
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/nisra-privacy-notice">Privacy</a></li>
+              <li class="list-inline-item">|</li>
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/accessibility-statement-nisra">Accessibility Statement</a></li>
+            </ul>
           </div>
         </footer>
         </div>

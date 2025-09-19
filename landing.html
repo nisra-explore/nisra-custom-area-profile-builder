@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <title>DAERA Custom Area Profile Builder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <link rel="icon" type="image" href="img/favicon-daera.svg">
 
     <!-- imports for bootstrap - jquery and popper are dependencies -->
     <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.4.1/dist/jquery.min.js"></script>
@@ -24,6 +22,13 @@
     <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
     <link rel ="stylesheet" href ="style.css">
 
+    <link rel="icon" href="img/icon/favicon.ico" type="image/vnd.microsoft.icon" />
+    <link rel="icon" type="image/png" href="img/icon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="img/icon/favicon.svg" />
+    <link rel="shortcut icon" href="img/icon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="img/icon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="NISRA Data Explorer" />
+
   </head>
 
   <body>
@@ -31,23 +36,19 @@
           
       <div class="content-wrapper">
 
+      <nav class="navbar py-3" style="background-color:#00205b;">
+        <div class="container-fluid d-flex align-items-center">
 
+          <!-- Logo (left) -->
+          <a class="navbar-brand ps-2 d-flex align-items-center me-auto" href="#">
+            <img src="img/nisra-logo-unstacked-white.svg" alt="NISRA logo" height="60" class="me-3">
+          </a>
 
-      <div id="top-container">
-        <div id="top-menu" class="grid" style="margin: 0;">
-          <div class="logo-container">
-              <a href="https://www.daera-ni.gov.uk/" target="_blank"><img id="top-menu-daera-logo" src="img/daera-logo.png" alt="DAERA logo. Clicking image takes user to DAERA website"></a>
-          </div>
+          <!-- Heading (right) -->
+          <h1 class="mb-0 pe-2 text-white fs-2 app-title ms-2">NISRA Profile Builder</h1>
 
-          <div id="dashboard-title-container">
-            <h1 id="dashboard-title">DAERA Custom Area Profile Builder</h1>
-            <!-- <span id="dashboard-subtitle">Access urban rural data across a range of <br>areas for Northern Ireland</span> -->
-          </div>
-          <div class="logo-container">
-            <a href="https://www.nisra.gov.uk/" target="_blank"><img id="top-menu-nisra-logo" src="img/nisra-logo-full-name-stack.svg" alt="NISRA logo. Clicking image takes user to NISRA website"></a>
-          </div>
         </div>
-      </div>
+      </nav>
 
       <div class="profile-banner">
         <div class="container" style="max-width: 1270px;">
@@ -56,9 +57,9 @@
               <h2 style="font-size: 3rem; margin-bottom: 2rem;">
                 Build your own custom area profile
               </h2>
-              <h4 class="mb-4">
+              <h3 class="mb-4">
                 Create your own bespoke area profile based on <br> Northern Ireland small area geographies
-              </h4>
+              </h3>
               <a href="index.html" class="gtstrt-btn">Get Started <svg class="right-arrow" viewBox="0 0 17 13" xmlns="http://www.w3.org/2000/svg" focusable="false"><path d="m10 .2-.9.9c-.1.1-.1.4 0 .5l4 4H.6c-.2 0-.4.2-.4.4v1.2c0 .2.2.4.4.4h12.5l-3.9 3.7c-.2.2-.2.4 0 .6l.8.9c.2.2.4.2.6 0L16.8 7c.2-.2.2-.4 0-.6L10.7.3c-.3-.2-.5-.2-.7-.1z"></path></svg></a>
             </div>
 
@@ -72,14 +73,14 @@
       <div id="main-container">
 
         <div class="container my-5">
-          <h3 class="mb-4">How to use the profile builder</h3>
+          <h2 class="mb-4">How to use the profile builder</h2>
 
           <div class="row">
             <!-- Step 1 -->
             <div class="col-md-6 mb-4">
               <div class="card h-100 shadow-sm">
                 <div class="card-body">
-                  <h4 class="card-title">Step 1 – Select an area</h4>
+                  <h3 class="card-title">Step 1 – Select an area</h3>
                   <p style="font-size: 20px; margin-bottom: 5px;"><strong>First</strong></p>
                   <p class="card-text">Select either <strong>Super Data Zones (SDZ)</strong> or <strong>Data Zones (DZ)</strong> as your chosen geography</strong></p>
                   <p style="font-size: 20px; margin-bottom: 5px;"><strong>Then</strong></p>
@@ -97,7 +98,7 @@
             <div class="col-md-6 mb-4">
               <div class="card h-100 shadow-sm">
                 <div class="card-body">
-                  <h4 class="card-title">Step 2 - View your profile</h4>
+                  <h3 class="card-title">Step 2 - View your profile</h3>
                   <p class="card-text">Select the statistics you are interested in using the Statistic selector. These will be aggregated for the areas in your selected profile.</p>
                   <p class="card-text">You can explore different views of your profile:</p>
                   <ul>
@@ -113,7 +114,7 @@
           </div>
 
           <div class="container my-5">
-            <h3 class="mb-4">Which datasets are available?</h3>
+            <h2 class="mb-4">Which datasets are available?</h2>
 
             <div class="accordion" id="zoneDatasetAccordion">
 
@@ -155,14 +156,14 @@
           </div>
 
           <div class="container my-5">
-            <h3 class="mb-4">Dashboard Functionality Overview</h3>
+            <h2 class="mb-4">Dashboard Functionality Overview</h2>
             <div class="card shadow-sm">
               <div class="card-body">
                 <p>
                   The DAERA Custom Area Profile Builder has been designed to support interactive selection, profile generation, and comparison of demographic, social, and economic data across Northern Ireland. Below are the key functions of the dashboard.
                 </p>
 
-                <h5 class="mt-4">1. Map Interface and Selection Controls</h5>
+                <h4 class="mt-4">1. Map Interface and Selection Controls</h4>
                 <p>The main map interface enables users to define custom areas using the following tools:</p>
                 <ul>
                   <li><strong>Geography selector (left panel):</strong> Allows switching between Super Data Zones (SDZ) and Data Zones (DZ) for area selection.</li>
@@ -177,7 +178,7 @@
                   <li><strong>Go to Area Profile button:</strong> Generates a starter profile for the selected zones and transitions to the output view.</li>
                 </ul>
 
-                <h5 class="mt-4">2. Profile Outputs and Data Views</h5>
+                <h4 class="mt-4">2. Profile Outputs and Data Views</h4>
                 <p>Upon generating a profile, users are presented with a range of configurable views and controls:</p>
                 <ul>
                   <li><strong>Dataset selector (left panel):</strong> Enables filtering by domain, including Demography, Education, Economy, and Health.</li>
@@ -192,14 +193,14 @@
                   </li>
                 </ul>
 
-                <h5 class="mt-4">3. Export and Download Options</h5>
+                <h4 class="mt-4">3. Export and Download Options</h4>
                 <p>The dashboard includes export functionality for further analysis and reporting:</p>
                 <ul>
                   <li><strong>Excel export:</strong> Downloads all currently selected and aggregated data as an Excel file.</li>
                   <li><strong>Summary image download:</strong> Allows saving a PNG version of the active view (charts or tables) and the profile summary.</li>
                 </ul>
 
-                <h5 class="mt-4">4. Data Source Transparency</h5>
+                <h4 class="mt-4">4. Data Source Transparency</h4>
                 <p>
                   All datasets presented in the dashboard are accompanied by source links. These appear at the bottom of the output panel and direct users to the relevant Census or NISRA data sources for reference, metadata, and further documentation.
                 </p>
@@ -209,52 +210,68 @@
 
         </div>
 
-        
+        <footer class="footer mt-auto py-4 bg-nisra text-white">
+          <div class="container">
+            <!-- 3 column section -->
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <h5 class="footer-headings">Data Tools</h5>
+                <ul class="list-unstyled">
+                  <li><a href="https://explore.nisra.gov.uk/local-stats/">Local Statistics Explorer</a></li>
+                  <li><a href="https://data.nisra.gov.uk">Data Portal</a></li>
+                  <li><a href="https://build.nisra.gov.uk/en/">Census Flexible Table Builder</a></li>
+                </ul>
+              </div>
+              <div class="col-md-4">
+                <h5 class="footer-headings">Corporate</h5>
+                <ul class="list-unstyled">
+                  <li><a href="https://www.nisra.gov.uk/">NISRA Website</a></li>
+                  <li><a href="https://www.nisra.gov.uk/statistics/about-nisra/careers">Careers</a></li>
+                  <li><a href="https://www.nisra.gov.uk/contact">Contact</a></li>
+                </ul>
+              </div>
+              <div class="col-md-4">
+                <h5 class="footer-headings">Follow</h5>
+                <ul class="list-inline">
+                  <li class="list-inline-item">
+                    <a href="https://www.facebook.com/nisra.gov.uk">
+                      <img src="img/logo/facebook-brands-solid-full.svg" class="img-50"/>
+                    </a>
+                  </li>
+                  <li class="list-inline-item">
+                    <a href="https://x.com/NISRA/">
+                      <img src="img/logo/x-twitter-brands-solid-full.svg" class="img-50"/>
+                    </a>
+                  </li>
+                  <li class="list-inline-item">
+                    <a href="https://www.youtube.com/user/nisrastats">
+                      <img src="img/logo/youtube-brands-solid-full.svg" class="img-50"/>
+                    </a>
+                  </li>
+                  <li class="list-inline-item">
+                    <a href="https://www.linkedin.com/company/northern-ireland-statistics-and-research-agency/">
+                      <img src="img/logo/linkedin-in-brands-solid-full.svg" class="img-50"/>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-        <footer>
-          <div id="footer-container">
-            <div class="row">
-              <div style="height: 170px; width: 350px; margin: 10px;">
-                <h3 style="font-weight: 700; font-size: 18px; color: #ffffff">Links</h3>
-                <a href="https://data.nisra.gov.uk/" target="_blank" rel="noopener noreferrer">NISRA Data
-                  Portal</a><br>
-                <a href="https://visual.nisra.gov.uk/" target="_blank" rel="noopener noreferrer">NISRA Interactive
-                  Data Visualisation Hub</a><br>
-                <a href="https://www.opendatani.gov.uk/" target="_blank" rel="noopener noreferrer">OpenDataNI</a><br>
-                <a href="https://www.nidirect.gov.uk" target="_blank" rel="noopener noreferrer">NIDirect</a><br>
-                <a href="https://www.gov.uk/" target="_blank" rel="noopener noreferrer">GOV.UK</a><br>
-              </div>
-              <div style="height: 170px; width: 120px; margin: 20px 0px 20px 60px;">
-                <h3 style="font-weight: 700; font-size: 18px; color: #ffffff">Follow NISRA</h3>
-                <i class="fa-brands fa-facebook-f"></i> <a href="https://www.facebook.com/nisra.gov.uk" target="_blank"
-                  rel="noopener noreferrer">Facebook</a><br>
-                <i class="fa-brands fa-x-twitter"></i> <a href="https://twitter.com/NISRA" target="_blank"
-                  rel="noopener noreferrer">Twitter</a><br>
-                <i class="fa-brands fa-youtube"></i> <a href="https://www.youtube.com/user/nisrastats" target="_blank"
-                  rel="noopener noreferrer">YouTube</a><br>
-              </div>
-            </div>
-            <div class="flex-list-footer">
-              <ul
-                style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; margin-left: -1px;">
-                <li class="cc-li" style="border-left:0px;"><a href="https://www.nisra.gov.uk/crown-copyright" target="_blank"
-                    rel="noopener noreferrer">© Crown Copyright</a></li>
-                <!--<li class="cc-li"><a href="https://www.nisra.gov.uk/contacts/programme-government-analytics-executive-office"
-                    target="_blank" rel="noopener noreferrer">Contact us</a></li> --> 
-                <li class="cc-li"><a href="https://consultations.nidirect.gov.uk/teo/d8cf2dfc" target="_blank">Leave
-                    feedback</a></li>
-                <li class="cc-li"><a href="https://www.nisra.gov.uk/terms-and-conditions" target="_blank"
-                    rel="noopener noreferrer">Terms and conditions</a></li>
-                <li class="cc-li"><a href="https://www.nisra.gov.uk/cookies" target="_blank"
-                    rel="noopener noreferrer">Cookies</a></li>
-                <li class="cc-li"><a href="https://www.nisra.gov.uk/nisra-privacy-notice" target="_blank"
-                    rel="noopener noreferrer">Privacy</a></li>
-                <li class="cc-li"><a href="https://www.nisra.gov.uk/accessibility-statement-nisra" target="_blank"
-                    rel="noopener noreferrer">Accessibility Statement</a></li>
-              </ul>
-            </div>
+            <!-- Horizontal list with separators -->
+            <ul class="list-inline footer-links text-center mb-0">
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/crown-copyright">© Crown Copyright</a></li>
+              <li class="list-inline-item">|</li>
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/terms-and-conditions">Terms and conditions</a></li>
+              <li class="list-inline-item">|</li>
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/cookies">Cookies</a></li>
+              <li class="list-inline-item">|</li>
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/nisra-privacy-notice">Privacy</a></li>
+              <li class="list-inline-item">|</li>
+              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/accessibility-statement-nisra">Accessibility Statement</a></li>
+            </ul>
           </div>
         </footer>
+
         </div>
     
       </div>   
