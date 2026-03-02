@@ -82,13 +82,13 @@
                 <div class="card-body">
                   <h3 class="card-title">Step 1 – Select an area</h3>
                   <p style="font-size: 20px; margin-bottom: 5px;"><strong>First</strong></p>
-                  <p class="card-text">Select either <strong>Super Data Zones (SDZ)</strong> or <strong>Data Zones (DZ)</strong> as your chosen geography</strong></p>
+                  <p class="card-text">Select either <strong>Super Data Zones (SDZ)</strong>, <strong>Data Zones (DZ)</strong> or <strong>District Electoral Area (DEA)</strong> as your chosen geography</strong></p>
                   <p style="font-size: 20px; margin-bottom: 5px;"><strong>Then</strong></p>
                   <p class="card-text" style="margin-bottom: 0px;">Select as many <strong>individual geographies</strong> as you want from the map</strong></p>
                   <strong>Or</strong>
-                  <p class="card-text">Select a predefined grouping of your chosen geographies using the <strong>area selector</strong></p>
+                  <p class="card-text">Select areas using the <strong>radius selector</strong></p>
 
-                  <p class="card-text"> Area selector and individual map selections can be combined</p>
+                  <p class="card-text"> Radius selector and individual map selections can be combined</p>
                   <p class="card-text">Once you're done, click <strong>“Go to area profile”</strong> to generate outputs based on your selection</p>
                 </div>
               </div>
@@ -104,8 +104,6 @@
                   <ul>
                     <li><strong>Chart view</strong> - A chart for each statistic, broken down by its sub-categories</li>
                     <li><strong>Table view</strong> - A table for each statistic, broken down by its sub-categories</li>
-                    <li><strong>Urban/Rural/Mixed Chart view</strong> - A chart for each statistic, broken down by its sub-categories, with Urban/Rural/Mixed area comparisons</li>
-                    <li><strong>Urban/Rural/Mixed Table view</strong> - A table for each statistic, broken down by its sub-categories, with Urban/Rural/Mixed area comparisons</li>
                   </ul>
                   <p class="card-text">All views include comparison to <strong>Northern Ireland (NI)</strong> as a default. An .xlsx <b>download</b> of the table data is available as is a snapshot image of any view of your area profile.</p>
                 </div>
@@ -152,6 +150,24 @@
                 </div>
               </div>
 
+                            <!-- DEA panel -->
+              <div class="card">
+                <div class="card-header" id="headingDEA">
+                  <h3 class="mb-0">
+                    <button class="daera-btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                      data-target="#collapseDEA" aria-expanded="false" aria-controls="collapseDEA">
+                      District Electoral Area (DEA)
+                    </button>
+                  </h3>
+                </div>
+                <div id="collapseDEA" class="collapse" aria-labelledby="headingDEA" data-parent="#zoneDatasetAccordion">
+                  <div class="card-body" id="dataset-dea-container">
+                    <p>Loading DEA datasets...</p>
+                  </div>
+                </div>
+              </div>
+
+
             </div>
           </div>
 
@@ -166,11 +182,11 @@
                 <h4 class="mt-4">1. Map Interface and Selection Controls</h4>
                 <p>The main map interface enables users to define custom areas using the following tools:</p>
                 <ul>
-                  <li><strong>Geography selector (left panel):</strong> Allows switching between Super Data Zones (SDZ) and Data Zones (DZ) for area selection.</li>
-                  <li><strong>Multi-area selector (left panel):</strong> Enables users to navigate directly to an LGD boundary and optionally group zones within it.</li>
+                  <li><strong>Geography selector (left panel):</strong> Allows switching between Super Data Zones (SDZ), Data Zones (DZ) and District Electoral Areas (DEA) for area selection.</li>
+                  <li><strong>Radius selector (left panel):</strong> Enables users to group zones within a defined radius from a selected central position.</li>
                   <li><strong>Map controls:</strong>
                     <ul>
-                      <li>Toggle display of urban/rural/mixed classifications on the map.</li>
+                      <li>Toggle display of classifications on the map.</li>
                       <li>Clear all current selections.</li>
                       <li>Reset the map zoom and position to default Northern Ireland extent.</li>
                     </ul>
@@ -187,8 +203,6 @@
                     <ul>
                       <li><strong>Chart View:</strong> Displays data distributions as percentage bar charts.</li>
                       <li><strong>Table View:</strong> Tabulates raw counts and percentage values for each dataset.</li>
-                      <li><strong>Urban/Rural Table:</strong> Breaks down results by settlement type within the selected area.</li>
-                      <li><strong>Urban/Rural Chart View:</strong> Provides visual comparison by urban, rural, and mixed classifications.</li>
                     </ul>
                   </li>
                 </ul>
@@ -202,7 +216,7 @@
 
                 <h4 class="mt-4">4. Data Source Transparency</h4>
                 <p>
-                  All datasets presented in the dashboard are accompanied by source links. These appear at the bottom of the output panel and direct users to the relevant Census or NISRA data sources for reference, metadata, and further documentation.
+                  All datasets presented in the dashboard are accompanied by source links. These can be accessed by clicking the i button beside the title of each chart and direct users to the relevant Census or NISRA data sources for reference, metadata, and further documentation.
                 </p>
               </div>
             </div>
@@ -210,67 +224,67 @@
 
         </div>
 
-        <footer class="footer mt-auto py-4 bg-nisra text-white">
-          <div class="container">
-            <!-- 3 column section -->
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <h5 class="footer-headings">Data Tools</h5>
-                <ul class="list-unstyled">
-                  <li><a href="https://explore.nisra.gov.uk/local-stats/">Local Statistics Explorer</a></li>
-                  <li><a href="https://data.nisra.gov.uk">Data Portal</a></li>
-                  <li><a href="https://build.nisra.gov.uk/en/">Census Flexible Table Builder</a></li>
-                </ul>
-              </div>
-              <div class="col-md-4">
-                <h5 class="footer-headings">Corporate</h5>
-                <ul class="list-unstyled">
-                  <li><a href="https://www.nisra.gov.uk/">NISRA Website</a></li>
-                  <li><a href="https://www.nisra.gov.uk/statistics/about-nisra/careers">Careers</a></li>
-                  <li><a href="https://www.nisra.gov.uk/contact">Contact</a></li>
-                </ul>
-              </div>
-              <div class="col-md-4">
-                <h5 class="footer-headings">Follow</h5>
-                <ul class="list-inline">
-                  <li class="list-inline-item">
-                    <a href="https://www.facebook.com/nisra.gov.uk">
-                      <img src="img/logo/facebook-brands-solid-full.svg" class="img-50"/>
-                    </a>
-                  </li>
-                  <li class="list-inline-item">
-                    <a href="https://x.com/NISRA/">
-                      <img src="img/logo/x-twitter-brands-solid-full.svg" class="img-50"/>
-                    </a>
-                  </li>
-                  <li class="list-inline-item">
-                    <a href="https://www.youtube.com/user/nisrastats">
-                      <img src="img/logo/youtube-brands-solid-full.svg" class="img-50"/>
-                    </a>
-                  </li>
-                  <li class="list-inline-item">
-                    <a href="https://www.linkedin.com/company/northern-ireland-statistics-and-research-agency/">
-                      <img src="img/logo/linkedin-in-brands-solid-full.svg" class="img-50"/>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Horizontal list with separators -->
-            <ul class="list-inline footer-links text-center mb-0">
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/crown-copyright">© Crown Copyright</a></li>
-              <li class="list-inline-item">|</li>
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/terms-and-conditions">Terms and conditions</a></li>
-              <li class="list-inline-item">|</li>
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/cookies">Cookies</a></li>
-              <li class="list-inline-item">|</li>
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/nisra-privacy-notice">Privacy</a></li>
-              <li class="list-inline-item">|</li>
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/accessibility-statement-nisra">Accessibility Statement</a></li>
+   <footer class="footer mt-auto py-4 bg-nisra text-white">
+      <div class="container">
+        <!-- 3 column section -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <h5>Data Tools</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://explore.nisra.gov.uk/local-stats/">Local Statistics Explorer</a></li>
+              <li><a href="https://data.nisra.gov.uk">Data Portal</a></li>
+              <li><a href="https://build.nisra.gov.uk/en/">Census Flexible Table Builder</a></li>
             </ul>
           </div>
-        </footer>
+          <div class="col-md-4">
+            <h5>Corporate</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://www.nisra.gov.uk/">NISRA Website</a></li>
+              <li><a href="https://www.nisra.gov.uk/statistics/about-nisra/careers">Careers</a></li>
+              <li><a href="https://www.nisra.gov.uk/contact">Contact</a></li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <h5>Follow</h5>
+            <ul class="list-inline">
+              <li class="list-inline-item">
+                <a href="https://www.facebook.com/nisra.gov.uk">
+                  <img src="img/logo/facebook-brands-solid-full.svg" title="Facebook" role="img" class="img-50"/>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="https://x.com/NISRA/">
+                  <img src="img/logo/x-twitter-brands-solid-full.svg" title="Twitter/X" role="img" class="img-50"/>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="https://www.youtube.com/user/nisrastats">
+                  <img src="img/logo/youtube-brands-solid-full.svg" title="YouTube" role="img" class="img-50"/>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="https://www.linkedin.com/company/northern-ireland-statistics-and-research-agency/">
+                  <img src="img/logo/linkedin-in-brands-solid-full.svg" title="LinkedIn" role="img" class="img-50"/>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Horizontal list with separators -->
+        <ul class="list-inline footer-links text-center mb-0">
+          <li class="list-inline-item"><a href="https://www.nisra.gov.uk/crown-copyright">© Crown Copyright</a></li>
+          <li class="list-inline-item">|</li>
+          <li class="list-inline-item"><a href="https://www.nisra.gov.uk/terms-and-conditions">Terms and conditions</a></li>
+          <li class="list-inline-item">|</li>
+          <li class="list-inline-item"><a href="https://www.nisra.gov.uk/cookies">Cookies</a></li>
+          <li class="list-inline-item">|</li>
+          <li class="list-inline-item"><a href="https://www.nisra.gov.uk/nisra-privacy-notice">Privacy</a></li>
+          <li class="list-inline-item">|</li>
+          <li class="list-inline-item"><a href="https://datavis.nisra.gov.uk/dissemination/accessibility-statement-visualisations.html">Accessibility Statement</a></li>
+        </ul>
+      </div>
+    </footer>
 
         </div>
     
@@ -289,25 +303,40 @@ async function loadDatasetButtons(containerId, zoneType) {
     const lookup = await response.json();
 
     const container = document.getElementById(containerId);
-    container.innerHTML = ''; // Clear placeholder
+    container.innerHTML = '';
+
+    // Map your internal zoneType to FTB geography codes
+    const ftbGeoCodeByZoneType = {
+      sdz: 'SDZ21',
+      dz:  'DZ21',
+      dea: 'DEA14'
+    };
+
+    const ftbGeo = ftbGeoCodeByZoneType[zoneType];
 
     lookup.forEach(item => {
-      const label = item.nested_list_names;
-      const code = item.further_breakdown_df;
-      const source = item.Source;
-      const normalizedLabel = label.trim().toLowerCase();
+      const label   = item.nested_list_names;
+      const code    = item.further_breakdown_df;
+      const source  = item.Source;
+      const normLbl = label.trim().toLowerCase();
 
       let fullUrl = '';
 
-      if (source === "Flexible Table Builder" && code) {
-        fullUrl = `https://build.nisra.gov.uk/en/custom/variables/${code}?d=PEOPLE&v=${zoneType}21&r=variables`;
+      if (source === "Flexible Table Builder" && code && ftbGeo) {
+        // Link straight to the data view for this geography + variable
+        fullUrl = `https://build.nisra.gov.uk/en/custom/data?d=PEOPLE&v=${ftbGeo}&v=${code}`;
       } else if (source === "Data Portal") {
-        if (normalizedLabel === "benefits statistics" && zoneType === "dz") {
+        // keep your existing DP special-casing here if you want
+        if (normLbl === "benefits statistics" && zoneType === "dz") {
           fullUrl = "https://data.nisra.gov.uk/table/BSDZ";
-        } else if (normalizedLabel === "benefits statistics" && zoneType === "sdz") {
+        } else if (normLbl === "benefits statistics" && zoneType === "sdz") {
           fullUrl = "https://data.nisra.gov.uk/table/BSSDZ";
-        } else if ((normalizedLabel === "age (mye)" || normalizedLabel === "sex (mye)") && zoneType === "sdz") {
+        } else if (normLbl === "benefits statistics" && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/BSDEA";
+        } else if ((normLbl === "age (mye)" || normLbl === "sex (mye)") && zoneType === "sdz") {
           fullUrl = "https://data.nisra.gov.uk/table/MYE01T012";
+        } else if ((normLbl === "age (mye)" || normLbl === "sex (mye)") && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/MYE01T010";
         }
       }
 
@@ -317,7 +346,6 @@ async function loadDatasetButtons(containerId, zoneType) {
         button.className = "daera-btn btn-outline-primary m-1";
         button.textContent = label;
         button.target = "_blank";
-
         container.appendChild(button);
       }
     });
@@ -328,9 +356,11 @@ async function loadDatasetButtons(containerId, zoneType) {
   }
 }
 
+
       document.addEventListener("DOMContentLoaded", () => {
         loadDatasetButtons('dataset-sdz-container', 'sdz');
         loadDatasetButtons('dataset-dz-container', 'dz');
+        loadDatasetButtons('dataset-dea-container', 'dea');
       });
     </script>
 

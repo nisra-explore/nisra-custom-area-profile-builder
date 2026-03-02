@@ -1,132 +1,158 @@
 [
   {
-    "further_breakdown_df": "AGE_BAND_BROAD",
     "nested_list_names": "Age (4 Categories)",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "AGE_BAND_BROAD",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "AGE_BAND_AGG7_A",
     "nested_list_names": "Age (7 Categories)",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "AGE_BAND_AGG7_A",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "COB_AGG3",
     "nested_list_names": "Country of Birth",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "COB_AGG3",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "ECONOMIC_ACTIVITY_AGG5",
     "nested_list_names": "Economic Activity",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "ECONOMIC_ACTIVITY_AGG5",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "HEALTH_CONDITION_MENTAL_HEALTH",
     "nested_list_names": "Health Condition Emotional or Mental Health Label",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "HEALTH_CONDITION_MENTAL_HEALTH",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "DISABILITY_DVO",
     "nested_list_names": "Health Problem or Disability Long term Label",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "DISABILITY_DVO",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "HEALTH_IN_GENERAL_AGG3",
     "nested_list_names": "Health in General",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "HEALTH_IN_GENERAL_AGG3",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "HH_FAMILY_COMPOSITION_AGG6_PERS",
     "nested_list_names": "Household Composition",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "HH_FAMILY_COMPOSITION_AGG6_PERS",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "HH_CAR_VAN_TC2_PERS",
     "nested_list_names": "Household Car or Van Availability",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "HH_CAR_VAN_TC2_PERS",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "HH_DEPENDENT_CHILDREN_IND_PERS",
     "nested_list_names": "Household Dependent Children",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "HH_DEPENDENT_CHILDREN_IND_PERS",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "HH_RENEWABLE_ENERGY_IND_PERS",
     "nested_list_names": "Household Renewable Energy Systems Label",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "HH_RENEWABLE_ENERGY_IND_PERS",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "MAR_CP_STATUS_AGG4",
     "nested_list_names": "Marital and Civil Partnership Status",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "MAR_CP_STATUS_AGG4",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "OCCUPATION_1DIGIT",
     "nested_list_names": "Occupation Current",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "OCCUPATION_1DIGIT",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "TRANSPORT_TO_STUDY_AGG5",
     "nested_list_names": "Place of Study Method of Travel",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "TRANSPORT_TO_STUDY_AGG5",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "DISTANCE_TO_STUDY_AGG7",
     "nested_list_names": "Place of Study Distance",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "DISTANCE_TO_STUDY_AGG7",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "DISTANCE_TO_WORK_AGG8",
     "nested_list_names": "Place of Work Distance",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "DISTANCE_TO_WORK_AGG8",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "TRANSPORT_TO_WORKPLACE_AGG7",
     "nested_list_names": "Place of Work Method of Travel",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "TRANSPORT_TO_WORKPLACE_AGG7",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "IS_CARER_AGG5",
     "nested_list_names": "Provision of Unpaid Care",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "IS_CARER_AGG5",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "HIGHEST_QUALIFICATION_AGG7",
     "nested_list_names": "Qualifications Highest Level",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "HIGHEST_QUALIFICATION_AGG7",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "RELIGION_BELONG_TO_AGG4",
     "nested_list_names": "Religion",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "RELIGION_BELONG_TO_AGG4",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "UR_SEX",
     "nested_list_names": "Sex Label",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "UR_SEX",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "SEXUAL_ORIENTATION_DVO_AGG4",
     "nested_list_names": "Sexual Orientation Label",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "SEXUAL_ORIENTATION_DVO_AGG4",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "MAIN_LANGUAGE_AGG3",
     "nested_list_names": "Main Language",
-    "Source": "Flexible Table Builder"
+    "further_breakdown_df": "MAIN_LANGUAGE_AGG3",
+    "Source": "Flexible Table Builder",
+    "Year": 2021
   },
   {
-    "further_breakdown_df": "Benefits",
     "nested_list_names": "Benefits Statistics",
-    "Source": "Data Portal"
+    "further_breakdown_df": "Benefits",
+    "Source": "Data Portal",
+    "Year": 2024
   },
   {
-    "further_breakdown_df": "MYE01T012",
     "nested_list_names": "Age (MYE)",
-    "Source": "Data Portal"
+    "further_breakdown_df": "MYE01T012",
+    "Source": "Data Portal",
+    "Year": 2024
   },
   {
-    "further_breakdown_df": "MYE01T012",
     "nested_list_names": "Sex (MYE)",
-    "Source": "Data Portal"
+    "further_breakdown_df": "MYE01T012",
+    "Source": "Data Portal",
+    "Year": 2024
   }
 ]

@@ -71,7 +71,7 @@
                 <div id="map-wrapper">
                   <div class="lgd-selector">
                     <div class="zone-selector-box">
-                      <label for="zone-selector"><h4>Select Building Block</h4></label>
+                      <label for="zone-selector"><h4>Select a geography to build with</h4></label>
                       <select id="zone-selector">
                         <option value="sdz" selected>Super Data Zone</option>
                         <option value="dz">Data Zone</option>
@@ -79,8 +79,28 @@
                       </select>
                     </div>
                     <div id="toolbar-insertion-point">
-
                       <h5>Then add areas to your custom area profile:</h5>
+                      <!-- POSTCODE SEARCH SECTION -->
+                        <div id="postcode-search-section" class="postcode-search-container">
+                          <h5>Quick search by postcode:</h5>
+                          <div class="postcode-input-group">
+                            <input 
+                              type="text" 
+                              id="postcode-input" 
+                              placeholder="Enter postcode (e.g., BT12 3AB)"
+                              class="postcode-input"
+                              >
+                            <button 
+                              id="postcode-search-btn" 
+                              class="postcode-search-btn" 
+                              type="button"
+                              aria-label="Search by postcode"
+                              >Search</button>
+                            </button>>
+                          </div>
+                          <div id="postcode-status" class="postcode-status"></div>
+                        </div>
+                      <!-- END POSTCODE SEARCH SECTION -->
                       <h4>Select individual areas on the map</h4>
                         <p>or</p>
                       <h4>Select using the radius selector</h4>
@@ -94,6 +114,17 @@
                         <div class="center-wrapper">
                           <button id="build-profile-btn" class="nav-button">Go to Area Profile</button>
                         </div>
+                      </div>
+                    </div>
+                    <div id="lgd-buttons-section" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ccc;">
+                      <button id="lgd-toggle-btn" class="lgd-section-toggle" aria-expanded="false" aria-controls="lgd-buttons-container">
+                        <h5 style="margin-bottom: 0; font-weight: bold; display: flex; align-items: center; gap: 8px; color: inherit;">
+                          Or select by Local Government District:
+                          <span class="lgd-toggle-icon">▶</span>
+                        </h5>
+                      </button>
+                      <div id="lgd-buttons-container" class="lgd-buttons-container" style="display: none;">
+                        <div id="lgd-buttons" style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%;"></div>
                       </div>
                     </div>
                   </div>
@@ -130,9 +161,9 @@
 
                   <div class="map-rail" aria-label="Map controls">
 
-                  <div class="about-button-pair-map">
+                  <div class="about-button-nav">
                     <button id="howto-rail-btn" class="nav-button" data-nav="howto">About</button>
-                    <button id="howto-rail-btn-2" class="nav-button">Share</button>
+                    <!-- <button id="howto-rail-btn-2" class="nav-button">Share</button> -->
                   </div>
 
                   </div>
@@ -150,23 +181,17 @@
 
               <div id="category-selector">
                     <h3>Create your Area Profile</h3>
-                    <h5>Select the statistics you wish to see for your chosen areas:</h5>
-
-                    <div class="source-legend" style="margin:.5rem 0;">
-                      <span class="source-badge badge-ftb">Flexible Table Builder</span>
-                      <span class="source-badge badge-portal">Data Portal</span>
-                    </div>
-                    <br>
+                    <h5><strong>Year:</strong> Data is from Census 2021 unless a different year is shown (details in charts and tables).</h5>
 
                     <form id="category-form">
 
                       <div class="category-group">
                         <button type="button" class="group-toggle">People and communities ▼</button>
                         <div class="group-content">
-                          <label><input type="checkbox" value="Age (4 Categories)" checked> Age (4 categories)</label>
-                          <label><input type="checkbox" value="Age (7 Categories)"> Age (7 categories)</label>
+                          <label><input type="checkbox" value="Age (4 Categories)" checked> Age (4 Categories)</label>
+                          <label><input type="checkbox" value="Age (7 Categories)"> Age (7 Categories)</label>
                           <label><input type="checkbox" value="Sex Label" checked> Sex</label>
-                          <label><input type="checkbox" value="Age (MYE)"> Age (MYE)</label>
+                          <label><input type="checkbox" value="Age (MYE)"> Age (MYE) (4 Categories)</label>
                           <label><input type="checkbox" value="Sex (MYE)"> Sex (MYE)</label>
                           <label><input type="checkbox" value="Religion"> Religion</label>
                           <label><input type="checkbox" value="Household Composition"> Household Composition</label>
@@ -236,15 +261,41 @@
               
 
 <div id="output-panel" style="flex: 1;">
-  <div class="breakdown-row">
 
+<div class="profile-header-bar">
+  
+  <div class="header-row">
+    <h1 id="areaProfileTitle" contenteditable="true"></h1>
+
+    <div class="profile-nav-buttons">
+            
+      <button id="change-selection" class="nav-button change-selections">
+        Back to Map
+      </button>
+
+      <div class="dropdown">
+        <button class="nav-button dropdown-toggle" id="downloadDropdown"
+                data-bs-toggle="dropdown">
+          Download
+        </button>
+        <ul class="dropdown-menu">
+          <li><button class="dropdown-item" onclick="downloadExcel()">Download Excel File</button></li>
+          <li><button class="dropdown-item" onclick="downloadSummaryImage()">Download Summary Image</button></li>
+        </ul>
+      </div>
+      <div class="about-button-pair-profile">
+        <button class="nav-button" data-nav="howto">About</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <div class="breakdown-row">
 <div id="breakdown-container">
 
   <div id="summary-hero" class="summary-flex">
   <div class="summary-top">
-    <div class="title-box">
-      <h1 style="font-size: 35px;" id="areaProfileTitle" contenteditable="true">Click to edit title for area profile</h1>
-    </div>
     <div class="summary-box">
       <div class="summary-content">
           <h4>Summary of Areas Selected:</h4>
@@ -266,30 +317,6 @@
 
 </div>
 
-<div class="profile-nav-buttons">
-  <div class="about-button-pair-profile">
-    <button class="nav-button" data-nav="howto">About</button>
-    <button class="nav-button">Share</button>
-  </div>
-  <div>
-    <button id="change-selection" class="nav-button change-selections">Back to Map</button>
-  </div>
-  <div class="dropdown">
-    <button
-      class="nav-button dropdown-toggle"
-      type="button"
-      id="downloadDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Download
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
-      <li><button class="dropdown-item" onclick="downloadExcel()">Download Excel File</button></li>
-      <li><button class="dropdown-item" onclick="downloadSummaryImage()">Download Summary Image</button></li>
-    </ul>
-  </div>
-</div>
 <!-- <div class="button-wrapper">
   <div class="button-row">
     <button id="about-btn" class="nav-button uniform-button">About</button>
@@ -337,8 +364,6 @@
                 <br>
                 <hr style="border-top: 5px solid #3878c5; margin: 0">
                 <br>
-                <button onclick="downloadExcel()">Download Excel File</button>
-                <button onclick="downloadSummaryImage()">Download Summary Image</button>
 
               </div>
               
@@ -367,67 +392,67 @@
           </div> <!--closes profile content div-->
         </div>
 
-        <footer class="footer mt-auto py-4 bg-nisra text-white">
-          <div class="container">
-            <!-- 3 column section -->
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <h5 class="footer-headings">Data Tools</h5>
-                <ul class="list-unstyled">
-                  <li><a href="https://explore.nisra.gov.uk/local-stats/">Local Statistics Explorer</a></li>
-                  <li><a href="https://data.nisra.gov.uk">Data Portal</a></li>
-                  <li><a href="https://build.nisra.gov.uk/en/">Census Flexible Table Builder</a></li>
-                </ul>
-              </div>
-              <div class="col-md-4">
-                <h5 class="footer-headings">Corporate</h5>
-                <ul class="list-unstyled">
-                  <li><a href="https://www.nisra.gov.uk/">NISRA Website</a></li>
-                  <li><a href="https://www.nisra.gov.uk/statistics/about-nisra/careers">Careers</a></li>
-                  <li><a href="https://www.nisra.gov.uk/contact">Contact</a></li>
-                </ul>
-              </div>
-              <div class="col-md-4">
-                <h5 class="footer-headings">Follow</h5>
-                <ul class="list-inline">
-                  <li class="list-inline-item">
-                    <a href="https://www.facebook.com/nisra.gov.uk">
-                      <img src="img/logo/facebook-brands-solid-full.svg" class="img-50"/>
-                    </a>
-                  </li>
-                  <li class="list-inline-item">
-                    <a href="https://x.com/NISRA/">
-                      <img src="img/logo/x-twitter-brands-solid-full.svg" class="img-50"/>
-                    </a>
-                  </li>
-                  <li class="list-inline-item">
-                    <a href="https://www.youtube.com/user/nisrastats">
-                      <img src="img/logo/youtube-brands-solid-full.svg" class="img-50"/>
-                    </a>
-                  </li>
-                  <li class="list-inline-item">
-                    <a href="https://www.linkedin.com/company/northern-ireland-statistics-and-research-agency/">
-                      <img src="img/logo/linkedin-in-brands-solid-full.svg" class="img-50"/>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Horizontal list with separators -->
-            <ul class="list-inline footer-links text-center mb-0">
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/crown-copyright">© Crown Copyright</a></li>
-              <li class="list-inline-item">|</li>
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/terms-and-conditions">Terms and conditions</a></li>
-              <li class="list-inline-item">|</li>
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/cookies">Cookies</a></li>
-              <li class="list-inline-item">|</li>
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/nisra-privacy-notice">Privacy</a></li>
-              <li class="list-inline-item">|</li>
-              <li class="list-inline-item"><a href="https://www.nisra.gov.uk/accessibility-statement-nisra">Accessibility Statement</a></li>
+   <footer class="footer mt-auto py-4 bg-nisra text-white">
+      <div class="container">
+        <!-- 3 column section -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <h5>Data Tools</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://explore.nisra.gov.uk/local-stats/">Local Statistics Explorer</a></li>
+              <li><a href="https://data.nisra.gov.uk">Data Portal</a></li>
+              <li><a href="https://build.nisra.gov.uk/en/">Census Flexible Table Builder</a></li>
             </ul>
           </div>
-        </footer>
+          <div class="col-md-4">
+            <h5>Corporate</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://www.nisra.gov.uk/">NISRA Website</a></li>
+              <li><a href="https://www.nisra.gov.uk/statistics/about-nisra/careers">Careers</a></li>
+              <li><a href="https://www.nisra.gov.uk/contact">Contact</a></li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <h5>Follow</h5>
+            <ul class="list-inline">
+              <li class="list-inline-item">
+                <a href="https://www.facebook.com/nisra.gov.uk">
+                  <img src="img/logo/facebook-brands-solid-full.svg" title="Facebook" role="img" class="img-50"/>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="https://x.com/NISRA/">
+                  <img src="img/logo/x-twitter-brands-solid-full.svg" title="Twitter/X" role="img" class="img-50"/>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="https://www.youtube.com/user/nisrastats">
+                  <img src="img/logo/youtube-brands-solid-full.svg" title="YouTube" role="img" class="img-50"/>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="https://www.linkedin.com/company/northern-ireland-statistics-and-research-agency/">
+                  <img src="img/logo/linkedin-in-brands-solid-full.svg" title="LinkedIn" role="img" class="img-50"/>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Horizontal list with separators -->
+        <ul class="list-inline footer-links text-center mb-0">
+          <li class="list-inline-item"><a href="https://www.nisra.gov.uk/crown-copyright">© Crown Copyright</a></li>
+          <li class="list-inline-item">|</li>
+          <li class="list-inline-item"><a href="https://www.nisra.gov.uk/terms-and-conditions">Terms and conditions</a></li>
+          <li class="list-inline-item">|</li>
+          <li class="list-inline-item"><a href="https://www.nisra.gov.uk/cookies">Cookies</a></li>
+          <li class="list-inline-item">|</li>
+          <li class="list-inline-item"><a href="https://www.nisra.gov.uk/nisra-privacy-notice">Privacy</a></li>
+          <li class="list-inline-item">|</li>
+          <li class="list-inline-item"><a href="https://datavis.nisra.gov.uk/dissemination/accessibility-statement-visualisations.html">Accessibility Statement</a></li>
+        </ul>
+      </div>
+    </footer>
         </div>
     
       </div>   
