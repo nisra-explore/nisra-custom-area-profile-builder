@@ -5,7 +5,7 @@ POSTCODE SEARCH FUNCTIONALITY
 This section handles postcode lookup and automatic map selection.
 Data source: CPD_LIGHT_JULY_2024.csv (hosted on GitHub)
 ================================================================================
-*/
+*/ 
 
 // Global variable to cache the postcode data (populated on first search)
 let postcodeDataCache = null;
