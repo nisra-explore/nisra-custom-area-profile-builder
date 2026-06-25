@@ -64,7 +64,7 @@
             </div>
 
             <div class="col-md-6 text-center">
-              <img src="img/landing.png" alt="Profile Builder Illustration" class="img-fluid" style="max-width: 90%;">
+              <img src="img/landing2.png" alt="Profile Builder Illustration" class="img-fluid" style="max-width: 90%;">
             </div>
           </div>
         </div>
@@ -82,14 +82,15 @@
                 <div class="card-body">
                   <h3 class="card-title">Step 1 – Select an area</h3>
                   <p style="font-size: 20px; margin-bottom: 5px;"><strong>First</strong></p>
-                  <p class="card-text">Select either <strong>Super Data Zones (SDZ)</strong>, <strong>Data Zones (DZ)</strong> or <strong>District Electoral Area (DEA)</strong> as your chosen geography</strong></p>
+                  <p class="card-text">Select either <strong>Super Data Zones (SDZ)</strong>, <strong>Data Zones (DZ)</strong>, <strong>District Electoral Area (DEA)</strong> or <strong>Local Government District (LGD)</strong> as your chosen geography</strong></p>
                   <p style="font-size: 20px; margin-bottom: 5px;"><strong>Then</strong></p>
                   <p class="card-text" style="margin-bottom: 0px;">Select as many <strong>individual geographies</strong> as you want from the map</strong></p>
                   <strong>Or</strong>
-                  <p class="card-text">Select areas using the <strong>radius selector</strong></p>
-
-                  <p class="card-text"> Radius selector and individual map selections can be combined</p>
-                  <p class="card-text">Once you're done, click <strong>“Go to area profile”</strong> to generate outputs based on your selection</p>
+                  <p class="card-text" style="margin-bottom: 0px;">Select areas using the <strong>radius selector</strong></p>
+                  <strong>Or</strong>
+                  <p class="card-text"> Enter a postcode in the <strong>postcode search box</strong></p>
+                  <p class="card-text"> Individual map selections, radius selector and postcode searches can be combined</p>
+                  
                 </div>
               </div>
             </div>
@@ -99,6 +100,7 @@
               <div class="card h-100 shadow-sm">
                 <div class="card-body">
                   <h3 class="card-title">Step 2 - View your profile</h3>
+                  <p class="card-text">Once you have selected your area, click <strong>“Go to area profile”</strong> to generate outputs based on your selection</p>
                   <p class="card-text">Select the statistics you are interested in using the Statistic selector. These will be aggregated for the areas in your selected profile.</p>
                   <p class="card-text">You can explore different views of your profile:</p>
                   <ul>
@@ -179,40 +181,124 @@
                   Custom Area Profiles has been designed to support interactive selection, profile generation, and comparison of demographic, social, and economic data across Northern Ireland. Below are the key functions of the dashboard.
                 </p>
 
-                <h4 class="mt-4">1. Map Interface and Selection Controls</h4>
-                <p>The main map interface enables users to define custom areas using the following tools:</p>
-                <ul>
-                  <li><strong>Geography selector (left panel):</strong> Allows switching between Super Data Zones (SDZ), Data Zones (DZ) and District Electoral Areas (DEA) for area selection.</li>
-                  <li><strong>Radius selector (left panel):</strong> Enables users to group zones within a defined radius from a selected central position.</li>
-                  <li><strong>Map controls:</strong>
-                    <ul>
-                      <li>Toggle display of classifications on the map.</li>
-                      <li>Clear all current selections.</li>
-                      <li>Reset the map zoom and position to default Northern Ireland extent.</li>
-                    </ul>
-                  </li>
-                  <li><strong>Go to Area Profile button:</strong> Generates a starter profile for the selected zones and transitions to the output view.</li>
-                </ul>
+              
+              <!-- First image -->
+              <div class="row align-items-center mt-4">
+                
+                <!-- LEFT: TEXT -->
+                <div class="col-md-7">
+                  <h4>1. Map Interface and Selection Controls</h4>
 
-                <h4 class="mt-4">2. Profile Outputs and Data Views</h4>
-                <p>Upon generating a profile, users are presented with a range of configurable views and controls:</p>
-                <ul>
-                  <li><strong>Dataset selector (left panel):</strong> Enables filtering by domain, including Demography, Education, Economy, and Health.</li>
-                  <li><strong>Summary population card:</strong> Displays the total aggregated population for the selected area, with an option to return to the map view.</li>
-                  <li><strong>Output view controls:</strong> Provide access to multiple presentation formats:
-                    <ul>
-                      <li><strong>Chart View:</strong> Displays data distributions as percentage bar charts.</li>
-                      <li><strong>Table View:</strong> Tabulates raw counts and percentage values for each dataset.</li>
-                    </ul>
-                  </li>
-                </ul>
+                  <p>The main map interface enables users to define custom areas using the following tools:</p>
+                  <ul>
+                    <li><strong>Geography selector (left panel):</strong> Allows switching between Super Data Zones (SDZ), Data Zones (DZ), District Electoral Areas (DEA) and Local Government Districts (LGD) for area selection.</li>
+                    <li><strong>Individual area selector (left panel):</strong> Enables users to select individual areas for profile generation.</li>
+                    <li><strong>Radius selector (left panel):</strong> Enables users to group zones within a defined radius from a selected central position. Default radius is 2 km.</li>
+                    <li><strong>Postcode search (left panel):</strong> Allows users to search for specific areas by postcode. To find out more about the postcode area use <a href="https://explore.nisra.gov.uk/postcode-search/" target="_blank">postcode finder</a></li>
+                    <li><strong>Go to Area Profile button:</strong> Generates a starter profile for the selected zones and transitions to the output view.</li>
+                    <li><strong>Selection by LGD</strong> Using the Local Government Districts (LGD) selector will provide an overlay of the selected district.</li>
+                  </ul>
+               </div>
 
+                <!-- RIGHT: IMAGE -->
+                <div class="col-md-5 text-center">
+                  <img src="img/sidebar.png" alt="Map interface sidebar controls" class="img-fluid" style="max-height: 350px;">
+                </div>
+
+              </div>
+
+              <!-- Second image -->
+
+              <div class="row align-items-center mt-4">
+                
+                <!-- LEFT: TEXT -->
+                <div class="col-md-7">
+                  <ul>
+                    <li><strong>Map controls:</strong>
+                      <ul>
+                        <li>Clear all current selections.</li>
+                        <li>Reset the map zoom and position to default to the full Northern Ireland view.</li>
+                        <li>Zoom in and out using the arrow keys. Zoom level is indicated by a percentage.</li>
+                      </ul>
+                    </li>
+                    
+                  </ul>
+               </div>
+
+                <!-- RIGHT: IMAGE -->
+                <div class="col-md-5 text-center">
+                  <img src="img/mapcontrols.png" alt="Map interface sidebar controls" class="img-fluid" style="max-height: 350px;">
+                </div>
+
+              </div>
+
+              <!-- Third image -->
+              <div class="row align-items-center mt-4">
+                
+                <!-- LEFT: TEXT -->
+                <div class="col-md-7">
+                  <h4 class="mt-4">2. Profile Outputs and Data Views</h4>
+                  <p>Upon generating a profile, users are presented with a range of configurable views and controls:</p>
+                  <ul>
+                        <li><strong>Dataset selector (left panel):</strong> Enables filtering by domain, including Demography, Education, Economy, and Health.</li>
+                        <li>Tick or untick the selection of datasets. <strong></strong>Reset selections</strong> to clear all ticks</li>
+                      </ul>
+                    </li>
+                    
+                  </ul>
+               </div>
+
+                <!-- RIGHT: IMAGE -->
+                <div class="col-md-5 text-center">
+                  <img src="img/selections.png" alt="Statistic selections" class="img-fluid" style="max-height: 400px;">
+                </div>
+
+              </div>
+
+
+              <!-- Fourth image -->
+              <div class="row align-items-center mt-4">
+                
+                <!-- LEFT: TEXT -->
+                <div class="col-md-7">
+                  <ul>
+                        <li><strong>Chart View:</strong> Displays data distributions as percentage bar charts.</li>
+                        <li><strong>Table View:</strong> Tabulates raw counts and percentage values for each dataset.</li>
+                      </ul>
+                    </li>
+                    
+                  </ul>
+               </div>
+
+                <!-- RIGHT: IMAGE -->
+                <div class="col-md-5 text-center">
+                  <img src="img/charts_tables.png" alt="Charts and tables" class="img-fluid" style="max-height: 400px;">
+                </div>
+              </div>
+
+
+              <!-- Fifth image -->
+              <div class="row align-items-center mt-4">
+                
+                <!-- LEFT: TEXT -->
+                <div class="col-md-7">
                 <h4 class="mt-4">3. Export and Download Options</h4>
                 <p>The dashboard includes export functionality for further analysis and reporting:</p>
                 <ul>
                   <li><strong>Excel export:</strong> Downloads all currently selected and aggregated data as an Excel file.</li>
-                  <li><strong>Summary image download:</strong> Allows saving a PNG version of the active view (charts or tables) and the profile summary.</li>
-                </ul>
+                  <li><strong>Summary image download:</strong> Allows saving a PNG version of the active view (charts or tables) and the profile summary.
+                      </ul>
+                    </li>
+                    
+                  </ul>
+               </div>
+
+                <!-- RIGHT: IMAGE -->
+                <div class="col-md-5 text-center">
+                  <img src="img/download.png" alt="Download options" class="img-fluid" style="max-height: 400px;">
+                </div>
+              </div>
+
 
                 <h4 class="mt-4">4. Data Source Transparency</h4>
                 <p>
