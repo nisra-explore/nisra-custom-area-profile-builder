@@ -5,13 +5,38 @@ POSTCODE SEARCH FUNCTIONALITY
 This section handles postcode lookup and automatic map selection.
 Data source: CPD_LIGHT_JULY_2024.csv (hosted on GitHub)
 ================================================================================
-*/ 
+*/
 
 // Global variable to cache the postcode data (populated on first search)
 let postcodeDataCache = null;
     let radiusKm = 2;   // ✅ shared
     let simplifyTolMeters = 10;
     let bufferMeters = 0;
+
+const AREA_LAYER_MAX_ZOOM = 11;
+
+function getResponsiveZoom() {
+  // Use innerWidth where available, fall back to document/client and screen width
+  const inner = window.innerWidth || document.documentElement.clientWidth || 0;
+  const scr = (typeof screen !== 'undefined' && screen.width) ? screen.width : 0;
+  const width = inner || scr;
+  
+  let baseZoom;
+  if (width < 576) baseZoom = 6.0;
+  else if (width < 768) baseZoom = 6.5;
+  else if (width < 1920) baseZoom = 7.0;
+  else baseZoom = 7.5;
+  
+  // Adjust for device pixel ratio to account for different physical screen sizes at same resolution
+  // High DPI screens (like small laptops) need lower zoom to show the same area
+  // This ensures consistent map coverage across different screen densities
+  const dpr = window.devicePixelRatio || 1;
+  const zoomAdjustment = (dpr - 1) * 1.8; // Reduce zoom more aggressively for high DPI screens
+  
+  const finalZoom = Math.max(baseZoom - zoomAdjustment, 5.5); // Ensure zoom doesn't go below 5.5
+  console.log('getResponsiveZoom calc:', { dpr, baseZoom, zoomAdjustment, finalZoom });
+  return finalZoom;
+}
     
 /**
  * Normalize postcode to uppercase and remove spaces
@@ -264,7 +289,7 @@ function zoomToResult(result, zoneType, searchId, attempts = 0) {
         map.stop();
         map.fitBounds(startingBbox, {
           padding: 40,
-          maxZoom: 11,
+          maxZoom: AREA_LAYER_MAX_ZOOM,
           duration: 800,
           curve: 1.5
         });
@@ -362,7 +387,7 @@ function zoomToResult(result, zoneType, searchId, attempts = 0) {
 
         // ✅ Step 1: force a consistent zoom level
         map.easeTo({
-          zoom: 7.5,
+          zoom: getResponsiveZoom(),
           duration: 300,
           essential: true
         });
@@ -372,7 +397,7 @@ function zoomToResult(result, zoneType, searchId, attempts = 0) {
           console.log('Calling fitBounds now...');
           map.fitBounds(bbox, {
             padding: 40,
-            maxZoom: 11,
+            maxZoom: AREA_LAYER_MAX_ZOOM,
             duration: 800,
             curve: 1.5
           });
@@ -435,15 +460,31 @@ document.addEventListener('DOMContentLoaded', function () {
   
   markEmptyCategoryGroups();
 
+  console.log('getResponsiveZoom debug:', { innerWidth: window.innerWidth, docClient: document.documentElement.clientWidth, screenWidth: (typeof screen !== 'undefined' ? screen.width : null), devicePixelRatio: window.devicePixelRatio, chosenZoom: getResponsiveZoom() });
+
   map = new maplibregl.Map({
     container: 'map',
     style: 'https://raw.githubusercontent.com/NISRA-Tech-Lab/map_tiles/main/basemap_styles/style-omt.json',
     center: [-6.8, 54.65],
-    zoom: 7.5,
-    minZoom: 7.5,
-    maxZoom: 13,
-    maxBounds: [[-9.20, 53.58], [-4.53, 55.72]]
+    zoom: getResponsiveZoom(),
+    minZoom: 6.0,
+    maxZoom: 16,
+    maxBounds: [[-9.50, 53.30], [-4.20, 56.00]]
   });
+
+  // Ensure the map ends up at the responsive zoom after any other code runs
+  map.once('load', () => {
+    const desired = getResponsiveZoom();
+    console.log('map.initialZoom:', map.getZoom(), 'desiredResponsiveZoom:', desired);
+    if (Math.abs(map.getZoom() - desired) > 0.01) {
+      console.log('Forcing responsive zoom to', desired);
+      try { map.jumpTo({ zoom: desired }); } catch (e) { console.warn('jumpTo failed', e); }
+    }
+    // Check again shortly after to catch any late overrides
+    setTimeout(() => console.log('map.zoom after 500ms:', map.getZoom()), 600);
+  });
+
+  map.getCanvas().setAttribute('tabindex', '-1');
 
   const vis = (id, show) => map.setLayoutProperty(id, 'visibility', show ? 'visible' : 'none');
 
@@ -519,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Clear everything and reset UI
 
-    const defaultCategories = ['Age (4 Categories)', 'Sex Label'];
+    const defaultCategories = ['Age (4 Categories)', 'Sex'];
     window.chosenCategories = defaultCategories;
     selectedCategories = defaultCategories;
 
@@ -684,10 +725,14 @@ document.addEventListener('DOMContentLoaded', function () {
         ]
       },
       center: [-6.8, 54.65],
-      zoom: 7.5,
+      zoom: getResponsiveZoom(),
       interactive: false, // no interactions
-      dragPan: false, scrollZoom: false, boxZoom: false, keyboard: false, doubleClickZoom: false, touchZoomRotate: false
+      dragPan: false, scrollZoom: false, boxZoom: false, keyboard: false, doubleClickZoom: false, touchZoomRotate: false,
+      attributionControl: false,
+      tabIndex: -1
     });
+
+    previewMap.getCanvas().setAttribute('tabindex', '-1');
 
     previewMap.on('load', () => {
       // Add the three zone layers (fill highlight + outline)
@@ -794,13 +839,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // nothing selected -> reset
     if (sel.size === 0) {
-      previewMap.easeTo({ center: [-6.8, 54.65], zoom: 7.5, duration: 0 });
+      previewMap.easeTo({ center: [-6.8, 54.65], zoom: getResponsiveZoom(), duration: 0 });
       return;
     }
 
     // ensure we’re zoomed out enough that all tiles for NI are present
-    if (previewMap.getZoom() > 7.3) {
-      previewMap.jumpTo({ center: [-6.8, 54.65], zoom: 7.3 });
+    if (previewMap.getZoom() > getResponsiveZoom()) {
+      previewMap.jumpTo({ center: [-6.8, 54.65], zoom: getResponsiveZoom() });
     }
     previewMap.resize();
 
@@ -962,6 +1007,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     map.addSource('sdz2021', {
       type: 'vector',
+      maxzoom: AREA_LAYER_MAX_ZOOM,
       tiles: [
         'https://raw.githubusercontent.com/nisra-explore/map_tiles/main/sdz_2021/{z}/{x}/{y}.pbf'
       ],
@@ -970,6 +1016,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     map.addSource('dz2021', {
       type: 'vector',
+      maxzoom: AREA_LAYER_MAX_ZOOM,
       tiles: [
         'https://raw.githubusercontent.com/nisra-explore/map_tiles/main/dz_2021/{z}/{x}/{y}.pbf'
       ],
@@ -978,6 +1025,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     map.addSource('dea2014', {
       type: 'vector',
+      maxzoom: AREA_LAYER_MAX_ZOOM,
       tiles: [
         'https://raw.githubusercontent.com/nisra-explore/map_tiles/main/dea_2014/{z}/{x}/{y}.pbf'
       ],
@@ -986,6 +1034,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     map.addSource('lgd2014', {
       type: 'vector',
+      maxzoom: AREA_LAYER_MAX_ZOOM,
       tiles: [
         'https://raw.githubusercontent.com/nisra-explore/map_tiles/main/lgd2014/{z}/{x}/{y}.pbf'
       ],
@@ -1227,6 +1276,13 @@ document.addEventListener('DOMContentLoaded', function () {
     updateSummaryPreview();
 
     map.on('mousemove', 'sdz-fill', (e) => {
+
+      // Disable hover popup on mobile/tablet
+      if (window.innerWidth <= 768) {
+        popup.remove();
+        return;
+      }
+
       if (!e.features.length) return;
 
       const feature = e.features[0];
@@ -1248,6 +1304,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     map.on('mousemove', 'dz-fill', (e) => {
+
+      // Disable hover popup on mobile/tablet
+      if (window.innerWidth <= 768) {
+        popup.remove();
+        return;
+      }
+
       if (!e.features.length) return;
 
       const feature = e.features[0];
@@ -1270,6 +1333,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     
     map.on('mousemove', 'dea-fill', (e) => {
+
+      // Disable hover popup on mobile/tablet
+      if (window.innerWidth <= 768) {
+        popup.remove();
+        return;
+      }
+
       if (!e.features.length) return;
 
       const feature = e.features[0];
@@ -1295,6 +1365,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     map.on('mousemove', 'lgd-fill', (e) => {
+
+      // Disable hover popup on mobile/tablet
+      if (window.innerWidth <= 768) {
+        popup.remove();
+        return;
+      }
+
       if (!e.features.length) return;
 
       const feature = e.features[0];
@@ -1314,7 +1391,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const value = labelObj[zoneName];
         const formattedValue = value.toLocaleString();  // ✅ adds commas
 
-        popupHtml = `<div><strong>${zoneName}</strong>: pop. ${formattedValue}</div>`;
+        popupHtml = `<div><strong>${zoneName}</strong> pop. ${formattedValue}</div>`;
       }
 
       map.getCanvas().style.cursor = 'pointer';
@@ -2244,7 +2321,7 @@ if (radiusInput) {
        zoomInBtn.addEventListener('click',  () => map.zoomIn({ duration: 250 }));
        zoomOutBtn.addEventListener('click', () => map.zoomOut({ duration: 250 }));
        homeBtn.addEventListener('click',    () => {
-           map.easeTo({ center: [-6.8, 54.65], zoom: 7.5, duration: 600 });
+           map.easeTo({ center: [-6.8, 54.65], zoom: getResponsiveZoom(), duration: 600 });
        });
 
       // SEARCH WIRING
@@ -2375,17 +2452,16 @@ if (radiusInput) {
 
     // wire once (no nesting)
     buildBtn?.addEventListener("click", () => {
-      if (selectedIds.size === 0) { openSelectModal(); return; }
-      outputContent.classList.remove("hidden-section");
-      mapContent.classList.add("hidden-section");
+      showProfileView();
 
-      previewMap?.resize();
-      updateSummaryPreview();
+      // Add history entry
+      history.pushState({ view: "profile" }, "", "#profile");
     });
 
-    changeBtn?.addEventListener("click", () => {
-      outputContent.classList.add("hidden-section");
-      mapContent.classList.remove("hidden-section");
+    changeBtn?.addEventListener("click", () => {      
+
+    showMapView();
+      history.pushState({ view: "map" }, "", "#map");
     });
 
     document.getElementById('apb-modal-close')?.addEventListener('click', closeSelectModal);
@@ -2422,7 +2498,7 @@ if (radiusInput) {
   document.getElementById('zone-selector').addEventListener('change', () => {
     map.easeTo({
       center: [-6.8, 54.65],
-      zoom: 7.5,
+      zoom: getResponsiveZoom(),
       duration: 1000
     });
   });
@@ -2431,7 +2507,7 @@ if (radiusInput) {
   document.getElementById('resetZoomBtn').addEventListener('click', () => {
     map.easeTo({
       center: [-6.8, 54.65],
-      zoom: 7.5,
+      zoom: getResponsiveZoom(),
       duration: 2000
     });
   });
@@ -2454,8 +2530,8 @@ if (radiusInput) {
 
   let DEFAULT_ZOOM = null;
 
-  map.on('load', () => {
-    DEFAULT_ZOOM = map.getZoom();
+map.on('load', () => {
+    DEFAULT_ZOOM = getResponsiveZoom();
     updateZoomDisplay();
     
     const nav = new maplibregl.NavigationControl({
@@ -2465,7 +2541,8 @@ if (radiusInput) {
 
   map.addControl(nav, 'bottom-right'); // temporary positio
 
-  });
+  }); 
+
 
   function updateZoomDisplay() {
     if (!DEFAULT_ZOOM) return;
@@ -2608,6 +2685,9 @@ if (radiusInput) {
         link.href = fullUrl;
         link.textContent = fullUrl;
         link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "new-tab-btn";
+        link.setAttribute("aria-label", `${label} (opens in a new tab)`);
         wrapper.appendChild(labelText);
         wrapper.appendChild(link);
         sourceLinkContainer.appendChild(wrapper);
@@ -3074,7 +3154,7 @@ if (radiusInput) {
       window.selectedZoneDetails[id] = mapData;
     });
 
-    const placeholderText = "Click to give your area a name";
+    const placeholderText = 'Click here to give your area a name';
     const savedTitle = window.areaProfileTitle?.trim();
     const applyTitleBtn = document.getElementById('apply-area-name');
 
@@ -3160,8 +3240,18 @@ if (radiusInput) {
       const totalInLGD = lgdTotals[lgd] || stats.total;
       totalZonesSelected += stats.total;
 
+      const unitLabel = currentZoneType === 'sdz'
+        ? 'super data zones selected'
+        : currentZoneType === 'dz'
+          ? 'data zones selected'
+          : currentZoneType === 'dea'
+            ? 'district electoral areas selected'
+            : currentZoneType === 'lgd'
+              ? 'local government districts selected'
+              : 'zones selected';
+
       const li = document.createElement("li");
-      li.innerHTML = `${lgd}: <strong>${stats.total} of ${totalInLGD}</strong> zones selected`;
+      li.innerHTML = `${lgd}: <strong>${stats.total} of ${totalInLGD}</strong> ${unitLabel}`;
       summaryList.appendChild(li);
     });
 
@@ -3358,7 +3448,7 @@ if (radiusInput) {
       totalRow.appendChild(totalPct);
 
       const totalNI = document.createElement("td");
-      totalNI.textContent = "–";
+      totalNI.textContent = totalCount > 0 ? "100%" : "0%";
       totalNI.style.textAlign = "right";
       totalRow.appendChild(totalNI);
 
@@ -3456,10 +3546,11 @@ if (radiusInput) {
     window.chartInstances = [];
 
     const FONT = "14px sans-serif";
-    const LINE_HEIGHT = 10;
+    const LINE_HEIGHT = 12;
     const BAR_HEIGHT = 32;
     const BAR_SPACING = 4;
-    const LABEL_BLOCK_HEIGHT = LINE_HEIGHT * 2 + 4;
+    const MIN_LABEL_BLOCK_HEIGHT = 24;
+    const MAX_LABEL_LINES = 4;
     const CHART_TOP_PADDING = 15;
     const LABEL_TO_BAR_GAP = 1;
    
@@ -3493,7 +3584,7 @@ if (radiusInput) {
       const title = document.createElement("h3");
 
       let titleText = category.replace(/ Label$/, "");
-      titleText = titleText.replace(/\s*\(MYE\)\s*/i, titleText.includes("Age") ? " (4 Categories)" : "");
+      titleText = titleText.replace(/\s*\(MYE\)\s*/i, titleText.includes("Age") ? " (4 categories)" : "");
       title.textContent = titleText.trim();
       title.style.margin = "0";
 
@@ -3529,6 +3620,9 @@ if (radiusInput) {
         const link = document.createElement("a");
         link.href = url;
         link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "new-tab-btn";
+        link.setAttribute("aria-label", "Source (opens in a new tab)");
         link.textContent = "Source";
         expandableContent.appendChild(link);
       } else {
@@ -3619,10 +3713,8 @@ if (radiusInput) {
         { label: "NI", data: [], type: "line", borderColor: "#222", borderWidth: 2, fill: false, pointRadius: 0 }
       ];
 
-      const canvasHeight = labels.length * (LABEL_BLOCK_HEIGHT + BAR_HEIGHT + BAR_SPACING + 26) + CHART_TOP_PADDING;
       const canvas = document.createElement("canvas");
       Object.assign(canvas.style, { display: "block", width: "100%", maxHeight: "none" });
-      canvas.height = canvasHeight;
       wrapper.appendChild(canvas);
 
       const spacer = document.createElement("div");
@@ -3640,6 +3732,46 @@ if (radiusInput) {
           || (typeof niTotals !== "undefined" && niTotals[category])
           || {};
         const niValues = labels.map(l => (typeof niMap[l] === "number" ? niMap[l] : null));
+
+        const labelCtx = canvas.getContext("2d");
+        labelCtx.font = FONT;
+
+        const wrapText = (text, width) => {
+          const words = text.split(/\s+/).filter(Boolean);
+          const lines = [];
+          let current = "";
+
+          words.forEach(word => {
+            const candidate = current ? `${current} ${word}` : word;
+            if (labelCtx.measureText(candidate).width <= width) {
+              current = candidate;
+            } else {
+              if (current) lines.push(current);
+              current = word;
+            }
+          });
+
+          if (current) lines.push(current);
+          return lines;
+        };
+
+        const maxAllowed = Math.max(40, drawWidth - 30);
+        const labelHeights = labels.map((label, i) => {
+          const breakdown = chartDatasets
+            .filter(ds => ds.type !== "line")
+            .map(ds => `${ds.data[i]}%`)
+            .join(" | ");
+          const niVal = niValues[i];
+          const niText = typeof niVal === "number" ? ` (NI ${niVal.toFixed(1)}%)` : "";
+          const fullText = `${label} ${breakdown}${niText}`;
+          const wrappedLines = wrapText(fullText, maxAllowed);
+          const displayLines = wrappedLines.slice(0, MAX_LABEL_LINES);
+          return Math.max(MIN_LABEL_BLOCK_HEIGHT, displayLines.length * LINE_HEIGHT + 8);
+        });
+        const maxLabelBlockHeight = Math.max(...labelHeights);
+        const canvasHeight = labels.length * (maxLabelBlockHeight + BAR_HEIGHT + BAR_SPACING + 26) + CHART_TOP_PADDING;
+        canvas.height = canvasHeight;
+        canvas.style.height = `${canvasHeight}px`;
         const rawMax = Math.max(
           ...chartDatasets[0].data,
           ...niValues.filter(v => typeof v === "number")
@@ -3654,11 +3786,13 @@ if (radiusInput) {
             responsive: false,
             maintainAspectRatio: false,
             animation: false,
-            layout: { padding: { top: CHART_TOP_PADDING, left: 10, right: 10, bottom: 0 } },
-            plugins: {
-              legend: { display: false },
-              tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } }
-            },
+            layout: { padding: { top: CHART_TOP_PADDING, left: 10, right: 10, bottom: 0 } },            
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: false
+            }
+          },
             scales: {
               x: {
                 beginAtZero: true,
@@ -3696,9 +3830,6 @@ if (radiusInput) {
 
                   const topBar = bars[0];
                   const topY = topBar.y - topBar.height / 2;
-                  const labelY = topY - LABEL_BLOCK_HEIGHT - 2;
-
-                  // Build combined single-line text
                   const breakdown = chartInst.data.datasets
                     .filter(ds => ds.type !== "line")
                     .map(ds => `${ds.data[i]}%`)
@@ -3706,21 +3837,15 @@ if (radiusInput) {
                   const niVal = niValues[i];
                   const niText = typeof niVal === "number" ? ` (NI ${niVal.toFixed(1)}%)` : "";
                   const fullText = `${label} ${breakdown}${niText}`;
+                  const maxAllowed = Math.max(40, chartInst.chartArea.right - xStart - 30);
+                  const wrappedLines = wrapText(fullText, maxAllowed);
+                  const displayLines = wrappedLines.slice(0, MAX_LABEL_LINES);
+                  const labelBlockHeight = Math.max(MIN_LABEL_BLOCK_HEIGHT, displayLines.length * LINE_HEIGHT + 8);
+                  const labelY = topY - labelBlockHeight - 2;
+                  const textBlockHeight = displayLines.length * LINE_HEIGHT;
+                  const textTop = labelY + Math.max(2, (labelBlockHeight - textBlockHeight) / 2);
 
-                  // Available width for the label text
-                  const maxAllowed = chartInst.chartArea.right - xStart - 30;
-
-                  // Decide whether to truncate
-                  let textToDraw = fullText;
-                  if (ctx.measureText(fullText).width > maxAllowed) {
-                    // simple truncation to fit, preserving word chars until width ok
-                    let trunc = fullText;
-                    while (trunc.length > 0 && ctx.measureText(trunc + "...").width > maxAllowed) {
-                      trunc = trunc.slice(0, -1);
-                    }
-                    textToDraw = trunc + "...";
-
-                    // info overlay to show full text on click
+                  if (wrappedLines.length > displayLines.length) {
                     const infoBtn = document.createElement("div");
                     infoBtn.className = "label-overlay";
                     infoBtn.textContent = "ⓘ";
@@ -3728,9 +3853,9 @@ if (radiusInput) {
 
                     const chartRect = chartInst.canvas.getBoundingClientRect();
                     const contRect = card.getBoundingClientRect();
-                    const labelW = ctx.measureText(textToDraw).width;
+                    const estimatedWidth = Math.max(...displayLines.map(line => ctx.measureText(line).width));
                     const topOff = labelY + chartRect.top - contRect.top + LINE_HEIGHT / 2 - 10;
-                    const leftOff = chartInst.canvas.offsetLeft + xStart + labelW + 6;
+                    const leftOff = chartInst.canvas.offsetLeft + xStart + estimatedWidth + 6;
 
                     Object.assign(infoBtn.style, {
                       top: `${topOff}px`,
@@ -3743,8 +3868,9 @@ if (radiusInput) {
                     card.appendChild(infoBtn);
                   }
 
-                  // Draw the single-line label (vertically positioned to avoid overlapping bars)
-                  ctx.fillText(textToDraw, xStart, labelY + (LABEL_BLOCK_HEIGHT - LINE_HEIGHT) / 2);
+                  displayLines.forEach((line, index) => {
+                    ctx.fillText(line, xStart, textTop + index * LINE_HEIGHT);
+                  });
                 });
 
                 ctx.restore();
@@ -3817,6 +3943,7 @@ if (radiusInput) {
     });
     document.querySelectorAll('.lgd-btn').forEach(label => {
       label.classList.remove('selected');
+      label.setAttribute('aria-checked', 'false');
     });
     popup.remove();
 
@@ -3833,6 +3960,7 @@ if (radiusInput) {
 
     document.querySelectorAll('.lgd-btn').forEach(label => {
       label.classList.remove('selected');
+      label.setAttribute('aria-checked', 'false');
     });
 
     document.querySelectorAll(".total-population").forEach(elem => {
@@ -3881,7 +4009,7 @@ if (radiusInput) {
     // ✅ Reset map view
     map.easeTo({
       center: [-6.8, 54.65],
-      zoom: 7.5,
+      zoom: getResponsiveZoom(),
       duration: 1000
     });
 
@@ -3950,6 +4078,15 @@ if (radiusInput) {
       label.htmlFor = checkboxId;
       label.textContent = lgdCode;
       label.className = 'lgd-btn';
+      label.tabIndex = 0;
+      label.setAttribute('role', 'checkbox');
+      label.setAttribute('aria-checked', 'false');
+
+      const updateLabelState = () => {
+        const isChecked = checkbox.checked;
+        label.classList.toggle('selected', isChecked);
+        label.setAttribute('aria-checked', isChecked ? 'true' : 'false');
+      };
 
       // Add checkbox to label
       label.insertBefore(checkbox, label.firstChild);
@@ -3957,8 +4094,11 @@ if (radiusInput) {
       // Add to container
       container.appendChild(label);
 
+      updateLabelState();
+
       // ATTACH EVENT LISTENER TO CHECKBOX (moved here so it's attached when checkboxes are created)
       checkbox.addEventListener('change', () => {
+        updateLabelState();
         const lgdCode = checkbox.value;
         const label = document.querySelector(`label[for="${checkbox.id}"]`);
 
@@ -4063,6 +4203,14 @@ if (radiusInput) {
         updateTables(Array.from(selectedIds));
         updateCtaEnabled();
         updateSummaryPreview();
+      });
+
+      label.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
       });
     });
   }
@@ -4573,7 +4721,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Determine if we need "(4 categories)" based on the original key
     let categoryNote = "";
     if (key.includes("Age") && key.includes("MYE")) {
-      categoryNote = "(4 Categories)";
+      categoryNote = "(4 categories)";
     }
 
     // Preserve checkbox + listeners
@@ -4679,6 +4827,11 @@ function downloadSummaryImage() {
   // Hide any download hover menu in the clone so the exported image is clean.
   cloneWrapper.querySelectorAll('.dropdown-menu').forEach(menu => {
     menu.style.display = 'none';
+  });
+
+  // Hide info buttons in exported image
+  cloneWrapper.querySelectorAll('.expand-toggle').forEach(btn => {
+    btn.style.display = 'none';
   });
 
   // Fix canvases in both cloned sections
@@ -4896,7 +5049,7 @@ function downloadSummaryImage() {
     });
   }).then(canvas => {
     const logo = new Image();
-    logo.src = 'img/nisra-logo.svg';
+    logo.src = 'img/nisra-only-colour.png';
 
     logo.onload = async () => {
       const padding = 20;
@@ -4932,13 +5085,22 @@ function downloadSummaryImage() {
 
 
 async function downloadExcel() {
+  const ENABLE_URBAN_RURAL_BREAKDOWN = false; // Set to true to include Urban/Rural breakdown in Excel export
+
   // Grab selected IDs (zones) and trigger a refresh of comparison data
   const selectedArray = Array.from(selectedIdsExcel);
+  
+  if (ENABLE_URBAN_RURAL_BREAKDOWN) {
   renderUrbanRuralComparison(selectedArray);
+  }
 
   // Pull in cached data from the window/global scope
   const aggregated = window.latestAggregatedData || {};
-  const comparison = window.urbanRuralComparisonData || {};
+
+  const comparison = ENABLE_URBAN_RURAL_BREAKDOWN
+  ? (window.urbanRuralComparisonData || {})
+  : {};
+  
   const selectedCategories = window.chosenCategories || [];
   const niTotals = window.niTotals || {};
 
@@ -4971,66 +5133,70 @@ async function downloadExcel() {
   const percentageHeader = `${excelAreaName} %`;
 
   // ZONE BREAKDOWN SHEET
-  const breakSheet = workbook.addWorksheet('Zone Breakdown');
-  const showAreaTypeColumn = zoneType === 'sdz' || zoneType === 'dz';
-  breakSheet.columns = showAreaTypeColumn
-    ? [{ width: 40 }, { width: 18 }]
-    : [{ width: 60 }];
-
-  breakSheet.addRow(['NISRA Custom Area Profile Builder Extract']);
-  breakSheet.addRow([]);
-  breakSheet.addRow([
-    `The information presented in tables are combined from ${totalZonesSelected} ${zoneTypeText}s listed below:`
-  ]);
-  breakSheet.addRow([`Date Extracted: ${new Date().toLocaleDateString('en-GB', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })}`]);
-  if (areaTitle) {
-    breakSheet.addRow([`Area Name: ${areaTitle}`]);
-  }
-  breakSheet.addRow([]);
-
-  const lgdGroups = {};
-  selectedArray.forEach(id => {
-    const mapData = window.selectedZoneDetails?.[id];
-    if (!mapData) return;
-    const lgd = mapData['LGD'];
-    const status = mapData['Urban_mixed_rural_status'];
-    const labelObj = mapData[labelLookup[zoneType]] || mapData['Census 2021 Super Data Zone Label'] || mapData['Census 2021 Data Zone Label'];
-    const zoneName = labelObj ? Object.keys(labelObj)[0] : null;
-    if (!zoneName || !lgd) return;
-    if (!lgdGroups[lgd]) lgdGroups[lgd] = [];
-    lgdGroups[lgd].push({ zoneName, status });
-  });
-
-  Object.keys(lgdGroups).sort().forEach(lgd => {
-    const titleRow = breakSheet.addRow([`${lgd} LGD`]);
-    titleRow.font = { bold: true };
-    if (showAreaTypeColumn) {
-      const headerRow = breakSheet.addRow(['Area Name', 'Area Type']);
-      headerRow.eachCell(cell => {
-        cell.font = { bold: true };
-        cell.alignment = { horizontal: 'left', vertical: 'middle' };
-      });
-    } else {
-      const headerRow = breakSheet.addRow(['Area Name']);
-      headerRow.getCell(1).font = { bold: true };
-      headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+    const breakSheet = workbook.addWorksheet('Zone Breakdown');  
+      
+    const showAreaTypeColumn =
+    ENABLE_URBAN_RURAL_BREAKDOWN &&
+    (zoneType === 'sdz' || zoneType === 'dz');
+    breakSheet.columns = showAreaTypeColumn
+      ? [{ width: 40 }, { width: 18 }]
+      : [{ width: 60 }];
+  
+    breakSheet.addRow(['NISRA Custom Area Profile Builder Extract']);
+    breakSheet.addRow([]);
+    breakSheet.addRow([
+      `The information presented in tables are combined from ${totalZonesSelected} ${zoneTypeText}s listed below:`
+    ]);
+    breakSheet.addRow([`Date Extracted: ${new Date().toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })}`]);
+    if (areaTitle) {
+      breakSheet.addRow([`Area Name: ${areaTitle}`]);
     }
-
-    lgdGroups[lgd].forEach(({ zoneName, status }) => {
-      const row = showAreaTypeColumn
-        ? breakSheet.addRow([zoneName, status || '-'])
-        : breakSheet.addRow([zoneName]);
-      row.eachCell(cell => {
-        cell.alignment = { horizontal: 'left', vertical: 'middle' };
-      });
+    breakSheet.addRow([]);
+  
+    const lgdGroups = {};
+    selectedArray.forEach(id => {
+      const mapData = window.selectedZoneDetails?.[id];
+      if (!mapData) return;
+      const lgd = mapData['LGD'];
+      const status = mapData['Urban_mixed_rural_status'];
+      const labelObj = mapData[labelLookup[zoneType]] || mapData['Census 2021 Super Data Zone Label'] || mapData['Census 2021 Data Zone Label'];
+      const zoneName = labelObj ? Object.keys(labelObj)[0] : null;
+      if (!zoneName || !lgd) return;
+      if (!lgdGroups[lgd]) lgdGroups[lgd] = [];
+      lgdGroups[lgd].push({ zoneName, status });
     });
 
-    breakSheet.addRow([]);
-  });
+    Object.keys(lgdGroups).sort().forEach(lgd => {
+      const titleRow = breakSheet.addRow([`${lgd} LGD`]);
+      titleRow.font = { bold: true };
+      if (showAreaTypeColumn) {
+        const headerRow = breakSheet.addRow(['Area Name', 'Area Type']);
+        headerRow.eachCell(cell => {
+          cell.font = { bold: true };
+          cell.alignment = { horizontal: 'left', vertical: 'middle' };
+        });
+      } else {
+        const headerRow = breakSheet.addRow(['Area Name']);
+        headerRow.getCell(1).font = { bold: true };
+        headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+      }
+
+      lgdGroups[lgd].forEach(({ zoneName, status }) => {
+        const row = showAreaTypeColumn
+          ? breakSheet.addRow([zoneName, status || '-'])
+          : breakSheet.addRow([zoneName]);
+        row.eachCell(cell => {
+          cell.alignment = { horizontal: 'left', vertical: 'middle' };
+        });
+      });
+
+      breakSheet.addRow([]);
+    });
+  
 
   // CATEGORY SHEETS
   const categories = selectedCategories.length ? selectedCategories : Object.keys(aggregated);
@@ -5091,52 +5257,55 @@ async function downloadExcel() {
     totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
     sheet.addRow([]);
 
-    groups.forEach(group => {
-      const groupCategoryData = comparison[group]?.[category];
-      if (!groupCategoryData || Object.keys(groupCategoryData).length === 0) return;
+    if (ENABLE_URBAN_RURAL_BREAKDOWN) {
+        groups.forEach(group => {
+          const groupCategoryData = comparison[group]?.[category];
+          if (!groupCategoryData || Object.keys(groupCategoryData).length === 0) return;
 
-      sheet.addRow([`${category.replace(/ Label$/, '')} – ${group}`]);
-      const groupHeaderRow = sheet.addRow(['Label', 'Count', percentageHeader, 'NI %']);
-      groupHeaderRow.eachCell((cell, colNumber) => {
-        cell.font = { bold: true };
-        cell.alignment = {
-          horizontal: colNumber === 1 ? 'left' : 'right',
-          vertical: 'middle'
-        };
-      });
+          sheet.addRow([`${category.replace(/ Label$/, '')} – ${group}`]);
+          const groupHeaderRow = sheet.addRow(['Label', 'Count', percentageHeader, 'NI %']);
+          groupHeaderRow.eachCell((cell, colNumber) => {
+            cell.font = { bold: true };
+            cell.alignment = {
+              horizontal: colNumber === 1 ? 'left' : 'right',
+              vertical: 'middle'
+            };
+          });
 
-      const total = Object.values(groupCategoryData).reduce((acc, val) => acc + val, 0);
-      Object.entries(groupCategoryData).forEach(([label, count]) => {
-        const pct = total > 0 ? count / total : 0;
-        const niVal = niTotals[category]?.[label];
-        const niPct = typeof niVal === 'number' ? niVal / 100 : null;
-        const row = sheet.addRow([
-          label,
-          count,
-          pct,
-          niPct !== null ? niPct : '-'
+
+        const total = Object.values(groupCategoryData).reduce((acc, val) => acc + val, 0);
+        Object.entries(groupCategoryData).forEach(([label, count]) => {
+          const pct = total > 0 ? count / total : 0;
+          const niVal = niTotals[category]?.[label];
+          const niPct = typeof niVal === 'number' ? niVal / 100 : null;
+          const row = sheet.addRow([
+            label,
+            count,
+            pct,
+            niPct !== null ? niPct : '-'
+          ]);
+          row.getCell(2).numFmt = '#,##0';
+          row.getCell(3).numFmt = '0.0%';
+          if (niPct !== null) row.getCell(4).numFmt = '0.0%';
+          row.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
+          row.getCell(3).alignment = { horizontal: 'right', vertical: 'middle' };
+          row.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
+        });
+
+        const groupTotalRow = sheet.addRow([
+          'Total',
+          total,
+          total > 0 ? 1 : 0,
+          '-'
         ]);
-        row.getCell(2).numFmt = '#,##0';
-        row.getCell(3).numFmt = '0.0%';
-        if (niPct !== null) row.getCell(4).numFmt = '0.0%';
-        row.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
-        row.getCell(3).alignment = { horizontal: 'right', vertical: 'middle' };
-        row.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
+        groupTotalRow.getCell(2).numFmt = '#,##0';
+        groupTotalRow.getCell(3).numFmt = '0.0%';
+        groupTotalRow.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
+        groupTotalRow.getCell(3).alignment = { horizontal: 'right', vertical: 'middle' };
+        groupTotalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
+        sheet.addRow([]);
       });
-
-      const groupTotalRow = sheet.addRow([
-        'Total',
-        total,
-        total > 0 ? 1 : 0,
-        '-'
-      ]);
-      groupTotalRow.getCell(2).numFmt = '#,##0';
-      groupTotalRow.getCell(3).numFmt = '0.0%';
-      groupTotalRow.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
-      groupTotalRow.getCell(3).alignment = { horizontal: 'right', vertical: 'middle' };
-      groupTotalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
-      sheet.addRow([]);
-    });
+    }
 
     sheet.addRow([]);
     sheet.addRow(['Notes on custom area aggregations']);
@@ -5331,3 +5500,49 @@ document.addEventListener("click", (e) => {
     closeProfile();
   }
 });
+
+// Returning to map page from destination when "Back" clicked in browser
+window.addEventListener("popstate", (event) => {
+  const view = event.state?.view || "map";
+
+  if (view === "profile") {
+    showProfileView();
+  } else {
+    showMapView();
+  }
+});
+
+window.addEventListener("load", () => {
+  history.replaceState({ view: "map" }, "", "#map");
+  showMapView(); // ensure UI is consistent on load
+});
+
+function showProfileView() {
+  document.getElementById("map-content").classList.add("hidden-section");
+  document.getElementById("output-content").classList.remove("hidden-section");
+}
+
+function showMapView() {
+  document.getElementById("map-content").classList.remove("hidden-section");
+  document.getElementById("output-content").classList.add("hidden-section");
+
+  // Critical for MapLibre
+  if (map) {
+    setTimeout(() => map.resize(), 100);
+  }
+
+  // Reset profile sidebar safely (no variables)
+  document.getElementById("profile-sidebar")?.classList.remove("open");
+  document.getElementById("profile-backdrop")?.classList.remove("active");
+}
+
+(() => {
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  const sidebar = document.querySelector('.lgd-selector');
+
+  if (!toggleBtn || !sidebar) return;
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('closed');
+  });
+})();

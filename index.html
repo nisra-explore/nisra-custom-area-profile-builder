@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en-GB">
   <head>
     <meta charset="UTF-8" />
@@ -46,7 +46,7 @@
         <!-- Banner row (full width) -->
         <div class="w-100" style="background-color:#3878c5;">
           <div class="text-white text-center py-1 px-3">
-            <h5 style="margin-bottom: 0px;"><strong>We welcome feedback from users through our <a href="https://dttselfserve.nidirect.gov.uk/NISRA/RateIt#/Custom_Area_Profiles" target="_blank">short survey</a></use></strong></h5>
+            <h5 style="margin-bottom: 0px;"><strong>We welcome feedback from users through our <span class="survey-link-wrap"><a class="survey-link" href="https://dttselfserve.nidirect.gov.uk/NISRA/RateIt#/Custom_Area_Profiles" target="_blank">short survey</a></span></strong></h5>
           </div>
         </div>
         
@@ -73,6 +73,7 @@
               <div class="map-and-controls">
                 <!--category selector -->                
                 <div id="map-wrapper">
+                  <button id="sidebar-toggle" aria-label="Toggle menu">☰</button>
                   <div class="lgd-selector">
                     <div class="zone-selector-box">
                       <label for="zone-selector"><h4>Select a geography to build with</h4></label>
@@ -247,57 +248,57 @@
                       <div class="category-group">
                         <button type="button" class="group-toggle">People and communities ▼</button>
                         <div class="group-content">
-                          <label><input type="checkbox" value="Age (4 Categories)" checked> Age (4 Categories)</label>
-                          <label><input type="checkbox" value="Age (7 Categories)"> Age (7 Categories)</label>
+                          <label><input type="checkbox" value="Age (4 Categories)" checked> Age (4 categories)</label>
+                          <label><input type="checkbox" value="Age (7 Categories)"> Age (7 categories)</label>
                           <label><input type="checkbox" value="Sex Label" checked> Sex</label>
-                          <label><input type="checkbox" value="Age (MYE)"> Age (MYE) (4 Categories)</label>
+                          <label><input type="checkbox" value="Age (MYE)"> Age (MYE) (4 categories)</label>
                           <label><input type="checkbox" value="Sex (MYE)"> Sex (MYE)</label>
                           <label><input type="checkbox" value="Religion"> Religion</label>
-                          <label><input type="checkbox" value="Household Composition"> Household Composition</label>
-                          <label><input type="checkbox" value="Country of Birth"> Country of Birth</label>
-                          <label><input type="checkbox" value="Main Language"> Main Language</label>
-                          <label><input type="checkbox" value="Sexual Orientation Label"> Sexual Orientation</label>
-                          <label><input type="checkbox" value="Household Dependent Children"> Dependent Children</label>
+                          <label><input type="checkbox" value="Household Composition"> Household composition</label>
+                          <label><input type="checkbox" value="Country of Birth"> Country of birth</label>
+                          <label><input type="checkbox" value="Main Language"> Main language</label>
+                          <label><input type="checkbox" value="Sexual Orientation Label"> Sexual orientation</label>
+                          <label><input type="checkbox" value="Household Dependent Children"> Dependent children</label>
                           <label><input type="checkbox" value="Household Tenure"> Tenure</label>
-                          <label><input type="checkbox" value="Marital and Civil Partnership Status"> Marital and Civil Partnership Status</label> 
+                          <label><input type="checkbox" value="Marital and Civil Partnership Status"> Marital and civil partnership status</label> 
                         </div>
                       </div>
 
                       <div class="category-group">
                         <button type="button" class="group-toggle">Education and skills ▼</button>
                         <div class="group-content">
-                          <label><input type="checkbox" value="Qualifications Highest Level"> Qualifications Highest Level</label>
-                          <label><input type="checkbox" value="Place of Study Method of Travel"> Place of Study (Method of Travel)</label> 
-                          <label><input type="checkbox" value="Place of Study Distance"> Place of Study (Distance)</label> 
+                          <label><input type="checkbox" value="Qualifications Highest Level"> Qualifications highest level</label>
+                          <label><input type="checkbox" value="Place of Study Method of Travel"> Place of study (method of travel)</label> 
+                          <label><input type="checkbox" value="Place of Study Distance"> Place of study (distance)</label> 
                         </div>
                       </div>
 
                       <div class="category-group">
                         <button type="button" class="group-toggle">Work, pay and benefits ▼</button>
                         <div class="group-content">
-                          <label><input type="checkbox" value="Economic Activity"> Economic Activity</label>
-                          <label><input type="checkbox" value="Place of Work Method of Travel"> Place of Work (Method of Travel)</label> 
-                          <label><input type="checkbox" value="Place of Work Distance"> Place of Work (Distance)</label> 
-                          <label><input type="checkbox" value="Occupation Current"> Current Occupation</label> 
-                          <label><input type="checkbox" value="Benefits Statistics"> Benefits Recipients</label>
+                          <label><input type="checkbox" value="Economic Activity"> Economic activity</label>
+                          <label><input type="checkbox" value="Place of Work Method of Travel"> Place of work (method of travel)</label> 
+                          <label><input type="checkbox" value="Place of Work Distance"> Place of work (distance)</label> 
+                          <label><input type="checkbox" value="Occupation Current"> Current occupation</label> 
+                          <label><input type="checkbox" value="Benefits Statistics"> Benefits recipients</label>
                         </div>
                       </div>
 
                       <div class="category-group">
                         <button type="button" class="group-toggle">Health and social care ▼</button>
                         <div class="group-content">
-                          <label><input type="checkbox" value="Health Condition Emotional or Mental Health Label"> Emotional or Mental Health Condition</label>
-                          <label><input type="checkbox" value="Health Problem or Disability Long term Label"> Health Problem or Disability (Long-term)</label>
-                          <label><input type="checkbox" value="Health in General"> Health in General</label>
-                          <label><input type="checkbox" value="Provision of Unpaid Care"> Provision of Unpaid Care</label> 
+                          <label><input type="checkbox" value="Health Condition Emotional or Mental Health Label"> Emotional or mental health condition</label>
+                          <label><input type="checkbox" value="Health Problem or Disability Long term Label"> Health problem or disability (long-term)</label>
+                          <label><input type="checkbox" value="Health in General"> Health in general</label>
+                          <label><input type="checkbox" value="Provision of Unpaid Care"> Provision of unpaid care</label> 
                         </div>
                       </div>
 
                       <div class="category-group">
                         <button type="button" class="group-toggle">Transport, environment and climate change ▼</button>
                         <div class="group-content">
-                          <label><input type="checkbox" value="Household Car or Van Availability"> Household Car or Van Availability</label>
-                          <label><input type="checkbox" value="Household Renewable Energy Systems Label"> Household Renewable Energy Systems</label>                          
+                          <label><input type="checkbox" value="Household Car or Van Availability"> Household car or van availability</label>
+                          <label><input type="checkbox" value="Household Renewable Energy Systems Label"> Household renewable energy systems</label>                          
                         </div>
                       </div>
 
@@ -376,13 +377,13 @@
   <div class="summary-top">
     <div class="summary-box">
       <div class="summary-content">
-          <h2 style="font-size: 18px;">Summary of Areas Selected:</h2>
+          <h2 style="font-size: 18px;">Summary of areas selected:</h2>
           <ul id="summaryList"></ul>
         </div>
     </div>
   </div>
 
-  <div class="summary-bottom">
+  <div class="summary-bottom" tabindex="-1">
     <div class="population-box">
       <div class="population-label">Population selected</div>
       <div class="population-value total-population">0</div>
@@ -456,7 +457,7 @@
               Different breakdowns of the selected datasets are available in most cases. Below are the links to where those currently selected were sourced:<br>
               <div id="sourceId" class="source_name"></div>
             </p>
- 
+
             <h3 style="margin-top: 20px;">Note on custom area aggregations</h3>
             <p style="margin-bottom: 10px;">
 

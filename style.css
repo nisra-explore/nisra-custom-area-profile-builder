@@ -3,7 +3,7 @@ html, body {
   padding: 0;
   height: 100%;
 }
- 
+
 body {
   background-color: #f2f5f8;
   display: flex;
@@ -40,7 +40,7 @@ body {
 
 .nav-button:focus,
 .nav-button:focus-visible {
-  outline: 3px solid #FFD700;
+  outline: 3px solid #3878c5;
   outline-offset: 2px;
 }
 
@@ -106,14 +106,6 @@ h5 { font-size: 15px; line-height: 1.333; font-weight: 400; }
 #profile-content {
   width: 100%;
 }
-
-@media (min-width: 992px) {
-  #profile-content {
-    padding: 20px 40px;
-    width: 100%;
-  }
-}
-
 
 a {
   color: #0064c8;
@@ -206,6 +198,31 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
+.survey-link-wrap {
+  display: inline-block;
+  padding: 0 0.15em;
+  border-radius: 2px;
+}
+
+.survey-link-wrap:focus-within {
+  outline: 3px solid #f8f8f8;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.survey-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.survey-link:focus,
+.survey-link:focus-visible {
+  outline: 3px solid #3878c5;
+  outline-offset: 2px;
+  border-radius: 2px;
+  text-decoration: underline;
+}
+
 /* Unified button-row style */
 input {
   border: none;
@@ -237,7 +254,7 @@ input[type=text] {
 .btn:focus-visible {
   background-color: #00205B;
   color: #fff;
-  outline: 3px solid #FFD700;
+  outline: 3px solid #3878c5;
   outline-offset: 2px;
 }
 
@@ -509,6 +526,40 @@ input[type=text] {
   overflow: visible;
 }
 
+.lgd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #c7c7c7;
+  border-radius: 4px;
+  background: #fff;
+  color: #212529;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.lgd-btn:hover {
+  background-color: #f2f8ff;
+  border-color: #3878c5;
+}
+
+.lgd-btn.selected {
+  background-color: #3878c5;
+  border-color: #3878c5;
+  color: #fff;
+}
+
+.lgd-btn:focus-visible {
+  outline: 3px solid #3878c5;
+  outline-offset: 2px;
+}
+
+.lgd-checkbox {
+  margin: 0;
+}
+
 /* Keyboard focus styles for LGD checkboxes and labels */
 
 .view-tab {
@@ -724,6 +775,11 @@ input[type=text] {
   text-decoration: none;
 }
 
+.gtstrt-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .right-arrow {
   fill: #fff;
   height: 18px;
@@ -818,26 +874,6 @@ input[type=text] {
 
 .map-rail .nav-button:hover { background-color: #072048; }
 
-@media (max-width: 900px) {
-  #map-wrapper {
-    --rail-width: clamp(160px, 28vw, 200px);
-    --cta-height: 110px;
-  }
-}
-
-@media (max-height: 800px) {
-  #map-wrapper {
-    height: 83vh;
-  }
-}
-
-@media (max-height: 750px) {
-  #map-wrapper { --cta-height: 100px; }
-}
-
-@media (max-height: 620px) {
-  #map-wrapper { --cta-height: 88px; }
-}
 
 .lgd-selector .zone-selector-box {
   position: static !important;
@@ -875,103 +911,6 @@ input[type=text] {
   right: 10px;
   bottom: 10px;
 }
-
-
-@media (max-width: 900px) {
-  #selection-controls {
-    margin-bottom: 6px;
-  }
-}
-
-
-@media (max-width: 900px) {
-
-  /* reduce space above */
-  .lgd-selector .population-label2 {
-    margin-top: 6px;       /* tighten gap */
-    margin-bottom: 2px;    /* small gap to value */
-    font-size: 13px;       /* smaller label text */
-    font-weight: 600;      /* optional: keep readable */
-  }
-
-  .lgd-selector .population-value2 {
-    margin-top: 0;
-    font-size: 16px;       /* reduce from large default */
-    line-height: 1.2;
-  }
-
-}
-
-
-@media (max-width: 900px) {
-
-  .lgd-selector .population-label2,
-  .lgd-selector .population-value2 {
-    display: inline-block;
-  }
-
-  .lgd-selector .population-label2 {
-    margin-right: 4px;
-  }
-
-}
-
-@media (max-width: 1300px) {
-
-  /* remove extra space after the postcode section */
-  .lgd-selector .selection-row {
-    margin-bottom: 4px;
-  }
-
-  .lgd-selector #postcode-row {
-    margin-bottom: 2px;
-  }
-
-  /* THIS is often the hidden culprit */
-  .lgd-selector .postcode-status {
-    margin: 0;
-    min-height: 0;
-    padding: 0;
-  }
-
-  /* tighten the divider spacing */
-  .lgd-selector .selection-divider {
-    margin: 0px 0;
-  }
-
-}
-
-
-@media (max-width: 900px) {
-
-  #selection-controls > *:last-child {
-    margin-bottom: 0 !important;
-  }
-
-}
-
-
-@media (max-width: 900px) {
-
-  #selection-controls {
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-
-  .population-label2 {
-    margin-top: 4px !important;
-  }
-
-}
-
-
-@media (max-width: 900px) {
-  .postcode-status:empty {
-    display: none;
-  }
-}
-
-
 
 #build-profile-btn {
   position: relative;
@@ -1521,18 +1460,6 @@ input[type=text] {
 
 .summary-box h4 { margin-top: 0; }
 
-@media (max-width: 768px) {
-  #summary-hero {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "title"
-      "summary"
-      "population"
-      "map";
-    grid-template-rows: auto auto auto 320px; /* give the map room on mobile */
-  }
-}
-
 .summary-content {
   display: flex;
   flex-direction: column;
@@ -1712,9 +1639,9 @@ main a[target="_blank"]::after {
 
 #postcode-row .postcode-input-small {
   width: 120px;   /* ✅ from your second rule */
-  height: 30px;
+  height: 25px;
   padding: 2px 6px;
-  font-size: 14px;
+  font-size: 12px;
   box-sizing: border-box;
   background-color: #ffffff;  /* ✅ white background */
   color: #000000;             /* ✅ black text */
@@ -1726,17 +1653,7 @@ main a[target="_blank"]::after {
   padding: 0 10px;
 }
 
-/* Mobile behaviour */
-@media (max-width: 500px) {
-  #postcode-row .postcode-inline {
-    width: 100%;
-    justify-content: flex-end;
-  }
 
-  .postcode-search-btn-small {
-    width: auto;
-  }
-}
 
 
 
@@ -1790,7 +1707,7 @@ main a[target="_blank"]::after {
   border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 18px;
+  font-size: 14px;
   transition: background-color 0.2s;
   display: flex;
   align-items: center;
@@ -1905,7 +1822,7 @@ padding-left: 100px
 
 .radius-input-wrapper input {
   width: 70px;
-  padding-right: 28px;   /* make space for "km" */
+  padding-right: 25px;   /* make space for "km" */
   box-sizing: border-box;
 }
 
@@ -1915,7 +1832,7 @@ padding-left: 100px
   top: 50%;
   transform: translateY(-50%);
   color: #666;
-  font-size: 14px;
+  font-size: 12px;
   pointer-events: none; /* allows clicking through to input */
 }
 
@@ -2038,18 +1955,6 @@ padding-left: 100px
 }
 
 
-/* On small screens */
-@media (max-width: 500px) {
-  .postcode-search-btn-small {
-    width: 100%;      /* ✅ forces it onto a new line */
-  }
-
-  #postcode-input {
-    flex: 1 1 auto;   /* ✅ allows input to shrink nicely */
-  }
-}
-
-
 .postcode-inline {
   display: flex;
   align-items: center;
@@ -2095,282 +2000,6 @@ padding-left: 100px
   pointer-events: auto;  /* buttons still clickable */
 }
 
-
-/* mobile */
-@media (max-width: 1300px) {
-  .lgd-selector {
-    width: 40vw;     /* much wider */
-    max-width: 320px; /* optional cap */
-    padding: 0.5rem;
-    line-height: 1.2;   /* tighter text */
-  }
-}
-
-@media (max-width: 1300px) {
-  .lgd-selector h4 {
-    font-size: 14px;   /* was 16px */
-    margin-bottom: 2px;
-  }
-}
-
-@media (max-width: 1300px) {
-  .lgd-selector p {
-    font-size: 1rem;   /* slightly smaller */
-    margin-bottom: 4px;
-  }
-}
-
-@media (max-width: 1300px) {
-  .lgd-selector .zone-selector-box {
-    margin-bottom: 5px !important;   /* was 10px */
-    padding: 0.25rem 0;              /* was 0.5rem */
-  }
-}
-
-@media (max-width: 1300px) {
-  .lgd-selector .selection-row span {
-    font-size: 14px; /* match your h4 */
-  }
-}
-
-@media (max-width: 1300px) {
-  .lgd-selector #zone-selector {
-    padding: 0.25rem;   /* was 0.4rem */
-    font-size: 13px;    /* was 14px */
-  }
-}
-
-@media (max-width: 1300px) {
-  #howto-rail-btn {
-    flex: 0 0 auto;
-    width: 90px;
-    min-width: 0;
-    margin-left: auto;
-  }
-}
-
-/* Mobile styles */
-@media (max-width: 576px) {
-
-  /* Reduce padding → reduces header height */
-  #top-menu .py-3 {
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
-  }
-
-  /* Make logo smaller */
-  #top-menu img {
-    height: 40px; /* was 60 */
-  }
-
-  /* Reduce heading size */
-  #top-menu .app-title {
-    font-size: 1.25rem; /* smaller than fs-2 */
-  }
-
-}
-
-@media (max-width: 1300px) {
-
-  .selection-row {
-    flex-wrap: nowrap;           /* prevent wrapping */
-  }
-
-  .selection-row span {
-    flex: 1;
-    min-width: 0;                /* ✅ prevents overflow issues */
-    font-size: 14px;
-  }
-
-  /* keep these together on the right */
-  #radius-control,
-  #circle-slot {
-    flex: 0 0 auto;
-  }
-
-  /* push radius + icon group to the right */
-  #radius-control {
-    margin-left: auto;
-  }
-
-  /* tighten spacing between input and icon */
-  #circle-slot {
-    margin-left: 6px;
-  }
-}
-
-@media (max-width: 1300px) {
-
-  .right-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;   /* keeps everything right-aligned */
-    margin-left: auto;
-    gap: 4px;
-  }
-
-  /* ✅ Make the icon row full width */
-  #circle-slot {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;  /* push icon to the right */
-  }
-
-}
-
-
-@media (max-width: 1300px) {
-  .cntrl-button-wrapper {
-    bottom: 70px;   /* push it higher */
-    right: 45px;    /* tighten spacing for mobile */
-  }
-}
-
-@media (max-width: 1300px) {
-  #coords {
-    bottom: 40px;   /* keep it near bottom */
-    right: 45px;    /* bring it in from the edge */
-    font-size: 11px; /* optional: slightly smaller */
-    padding: 4px 8px; /* optional: tighter box */
-  }
-
-}
-
-
-@media (max-width: 1300px) {
-  #zoom-level {
-    bottom: 130px;   /* adjust to sit above buttons */
-    right: 45px;     /* align with everything else */
-    font-size: 11px; /* optional: slightly smaller */
-    padding: 4px 8px;
-  }
-
-}
-
-
-
-@media (max-width: 550px) {
-  #zoom-level {
-    bottom: 140px;   /* adjust to sit above buttons */
-    right: 40px;     /* align with everything else */
-    font-size: 11px; /* optional: slightly smaller */
-    padding: 4px 8px;
-  }
-}
-
-@media (max-width: 550px) {
-  .cntrl-button-wrapper {
-    flex-direction: column;   /* ✅ switch to vertical */
-    align-items: flex-end;    /* keep right-aligned */
-    gap: 6px;                 /* slightly tighter spacing */
-    right: 40px;              /* bring in from edge */
-    bottom: 55px;             /* adjust position if needed */
-  }
-}
-
-@media (max-width: 550px) {
-  #coords {
-    bottom: 18px;   /* keep it near bottom */
-    right: 40px;    /* bring it in from the edge */
-    font-size: 11px; /* optional: slightly smaller */
-    padding: 4px 8px; /* optional: tighter box */
-  }
-}
-
-
-
-@media (max-width: 450px) {
-  .cntrl-button-wrapper {
-    flex-direction: column;   /* ✅ switch to vertical */
-    align-items: flex-end;    /* keep right-aligned */
-    gap: 6px;                 /* slightly tighter spacing */
-    right: 40px;              /* bring in from edge */
-    bottom: 62px;             /* adjust position if needed */
-  }
-}
-
-@media (max-width: 450px) {
-  #zoom-level {
-    bottom: 140px;   /* adjust to sit above buttons */
-    right: 40px;     /* align with everything else */
-    font-size: 11px; /* optional: slightly smaller */
-    padding: 4px 8px;
-  }
-}
-
-@media (max-width: 450px) {
-  #coords {
-    bottom: 20px;   /* keep it near bottom */
-    right: 10px;    /* bring it in from the edge */
-    font-size: 11px; /* optional: slightly smaller */
-    padding: 4px 8px; /* optional: tighter box */
-  }
-}
-
-
-@media (max-width: 450px) {
-
-  #coords span {
-    display: block;   /* ✅ stack on new lines */
-  }
-
-  .coords-line-2::before {
-    content: "";      /* ✅ remove the separator */
-  }
-
-}
-
-@media (max-width: 380px) {
-
-  #single-select-row span,
-  #multi-select-row span,
-  #postcode-row span {
-    font-size: 12px;
-    line-height: 1.2;
-  }
-
-}
-
-@media (max-width: 380px) {
-
-  .selection-row {
-    padding: 2px 4px;   /* tighter rows */
-    gap: 6px;
-  }
-
-  .selection-divider {
-    margin: 2px 0;
-    font-size: 12px;
-  }
-
-}
-
-
-@media (max-width: 768px) {
-  .header-row {
-    flex-wrap: wrap;              /* allow wrapping */
-  }
-
-  .profile-nav-buttons {
-    order: 1;                     /* buttons first */
-    width: 100%;                  /* full width row */
-    justify-content: flex-start;  /* or center if preferred */
-  }
-
-  #areaProfileTitle {
-    order: 2;                     /* title below */
-    width: 100%;                  /* full width */
-    margin-top: 0.5rem;
-    text-align: left;             /* or center */
-white-space: normal;          /* allow wrapping */
-  overflow-wrap: break-word;    /* break long words if needed */
-  word-break: break-word;
-  max-width: 100%;
-
-  }
-  
-}
-
 #areaProfileTitle {
   min-width: 0;   /* ✅ CRITICAL */
   max-width: 100%;
@@ -2384,32 +2013,6 @@ white-space: normal;          /* allow wrapping */
   max-width: 100%;
 }
 
-@media (max-width: 768px) {
-  .header-row {
-    align-items: stretch;
-  }
-}
-
-@media (max-width: 768px) {
-  .profile-nav-buttons {
-    width: auto;        /* don’t stretch */
-    max-width: 100%;
-    align-self: flex-start;
-  }
-}
-
-@media (max-width: 768px) {
-  #areaProfileTitle {
-    min-width: 0;                  /* ✅ prevents flex overflow */
-    max-width: 100%;
-    width: 100%;
-    font-size: clamp(1.4rem, 5vw, 1.8rem);
-    line-height: 1.2;
-    white-space: normal;
-    word-break: break-word;
-    margin-top: 0.5rem;
-  }
-}
 
 #breakdown-container {
   width: 100%;
@@ -2418,15 +2021,6 @@ white-space: normal;          /* allow wrapping */
   border-radius: 4px;
   background-color: #fff;
 }
-@media (max-width: 768px) {
-#breakdown-container {
-  align-self: center;
-  width: 100%;
-  max-width: 90vw;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-}
 
 
 .page-layout {
@@ -2434,66 +2028,6 @@ white-space: normal;          /* allow wrapping */
   flex-direction: column;
   gap: 1rem;
 }
-
-@media (min-width: 768px) {
-  .page-layout {
-    flex-direction: row;
-  }
-}
-
-@media (max-width: 768px) {
-
-  #map-wrapper {
-    display: flex;
-    flex-direction: column;
-  }
-
-}
-
-@media (max-width: 768px) {
-
-  .nav-button-container.cta {
-    order: -1;                /* ⬆ moves it to the top */
-    width: 100%;
-    position: static !important;
-    margin: 0 0 12px 0;
-  }
-
-}
-
-@media (max-width: 768px) {
-
-  .nav-button-container.cta {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 12px;
-  }
-
-}
-
-@media (max-width: 768px) {
-
-  .nav-button-container.cta {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-}
-
-@media (max-width: 768px) {
-
-  #build-profile-btn {
-    width: 100%;
-    min-height: 48px;   /* proper touch target */
-    font-size: 18px;
-    white-space: normal;
-    text-align: center;
-  }
-
-}
-
 
 
 #summary-hero {
@@ -2507,17 +2041,6 @@ white-space: normal;          /* allow wrapping */
   min-width: 0;
 }
 
-@media (max-width: 768px) {
-  #summary-hero {
-    grid-template-columns: 1fr;   /* 🚑 prevents shrink */
-    grid-template-areas:
-      "title"
-      "summary"
-      "population"
-      "map";
-    grid-template-rows: auto auto auto 320px;
-  }
-}
 
 .map-box,
 #summary-map {
@@ -2533,13 +2056,6 @@ white-space: normal;          /* allow wrapping */
 }
 
 
-@media (max-width: 768px) {
-  #areaProfileTitle {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-}
 
 /* ===============================
    PROFILE SIDEBAR – BASE
@@ -2553,57 +2069,13 @@ white-space: normal;          /* allow wrapping */
 /* ===============================
    MOBILE BEHAVIOUR
    =============================== */
-@media (max-width: 991.98px) {
 
-  .profile-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100dvh;
-    width: min(90vw, 360px);
-    z-index: 1050;
-
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
-    overflow-y: auto;
-    box-shadow: 2px 0 12px rgba(0,0,0,.2);
-  }
-
-  .profile-sidebar.open {
-    transform: translateX(0);
-  }
-
-  #profile-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
-    z-index: 1040;
-  }
-
-  #profile-backdrop.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  body.profile-open {
-    overflow: hidden;
-  }
-}
 
 /* Default: hidden everywhere */
 .mobile-only {
   display: none !important;
 }
 
-/* Show on mobile + tablet */
-@media (max-width: 991.98px) {
-  .mobile-only {
-    display: inline-flex !important;
-  }
-}
 
 .btn {
         display: flex;
@@ -2648,19 +2120,6 @@ white-space: normal;          /* allow wrapping */
   width: 100%;
 }
 
-/* Tablet and up */
-@media (min-width: 768px) {
-  .charts-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Large screens (optional) */
-@media (min-width: 1200px) {
-  .charts-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
 .table-grid {
   display: grid;
@@ -2668,19 +2127,7 @@ white-space: normal;          /* allow wrapping */
   gap: 2rem;
 }
 
-/* Tablet */
-@media (min-width: 768px) {
-  .table-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
-/* Desktop (optional) */
-@media (min-width: 1200px) {
-  .table-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
 #charts-container {
   min-width: 0;
@@ -2727,84 +2174,16 @@ white-space: normal;          /* allow wrapping */
 #open-profile     { order: 3; } /* Create profile */
 .profile-nav-buttons { order: 4; } /* Back + Download */
 
-@media (max-width: 767.98px) {
 
-  #open-profile {
-    order: 1;
-    width: 100%;
-  }
-
-  .profile-nav-buttons {
-    order: 2;
-    width: 100%;
-  }
-
-  #areaProfileTitle {
-    order: 3;
-    width: 100%;
-  }
-
-  #apply-area-name {
-    order: 4;
-    margin-top: 6px;
-  }
-}
 
 .profile-nav-buttons {
   display: flex;
   gap: 8px;
 }
 
-@media (min-width: 992px) {
-  .header-row {
-    flex-wrap: nowrap;   /* ✅ prevents wrap */
-  }
-
-  #areaProfileTitle { order: 1; }
-  #apply-area-name { order: 2; }
-  .profile-nav-buttons { order: 3; }
-
-  /* ✅ ensure proper spacing */
-  #apply-area-name {
-    margin-right: 8px;
-  }
-}
 
 
 
-@media (min-width: 768px) and (max-width: 991.98px) {
-
-  #open-profile {
-    order: 1;
-    width: auto;       /* ✅ CRITICAL */
-    flex: 0 0 auto;    /* ✅ prevents it taking a full row */
-  }
-
-  
- .profile-nav-buttons {
-    order: 2;
-    display: flex;
-    gap: 8px;
-    flex: 0 0 auto;   /* ✅ stop wrapping */
-  }
-
-  #areaProfileTitle {
-    order: 3;
-    width: 100%;   /* ✅ forces new line */
-    margin-top: 6px;
-  }
-
-  #apply-area-name {
-    order: 4;
-  }
-}
-
-
-@media (min-width: 768px) and (max-width: 991.98px) {
-  #open-profile {
-    width: auto !important;
-  }
-}
 
 
 #open-profile {
@@ -2820,43 +2199,6 @@ white-space: normal;          /* allow wrapping */
 }
 
 
-@media (min-width: 768px) and (max-width: 991.98px) {
-
-  .header-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .top-controls {
-    order: 1;
-    width: 100%;   /* ✅ ALL THREE stay on same row */
-  }
-
-  #areaProfileTitle {
-    order: 2;
-    width: 100%;   /* ✅ forces new row */
-    margin-top: 6px;
-  }
-
-  #apply-area-name {
-    order: 3;
-  }
-}
-@media (min-width: 992px) {
-
-  .header-row {
-    flex-wrap: nowrap;
-  }
-
-  .top-controls {
-    order: 3;
-    width: auto;
-  }
-
-  #areaProfileTitle { order: 1; }
-  #apply-area-name { order: 2; }
-}
 
 
 
@@ -2882,12 +2224,7 @@ white-space: normal;          /* allow wrapping */
   white-space: nowrap;   /* ✅ keeps text clean */
 }
 
-@media (max-width: 991.98px) {
-  .nav-button {
-    padding: 0.35rem 0.6rem;
-    font-size: 14px;
-  }
-}
+
 
 #breakdown-container {
   justify-content: center;
@@ -2896,63 +2233,7 @@ white-space: normal;          /* allow wrapping */
 }
 
 /* Only constrain on medium screens */
-@media (max-width: 1400px) {
-  #breakdown-container {
-    max-width: 1200px;
-  }
-}
 
-/* Let it expand fully on very large screens */
-@media (min-width: 1601px) {
-  #breakdown-container {
-    min-width: 1467px;
-  }
-}
-
-@media (max-width: 800px) {
-
-  population-label {
-    font-size: 24px;
-      font-weight: bold;
-  }
-
-  .population-value {
-    font-size: 24px;
-  }
-
-}
-
-@media (max-width: 991px) {
-
-  .profile-sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-
-  .profile-sidebar.open {
-    transform: translateX(0);
-  }
-
-  #profile-backdrop {
-    display: none;
-  }
-
-  #profile-backdrop.active {
-    display: block;
-  }
-
-  .mobile-only {
-    display: none;
-  }
-
-}
-
-@media (min-width: 767px) {
-  #breakdown-container {
-    margin-left: -24px;
-    margin-right: 0;
-  }
-}
 
 
 body {
@@ -2979,4 +2260,673 @@ td, th {
 * {
   box-sizing: border-box;
 }
+
+/* Toggle button */
+#sidebar-toggle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+  background: #3878c5;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+
+
+.lgd-selector.open {
+  box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+}
+
+
+/* ============================================================================================================= */
+
+/* ========================
+   ≤1300px (smaller desktop)
+======================== */
+@media (max-width: 1300px) {
+
+  /* ===== Sidebar layout ===== */
+  .lgd-selector {
+    width: 40vw;
+    max-width: 320px;
+    padding: 0.5rem;
+    line-height: 1.2;
+  }
+
+  .lgd-selector h4 {
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .lgd-selector p {
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+
+  .lgd-selector #zone-selector {
+    padding: 0.25rem;
+    font-size: 13px;
+  }
+
+  .lgd-selector .zone-selector-box {
+    margin-bottom: 5px !important;
+    padding: 0.25rem 0;
+  }
+
+  .lgd-selector .selection-row span {
+    font-size: 14px;
+  }
+
+  /* ===== Selection spacing fixes ===== */
+  .lgd-selector .selection-row {
+    margin-bottom: 4px;
+  }
+
+  .lgd-selector #postcode-row {
+    margin-bottom: 2px;
+  }
+
+  .lgd-selector .postcode-status {
+    margin: 0;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .lgd-selector .selection-divider {
+    margin: 0;
+  }
+
+  /* ===== Selection layout ===== */
+  .selection-row {
+    flex-wrap: nowrap;
+  }
+
+  .selection-row span {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+  }
+
+  #radius-control,
+  #circle-slot {
+    flex: 0 0 auto;
+  }
+
+  #radius-control {
+    margin-left: auto;
+  }
+
+  #circle-slot {
+    margin-left: 6px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .right-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: auto;
+    gap: 4px;
+  }
+
+  /* ===== Map UI positioning ===== */
+  #howto-rail-btn {
+    flex: 0 0 auto;
+    width: 90px;
+    margin-left: auto;
+  }
+
+  .cntrl-button-wrapper {
+    bottom: 70px;
+    right: 45px;
+  }
+
+  #coords {
+    bottom: 40px;
+    right: 45px;
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  #zoom-level {
+    bottom: 130px;
+    right: 45px;
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* === special cases === */
+
+@media (min-width: 1200px) {
+  .charts-grid,
+  .table-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  #breakdown-container {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 1601px) {
+  #breakdown-container {
+    min-width: 1467px;
+  }
+}
+
+
+/* ========================
+   ≤992px (tablet & below)
+======================== */
+@media (max-width: 992px) {
+
+  /* ===== Map layout ===== */
+  #map-wrapper {
+    --rail-width: clamp(160px, 28vw, 200px);
+    --cta-height: 110px;
+  }
+
+  /* ===== Selection controls spacing ===== */
+  #selection-controls {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  #selection-controls > *:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .lgd-selector .population-label2 {
+    margin-top: 6px;
+    margin-bottom: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .lgd-selector .population-value2 {
+    margin-top: 0;
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  .lgd-selector .population-label2,
+  .lgd-selector .population-value2 {
+    display: inline-block;
+  }
+
+  .postcode-status:empty {
+    display: none;
+  }
+
+  /* ===== Mobile sidebar (map selector) ===== */
+  .lgd-selector {
+    width: 70vw;
+    max-width: 263px;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+    left: 0;
+    top: 0;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .lgd-selector.closed {
+    transform: translateX(-110%);
+  }
+
+  /* ===== Profile sidebar ===== */
+  .profile-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: min(90vw, 360px);
+    z-index: 1050;
+
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0,0,0,.2);
+  }
+
+  .profile-sidebar.open {
+    transform: translateX(0);
+  }
+
+  #profile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 1040;
+  }
+
+  #profile-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  body.profile-open {
+    overflow: hidden;
+  }
+
+  /* ===== Buttons & mobile visibility ===== */
+  .nav-button {
+    padding: 0.35rem 0.6rem;
+    font-size: 14px;
+  }
+
+  .mobile-only {
+    display: inline-flex !important;
+  }
+}
+
+/* ========================
+   ≥992px (desktop)
+======================== */
+@media (min-width: 992px) {
+
+  #profile-content {
+    padding: 20px 40px;
+    width: 100%;
+  }
+
+  .header-row {
+    flex-wrap: nowrap;
+  }
+
+  #areaProfileTitle { order: 1; }
+  #apply-area-name { order: 2; margin-right: 8px; }
+
+  .profile-nav-buttons,
+  .top-controls {
+    order: 3;
+    width: auto;
+  }
+
+  #sidebar-toggle {
+    display: none;
+  }
+
+  .lgd-selector {
+    transform: none !important;
+  }
+
+}
+
+/* ========================
+   ≤768px (mobile)
+======================== */
+@media (max-width: 768px) {
+
+  /* ===== Layout ===== */
+  #summary-hero {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "summary"
+      "population"
+      "map";
+    grid-template-rows: auto auto auto 320px;
+  }
+
+  .page-layout {
+    flex-direction: column;
+  }
+
+  #map-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+/* ===== Avoid overlap with hamburger button ===== */
+
+  .zone-selector-box label,
+  .zone-selector-box #zone-selector {
+    margin-left: 43px;
+  }
+
+  .zone-selector-box #zone-selector {
+    width: calc(100% - 50px);
+  }
+
+
+
+  /* ===== Hide map controls on mobile ===== */
+  #coords,
+  #zoom-level,
+  #resetZoomBtn,
+  .maplibregl-ctrl-group {
+    display: none !important;
+  }
+
+  /* ===== Header ===== */
+  .header-row {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .profile-nav-buttons {
+    order: 1;
+    width: auto;
+    max-width: 100%;
+    align-self: flex-start;
+  }
+
+  #areaProfileTitle {
+    order: 2;
+    text-align: left;
+    overflow-wrap: break-word;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    line-height: 1.2;
+    margin-top: 0.5rem;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* ===== Top menu ===== */
+  #top-menu .py-3 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  #top-menu img {
+    height: 20px;
+  }
+
+  #top-menu .app-title {
+    font-size: 1.25rem;
+  }
+
+  /* ===== CTA block ===== */
+  .nav-button-container.cta {
+    order: -1;
+    width: 100%;
+    position: static !important;
+    margin: 0 0 12px 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+  }
+
+  /* ===== Buttons ===== */
+  #postcode-search-btn,
+  #build-profile-btn {
+    width: 100%;
+    min-height: 36px;
+    font-size: 12px;
+    padding: 0.4rem 0.8rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* ===== Inputs ===== */
+  #radius-input,
+  .radius-input-wrapper input {
+    width: 50px;
+  }
+
+  .radius-input-wrapper input {
+    padding-right: 20px;
+  }
+
+  .radius-input-wrapper .unit {
+    right: 6px;
+    font-size: 11px;
+  }
+
+  /* ===== Breakdown container ===== */
+  #breakdown-container {
+    align-self: center;
+    width: 100%;
+    max-width: 90vw;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  /* ===== Population ===== */
+  .population-label {
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .population-value {
+    font-size: 24px;
+  }
+
+  /* ===== Mobile ordering ===== */
+  #open-profile {
+    order: 1;
+    width: 100%;
+  }
+
+  .profile-nav-buttons {
+    order: 2;
+    width: 100%;
+  }
+
+  #areaProfileTitle {
+    order: 3;
+  }
+
+  #apply-area-name {
+    order: 4;
+    margin-top: 6px;
+  }
+}
+
+/* ========================
+   Height adjustments
+======================== */
+@media (max-height: 800px) {
+  #map-wrapper {
+    height: 83vh;
+  }
+}
+
+@media (max-height: 750px) {
+  #map-wrapper {
+    --cta-height: 100px;
+  }
+}
+
+@media (max-height: 620px) {
+  #map-wrapper {
+    --cta-height: 88px;
+  }
+}
+
+/* ========================
+   768px–992px (tablet only)
+======================== */
+@media (min-width: 768px) and (max-width: 992px) {
+
+  #open-profile {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .profile-nav-buttons {
+    display: flex;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+
+  .header-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .top-controls {
+    order: 1;
+    width: 100%;
+  }
+
+  #areaProfileTitle {
+    order: 2;
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  #apply-area-name {
+    order: 3;
+  }
+}
+
+
+
+/* ========================
+   ≥768px (tablet and up)
+======================== */
+@media (min-width: 768px) {
+
+  .page-layout {
+    flex-direction: row;
+  }
+
+  .charts-grid,
+  .table-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #breakdown-container {
+    margin-left: -24px;
+    margin-right: 0;
+  }
+}
+
+
+
+/* ========================
+   ≤480px (small mobile)
+======================== */
+
+
+@media (max-width: 550px) {
+
+  .cntrl-button-wrapper {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    right: 40px;
+    bottom: 55px;
+  }
+
+  #zoom-level {
+    bottom: 140px;
+    right: 40px;
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  #coords {
+    bottom: 18px;
+    right: 40px;
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 500px) {
+
+  #postcode-row .postcode-inline {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .postcode-search-btn-small {
+    width: 100%;
+  }
+
+  #postcode-input {
+    flex: 1 1 auto;
+  }
+}
+
+
+@media (max-width: 450px) {
+
+  .cntrl-button-wrapper {
+    bottom: 62px;
+  }
+
+  #coords {
+    bottom: 20px;
+    right: 10px;
+  }
+
+  #coords span {
+    display: block;
+  }
+
+  .coords-line-2::before {
+    content: "";
+  }
+}
+
+@media (max-width: 380px) {
+
+  #single-select-row span,
+  #multi-select-row span,
+  #postcode-row span {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .selection-row {
+    padding: 2px 4px;
+    gap: 6px;
+  }
+
+  .selection-divider {
+    margin: 2px 0;
+    font-size: 12px;
+  }
+}
+
+
+/* ============================================================================================================= */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
