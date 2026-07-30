@@ -64,7 +64,8 @@
       </div>
     </nav>
 
-      <hr style="border-top: 4px solid #3878c5; margin: 0">
+      <!-- <hr style="border-top: 4px solid #3878c5; margin: 0"> -->
+      <hr style="border-top: 4px solid #68a41e; margin: 0">
 
       <div id="main">
 
@@ -138,12 +139,19 @@
 
                       </div>
 
-                      <div class="population-label2">Population selected:</div>
-                      <div class="population-value2 total-population">0</div>    
+                      <div class="population-row">
+                        <div class="population-label2">Population selected: </div>
+                        <div class="population-value-wrapper">
+                          <div class="population-value2 total-population">0</div>
+                          <button class="population-info-btn" type="button" aria-label="Population source information" hidden>
+                            <span aria-hidden="true">i</span>
+                          </button>
+                        </div>
+                      </div>
 
                       <div class="nav-button-container cta">
                         <div class="center-wrapper">
-                          <button id="build-profile-btn" class="nav-button">Go to Area Profile</button>
+                          <button id="build-profile-btn" class="nav-button">Go to area profile</button>
                         </div>
                       </div>
                     </div>
@@ -236,7 +244,7 @@
   <div class="profile-body">
 
               <div id="category-selector">
-                    <h3>Create your Area Profile</h3>
+                    <h3>Create your area profile</h3>
                     <h2 style="font-size: 15px;"><strong>Year:</strong> Data is from Census 2021 unless a different year is shown (details in charts and tables).</h2>
 
                     <button id="reset-categories-btn" class="nav-button" type="button">
@@ -267,9 +275,12 @@
                       <div class="category-group">
                         <button type="button" class="group-toggle">Education and skills ▼</button>
                         <div class="group-content">
-                          <label><input type="checkbox" value="Qualifications Highest Level"> Qualifications highest level</label>
-                          <label><input type="checkbox" value="Place of Study Method of Travel"> Place of study (method of travel)</label> 
-                          <label><input type="checkbox" value="Place of Study Distance"> Place of study (distance)</label> 
+                          <label><input type="checkbox" value="School census - primary"> School census - primary (gender)</label> 
+                          <label><input type="checkbox" value="School census - post-primary"> School census - post-primary (gender)</label> 
+                          <label><input type="checkbox" value="School census - special schools"> School census - special schools (gender)</label> 
+                          <label><input type="checkbox" value="Qualifications Highest Level"> Qualifications Highest Level</label>
+                          <label><input type="checkbox" value="Place of Study Method of Travel"> Place of Study (Method of Travel)</label> 
+                          <label><input type="checkbox" value="Place of Study Distance"> Place of Study (Distance)</label> 
                         </div>
                       </div>
 
@@ -305,12 +316,14 @@
                       <div class="category-group">
                         <button type="button" class="group-toggle">Business, economy and trade ▼</button>
                         <div class="group-content"> 
+                          <label><input type="checkbox" value="Number of businesses"> Number of businesses</label> 
+                          <label><input type="checkbox" value="Employee Jobs"> Employee Jobs</label>                           
                         </div>
                       </div>
-
                       <div class="category-group">
                         <button type="button" class="group-toggle">Crime and justice ▼</button>
                         <div class="group-content">
+                          <label><input type="checkbox" value="All crimes recorded by the police"> All crimes recorded by the police</label> 
                         </div>
                       </div>
 
@@ -336,7 +349,7 @@
       type="button"
       aria-expanded="false"
       aria-controls="profile-sidebar">
-      ☰ Create your own profile
+      ☰ Create your area profile
     </button>
 
     <div class="profile-nav-buttons">
@@ -356,8 +369,8 @@
           Download
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
-          <li><button class="dropdown-item" onclick="downloadExcel()">Download Excel File</button></li>
-          <li><button class="dropdown-item" onclick="downloadSummaryImage()">Download Summary Image</button></li>
+          <li><button class="dropdown-item" onclick="downloadExcel()">data (in Excel format)</button></li>
+          <li><button class="dropdown-item" onclick="downloadSummaryImage()">chart (as image)</button></li>
         </ul>
       </div>
     </div>
@@ -370,7 +383,6 @@
 
 </div>
 
-<div class="container-fluid px-2 px-md-4">
   <div id="breakdown-container" class="row g-3">
 
   <div id="summary-hero" class="summary-flex">
@@ -385,13 +397,28 @@
 
   <div class="summary-bottom" tabindex="-1">
     <div class="population-box">
-      <div class="population-label">Population selected</div>
-      <div class="population-value total-population">0</div>
-    </div>
-    <div class="map-box">
-      <div id="summary-map"></div>
+      <div class="population-label">Population selected: </div>
+      <div class="population-value-wrapper">
+        <div class="population-value total-population">0</div>
+
+        <button
+          class="population-info-btn"
+          type="button"
+          aria-expanded="false">
+          <span aria-hidden="true">i</span>
+        </button>
+      </div>
+
+      <div class="population-info-text" hidden>
+        Mid-year estimate 2024
+      </div>
     </div>
   </div>
+
+  <div id="summary-map-panel">
+    <div id="summary-map"></div>
+  </div>
+
 </div>
 
 </div>
@@ -422,7 +449,6 @@
     <button id="change-selection" class="nav-button uniform-button">Change Selections</button>
   </div>
 </div> -->
-  </div>
 
                 <!-- <div id="summary-hero">
                     <div id="summary-map"></div>

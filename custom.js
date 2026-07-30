@@ -37,6 +37,148 @@ function getResponsiveZoom() {
   console.log('getResponsiveZoom calc:', { dpr, baseZoom, zoomAdjustment, finalZoom });
   return finalZoom;
 }
+
+function togglePopulationInfoButtons() {
+  document.querySelectorAll('.population-value-wrapper').forEach(wrapper => {
+    if (wrapper.closest('.export-clone-root')) return;
+
+    const valueEl = wrapper.querySelector('.total-population');
+    const infoBtn = wrapper.querySelector('.population-info-btn');
+
+    if (!valueEl || !infoBtn) return;
+
+    const rawValue = String(valueEl.textContent || '').replace(/,/g, '').trim();
+    const numericValue = Number.parseFloat(rawValue);
+    const shouldHide = !Number.isFinite(numericValue) || numericValue <= 0;
+
+    infoBtn.hidden = shouldHide;
+    infoBtn.setAttribute('aria-hidden', shouldHide ? 'true' : 'false');
+    if (shouldHide) {
+      infoBtn.setAttribute('aria-expanded', 'false');
+    }
+    infoBtn.style.display = shouldHide ? 'none' : '';
+
+    const infoText = getPopulationInfoText(infoBtn);
+    if (infoText && shouldHide) {
+      infoText.hidden = true;
+    }
+  });
+}
+
+function getPopulationInfoContainer(btn) {
+  return btn.closest('.population-row, .population-box') || btn.parentElement;
+}
+
+function getPopulationInfoText(btn) {
+  const container = getPopulationInfoContainer(btn);
+  if (!container) return null;
+
+  const childInfoText = Array.from(container.children).find(
+    (child) => child.classList && child.classList.contains('population-info-text')
+  );
+
+  return childInfoText || null;
+}
+
+let midYearEstimateTooltipText = 'Mid-year estimate 2024';
+
+function setupPopulationInfoButtons() {
+  document.querySelectorAll('.population-info-btn').forEach(btn => {
+    if (btn.closest('.export-clone-root')) return;
+
+    if (btn.dataset.populationInfoSetup === 'true') return;
+    btn.dataset.populationInfoSetup = 'true';
+
+    if (!btn.querySelector('img')) {
+      btn.innerHTML = '';
+      const icon = document.createElement('img');
+      icon.src = 'img/i-button.svg';
+      icon.alt = '';
+      icon.setAttribute('aria-hidden', 'true');
+      btn.appendChild(icon);
+    }
+
+    const tooltipText = btn.dataset.tooltip || btn.getAttribute('title') || midYearEstimateTooltipText;
+    const container = getPopulationInfoContainer(btn);
+    if (!container) return;
+
+    let infoText = getPopulationInfoText(btn);
+
+    if (!infoText) {
+      infoText = document.createElement('div');
+      infoText.className = 'population-info-text';
+      infoText.hidden = true;
+      container.appendChild(infoText);
+    }
+
+    infoText.textContent = tooltipText;
+
+    if (!btn.hasAttribute('aria-expanded')) {
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    btn.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      infoText.hidden = expanded;
+      btn.classList.toggle('is-active', !expanded);
+    });
+  });
+}
+
+function applyMidYearEstimateTooltipFromLookup() {
+  if (typeof window.getSexMyeYear !== 'function') {
+    console.log('applyMidYearEstimateTooltipFromLookup: getSexMyeYear is not ready yet');
+    return;
+  }
+
+  window.getSexMyeYear()
+    .then((year) => {
+      const tooltipText = `Mid-year estimate ${year ?? '2024'}`;
+      midYearEstimateTooltipText = tooltipText;
+      window.midYearEstimateTooltipText = tooltipText;
+      console.log('applyMidYearEstimateTooltipFromLookup built tooltip:', tooltipText);
+
+      document.querySelectorAll('.population-info-btn').forEach((btn) => {
+        // Keep explicit tooltip text if provided in markup.
+        if (btn.dataset.tooltip || btn.getAttribute('title')) return;
+
+        const infoText = getPopulationInfoText(btn);
+        if (infoText) {
+          infoText.textContent = tooltipText;
+        }
+      });
+    })
+    .catch((error) => {
+      console.error('applyMidYearEstimateTooltipFromLookup failed:', error);
+    });
+}
+
+function observePopulationValueChanges() {
+  if (typeof MutationObserver === 'undefined' || document.body === null) return;
+
+  if (window.__populationInfoObserver) {
+    window.__populationInfoObserver.disconnect();
+  }
+
+  window.__populationInfoObserver = new MutationObserver(() => {
+    togglePopulationInfoButtons();
+    setupPopulationInfoButtons();
+  });
+
+  window.__populationInfoObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+}
+
+togglePopulationInfoButtons();
+setupPopulationInfoButtons();
+applyMidYearEstimateTooltipFromLookup();
+observePopulationValueChanges();
     
 /**
  * Normalize postcode to uppercase and remove spaces
@@ -457,7 +599,7 @@ window.selectGeographyByCode = function(code, zoneType) {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-  
+    
   markEmptyCategoryGroups();
 
   console.log('getResponsiveZoom debug:', { innerWidth: window.innerWidth, docClient: document.documentElement.clientWidth, screenWidth: (typeof screen !== 'undefined' ? screen.width : null), devicePixelRatio: window.devicePixelRatio, chosenZoom: getResponsiveZoom() });
@@ -545,9 +687,11 @@ document.addEventListener('DOMContentLoaded', function () {
   zoneSelector.addEventListener('change', onZoneChange);
   function onZoneChange(e) {
     const selected = e.target.value;                 // 'sdz' | 'dz' | 'dea'
+
     activeZone = selected;
     currentZoneType = selected;
     window.selectedZoneType = selected;
+    
     updateSourceLink();
 
     vis('sdz-fill', selected === 'sdz'); vis('dz-fill', selected === 'dz'); vis('dea-fill', selected === 'dea'); vis('lgd-fill', selected === 'lgd');
@@ -595,59 +739,98 @@ document.addEventListener('DOMContentLoaded', function () {
       dzData = data["Data Zone"] || {};
       deaData = data["District Electoral Area"] || {};
       niTotals = data["NI Total"] || {};
+      sdzDatas = data["Local Government District"] || {};
       window.niTotals = niTotals;
 
-    // BUILD LGD DATA FROM SDZ
-    lgdData = {};
+const lookup = {
+  "N09000003": "Belfast",
+  "N09000001": "Antrim and Newtownabbey",
+  "N09000007": "Lisburn and Castlereagh",
+  "N09000011": "Ards and North Down",
+  "N09000010": "Newry, Mourne and Down",
+  "N09000002": "Armagh City, Banbridge and Craigavon",
+  "N09000004": "Causeway Coast and Glens",
+  "N09000008": "Mid and East Antrim",
+  "N09000009": "Mid Ulster",
+  "N09000005": "Derry City and Strabane",
+  "N09000006": "Fermanagh and Omagh"
+};
 
-    Object.entries(sdzData).forEach(([sdzCode, record]) => {
-      const lgdName = record["LGD"];
-      if (!lgdName) return;
+const updatedLGD = Object.fromEntries(
+  Object.entries(data["Local Government District"])
+    .map(([code, value]) => [lookup[code] || code, value])
+);
 
-      if (!lgdData[lgdName]) {
-        lgdData[lgdName] = {
-          "Local Government District 2021 Label": {},
-          population: 0,
-          LGD: lgdName
-        };
-        lgdData[lgdName]["Local Government District 2021 Label"][lgdName] = 0;
-      }
+   // BUILD LGD DATA FROM SDZ
+lgdData = {};
 
-      // get SDZ population
-      const popObj = record["Census 2021 Super Data Zone Label"];
-      const pop = popObj ? Object.values(popObj)[0] : 0;
+Object.entries(sdzData).forEach(([sdzCode, record]) => {
+  const lgdName = record["LGD"];
+  if (!lgdName) return;
 
-      lgdData[lgdName]["Local Government District 2021 Label"][lgdName] += pop;
-      lgdData[lgdName].population += pop;
+  if (!lgdData[lgdName]) {
+    lgdData[lgdName] = {
+      "Local Government District 2021 Label": {},
+      population: 0,
+      LGD: lgdName
+    };
+    lgdData[lgdName]["Local Government District 2021 Label"][lgdName] = 0;
+  }
 
-      // Aggregate all category breakdowns for the LGD
-      for (const [category, values] of Object.entries(record)) {
-        if (category === "LGD" || category === "Census 2021 Super Data Zone Label" || category === "Urban_mixed_rural_status") {
-          continue;
-        }
-        if (!values || typeof values !== 'object') {
-          continue;
-        }
+  // get SDZ population
+  const popObj = record["Census 2021 Super Data Zone Label"];
+  const pop = popObj ? Object.values(popObj)[0] : 0;
 
-        if (!lgdData[lgdName][category]) {
-          lgdData[lgdName][category] = {};
-        }
+  lgdData[lgdName]["Local Government District 2021 Label"][lgdName] += pop;
+  lgdData[lgdName].population += pop;
 
-        for (const [label, count] of Object.entries(values)) {
-          const numericValue = typeof count === 'number' ? count : Number(count);
-          if (Number.isNaN(numericValue)) continue;
-          lgdData[lgdName][category][label] = (lgdData[lgdName][category][label] || 0) + numericValue;
-        }
-      }
-    });
+  // Aggregate all category breakdowns for the LGD
+  for (const [category, values] of Object.entries(record)) {
 
-    console.log("LGD Data:", lgdData); // debug
+    if (
+      category === "LGD" ||
+      category === "Census 2021 Super Data Zone Label" ||
+      category === "Urban_mixed_rural_status"
+    ) {
+      continue;
+    }
 
-      AREA_INDEX.sdz = AREA_INDEX.dz = AREA_INDEX.dea = null;
-      ensureIndexFor(activeZone);
-      populateDatalist(activeZone);
-      populateLGDButtons();
-      decorateCategoryBadges()
+    if (!values || typeof values !== "object") {
+      continue;
+    }
+
+    if (!lgdData[lgdName][category]) {
+      lgdData[lgdName][category] = {};
+    }
+
+    for (const [label, count] of Object.entries(values)) {
+      const numericValue =
+        typeof count === "number" ? count : Number(count);
+
+      if (Number.isNaN(numericValue)) continue;
+
+      lgdData[lgdName][category][label] =
+        (lgdData[lgdName][category][label] || 0) + numericValue;
+    }
+  }
+});
+
+
+
+for (const [lgdName, extraData] of Object.entries(updatedLGD)) {
+
+  if (!lgdData[lgdName]) continue;
+
+  Object.assign(lgdData[lgdName], extraData);
+
+}
+
+// continue with rest of app
+AREA_INDEX.sdz = AREA_INDEX.dz = AREA_INDEX.dea = null;
+ensureIndexFor(activeZone);
+populateDatalist(activeZone);
+populateLGDButtons();
+decorateCategoryBadges();
     });
 
   // Function that toggles urban/rural fill based on zone selection
@@ -684,111 +867,169 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Initialize the small preview map
-  function initSummaryPreviewMap() {
-    const container = document.getElementById('summary-map');
-    if (!container || previewMap) return;
+function initSummaryPreviewMap() {
+  const container = document.getElementById('summary-map');
+  if (!container || previewMap) return;
 
-    previewMap = new maplibregl.Map({
-      container: 'summary-map',
-      style: {
-        version: 8,
-        sources: {
-          osmRaster: {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '© OpenStreetMap'
-          },
-          sdz2021: {
-            type: 'vector',
-            tiles: ['https://raw.githubusercontent.com/nisra-explore/map_tiles/main/sdz_2021/{z}/{x}/{y}.pbf'],
-            promoteId: 'sdz_code'
-          },
-          dz2021: {
-            type: 'vector',
-            tiles: ['https://raw.githubusercontent.com/nisra-explore/map_tiles/main/dz_2021/{z}/{x}/{y}.pbf'],
-            promoteId: 'dz_code'
-          },
-          dea2014: {
-            type: 'vector',
-            tiles: ['https://raw.githubusercontent.com/nisra-explore/map_tiles/main/dea_2014/{z}/{x}/{y}.pbf'],
-            promoteId: 'dea_code'
-          },
-            lgd2014: {
-            type: 'vector',
-            tiles: ['https://raw.githubusercontent.com/nisra-explore/map_tiles/main/lgd2014/{z}/{x}/{y}.pbf'],
-            promoteId: 'lgd_code'
-          }
-        },
-        layers: [
-          { id: 'bg', type: 'raster', source: 'osmRaster' }
-        ]
-      },
-      center: [-6.8, 54.65],
-      zoom: getResponsiveZoom(),
-      interactive: false, // no interactions
-      dragPan: false, scrollZoom: false, boxZoom: false, keyboard: false, doubleClickZoom: false, touchZoomRotate: false,
-      attributionControl: false,
-      tabIndex: -1
+  previewMap = new maplibregl.Map({
+  container: 'summary-map',
+  style: 'https://raw.githubusercontent.com/NISRA-Tech-Lab/map_tiles/main/basemap_styles/style-omt.json',
+  center: [-6.8, 54.65],
+  zoom: 7.5,
+  preserveDrawingBuffer: true,
+  interactive: false
+});
+
+  previewMap.on('load', () => {
+
+  function addZoneLayers(idPrefix, src, srcLayer) {
+
+  // Selected fill
+  previewMap.addLayer({
+    id: `${idPrefix}-fill`,
+    type: 'fill',
+    source: src,
+    'source-layer': srcLayer,
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-color': '#1c569c',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hovered'], false],
+        0.35,
+        0
+      ]
+    }
+  });
+
+  // SELECTED boundaries ONLY
+  previewMap.addLayer({
+    id: `${idPrefix}-outline-selected`,
+    type: 'line',
+    source: src,
+    'source-layer': srcLayer,
+    layout: { visibility: 'none' },
+    paint: {
+      'line-color': [
+        'case',
+        ['boolean', ['feature-state', 'hovered'], false],
+        '#000000',
+        'rgba(0,0,0,0)'
+      ],
+      'line-width': [
+        'case',
+        ['boolean', ['feature-state', 'hovered'], false],
+        1.5,
+        0
+      ]
+    }
+  });
+}
+
+    // Add vector sources
+    previewMap.addSource('sdz2021', {
+      type: 'vector',
+      tiles: [
+        'https://raw.githubusercontent.com/nisra-explore/map_tiles/main/sdz_2021/{z}/{x}/{y}.pbf'
+      ],
+      promoteId: 'sdz_code'
     });
 
-    previewMap.getCanvas().setAttribute('tabindex', '-1');
-
-    previewMap.on('load', () => {
-      // Add the three zone layers (fill highlight + outline)
-      function addZoneLayers(idPrefix, src, srcLayer) {
-        previewMap.addLayer({
-          id: `${idPrefix}-fill`,
-          type: 'fill',
-          source: src,
-          'source-layer': srcLayer,
-          layout: { visibility: 'none' },
-          paint: {
-            'fill-color': '#3878c5',
-            'fill-opacity': [
-              'case',
-              ['boolean', ['feature-state', 'hovered'], false], 0.35, 0
-            ]
-          }
-        });
-        previewMap.addLayer({
-          id: `${idPrefix}-outline`,
-          type: 'line',
-          source: src,
-          'source-layer': srcLayer,
-          layout: { visibility: 'none' },
-          paint: { 'line-color': '#666', 'line-width': 1 }
-        });
-      }
-
-      addZoneLayers('sdz-preview', 'sdz2021', 'SDZ2021_clipped');
-      addZoneLayers('dz-preview', 'dz2021', 'DZ2021_clipped');
-      addZoneLayers('dea-preview', 'dea2014', 'DEA2014_clipped');
-      addZoneLayers('lgd-preview', 'lgd2014', 'LGD2014_clipped');
-
-      previewReady = true;
-      previewActiveZone = activeZone;
-      syncPreviewVisibility();
-      updateSummaryPreview();
+    previewMap.addSource('dz2021', {
+      type: 'vector',
+      tiles: [
+        'https://raw.githubusercontent.com/nisra-explore/map_tiles/main/dz_2021/{z}/{x}/{y}.pbf'
+      ],
+      promoteId: 'dz_code'
     });
-  }
+
+    previewMap.addSource('dea2014', {
+      type: 'vector',
+      tiles: [
+        'https://raw.githubusercontent.com/nisra-explore/map_tiles/main/dea_2014/{z}/{x}/{y}.pbf'
+      ],
+      promoteId: 'dea_code'
+    });
+
+    previewMap.addSource('lgd2014', {
+      type: 'vector',
+      tiles: [
+        'https://raw.githubusercontent.com/nisra-explore/map_tiles/main/lgd2014/{z}/{x}/{y}.pbf'
+      ],
+      promoteId: 'lgd_code'
+    });
+
+    addZoneLayers('sdz-preview', 'sdz2021', 'SDZ2021_clipped');
+    addZoneLayers('dz-preview', 'dz2021', 'DZ2021_clipped');
+    addZoneLayers('dea-preview', 'dea2014', 'DEA2014_clipped');
+    addZoneLayers('lgd-preview', 'lgd2014', 'LGD2014_clipped');
+
+    previewReady = true;
+    previewActiveZone = activeZone;
+
+    syncPreviewVisibility();
+    updateSummaryPreview();
+    previewMap.resize();
+  });
+}
 
   // Toggle which zone layers are visible in the preview
   function syncPreviewVisibility() {
-    if (!previewReady) return;
-    const showSDZ = activeZone === 'sdz';
-    const showDZ = activeZone === 'dz';
-    const showDEA = activeZone === 'dea';
-    const showLGD = activeZone === 'lgd';
-    previewMap.setLayoutProperty('sdz-preview-fill', 'visibility', showSDZ ? 'visible' : 'none');
-    previewMap.setLayoutProperty('sdz-preview-outline', 'visibility', showSDZ ? 'visible' : 'none');
-    previewMap.setLayoutProperty('dz-preview-fill', 'visibility', showDZ ? 'visible' : 'none');
-    previewMap.setLayoutProperty('dz-preview-outline', 'visibility', showDZ ? 'visible' : 'none');
-    previewMap.setLayoutProperty('dea-preview-fill', 'visibility', showDEA ? 'visible' : 'none');
-    previewMap.setLayoutProperty('dea-preview-outline', 'visibility', showDEA ? 'visible' : 'none');
-    previewMap.setLayoutProperty('lgd-preview-fill', 'visibility', showLGD ? 'visible' : 'none');
-    previewMap.setLayoutProperty('lgd-preview-outline', 'visibility', showLGD ? 'visible' : 'none');
-  }
+  if (!previewReady) return;
+
+  const showSDZ = activeZone === 'sdz';
+  const showDZ = activeZone === 'dz';
+  const showDEA = activeZone === 'dea';
+  const showLGD = activeZone === 'lgd';
+
+  previewMap.setLayoutProperty(
+    'sdz-preview-fill',
+    'visibility',
+    showSDZ ? 'visible' : 'none'
+  );
+
+  previewMap.setLayoutProperty(
+    'dz-preview-fill',
+    'visibility',
+    showDZ ? 'visible' : 'none'
+  );
+
+  previewMap.setLayoutProperty(
+    'dea-preview-fill',
+    'visibility',
+    showDEA ? 'visible' : 'none'
+  );
+
+  previewMap.setLayoutProperty(
+    'lgd-preview-fill',
+    'visibility',
+    showLGD ? 'visible' : 'none'
+  );
+
+  previewMap.setLayoutProperty(
+    'sdz-preview-outline-selected',
+    'visibility',
+    showSDZ ? 'visible' : 'none'
+  );
+
+  previewMap.setLayoutProperty(
+    'dz-preview-outline-selected',
+    'visibility',
+    showDZ ? 'visible' : 'none'
+  );
+
+  previewMap.setLayoutProperty(
+    'dea-preview-outline-selected',
+    'visibility',
+    showDEA ? 'visible' : 'none'
+  );
+
+  previewMap.setLayoutProperty(
+    'lgd-preview-outline-selected',
+    'visibility',
+    showLGD ? 'visible' : 'none'
+  );
+}
 
   // Apply selection highlight + fit bounds in the preview
   function waitForPreviewTiles(cb, tries = 12) {
@@ -804,87 +1045,176 @@ document.addEventListener('DOMContentLoaded', function () {
     previewMap.once('render', () => waitForPreviewTiles(cb, tries - 1));
   }
 
-  function updateSummaryPreview() {
-    if (!previewReady) return;
+function updateSummaryPreview() {
 
-    const z = activeZone;
-    const { source, sourceLayer } = getZoneIdsFor(z);
-    const layerId = z === 'sdz' ? 'sdz-preview-fill' : z === 'dz' ? 'dz-preview-fill' : z === 'dea' ? 'dea-preview-fill' : 'lgd-preview-fill';
+  if (!previewReady) return;
+  const z = activeZone;
+  const { source, sourceLayer } = getZoneIdsFor(z);
 
-    // zone switch: clear old feature-state & show correct layers
-    if (previewActiveZone !== z) {
-      const { source: oldSrc, sourceLayer: oldSL } = getZoneIdsFor(previewActiveZone || z);
-      Array.from(previewSelectedIds).forEach(id => {
-        try { previewMap.setFeatureState({ source: oldSrc, sourceLayer: oldSL, id }, { hovered: false }); } catch { }
-      });
-      previewSelectedIds.clear();
-      previewActiveZone = z;
-      syncPreviewVisibility();
-    }
+  // Handle zone switching
+  if (previewActiveZone !== z) {
+    const { source: oldSrc, sourceLayer: oldSL } =
+      getZoneIdsFor(previewActiveZone || z);
 
-    // sync feature-state for current selection 
-    const sel = new Set(Array.from(selectedIds).map(String));
     Array.from(previewSelectedIds).forEach(id => {
-      if (!sel.has(String(id))) {
-        try { previewMap.setFeatureState({ source, sourceLayer, id }, { hovered: false }); } catch { }
-        previewSelectedIds.delete(id);
+  try {
+
+    const featureId =
+      previewActiveZone === 'lgd'
+        ? (lgdNameToId.get(id) || id)
+        : id;
+
+    previewMap.setFeatureState(
+      {
+        source: oldSrc,
+        sourceLayer: oldSL,
+        id: featureId
+      },
+      {
+        hovered: false
       }
-    });
-    sel.forEach(id => {
-      if (!previewSelectedIds.has(id)) {
-        try { previewMap.setFeatureState({ source, sourceLayer, id }, { hovered: true }); } catch { }
-        previewSelectedIds.add(id);
-      }
-    });
+    );
 
-    // nothing selected -> reset
-    if (sel.size === 0) {
-      previewMap.easeTo({ center: [-6.8, 54.65], zoom: getResponsiveZoom(), duration: 0 });
-      return;
-    }
+  } catch {}
+});
 
-    // ensure we’re zoomed out enough that all tiles for NI are present
-    if (previewMap.getZoom() > getResponsiveZoom()) {
-      previewMap.jumpTo({ center: [-6.8, 54.65], zoom: getResponsiveZoom() });
-    }
-    previewMap.resize();
+    previewSelectedIds.clear();
+    previewActiveZone = z;
+    syncPreviewVisibility();
 
-    previewMap.jumpTo({
-      center: map.getCenter(),
-      zoom: map.getZoom()
-    });
 
-    waitForPreviewTiles(() => {
-      // Prefer source-level query so we get features even if off-screen
-      let feats = [];
-      try {
-        feats = previewMap.querySourceFeatures(source, { sourceLayer });
-      } catch (_) { /* some builds throw; will fall back below */ }
-
-      // Filter to our selected ids
-      const picked = feats.filter(f => sel.has(String(f.id)));
-
-      // Fallback: if source query gave nothing (older builds), use rendered layer
-      const useFeats = picked.length
-        ? picked
-        : previewMap.queryRenderedFeatures({ layers: [layerId] }).filter(f => sel.has(String(f.id)));
-
-      if (!useFeats.length) return;
-
-      // Union bbox
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      for (const f of useFeats) {
-        try {
-          const bb = turf.bbox({ type: 'Feature', geometry: f.geometry, properties: {} });
-          minX = Math.min(minX, bb[0]); minY = Math.min(minY, bb[1]);
-          maxX = Math.max(maxX, bb[2]); maxY = Math.max(maxY, bb[3]);
-        } catch { }
-      }
-      if (isFinite(minX)) {
-        previewMap.fitBounds([[minX, minY], [maxX, maxY]], { padding: 18, duration: 0 });
-      }
-    });
   }
+
+  // Sync selection highlighting
+  const sel = new Set(Array.from(selectedIds).map(String));
+
+  Array.from(previewSelectedIds).forEach(id => {
+    if (!sel.has(String(id))) {
+      try {
+        previewMap.setFeatureState(
+          { source, sourceLayer, id },
+          { hovered: false }
+        );
+      } catch {}
+      previewSelectedIds.delete(id);
+    }
+  });
+
+  sel.forEach(id => {
+    if (!previewSelectedIds.has(id)) {
+      try {
+        
+      const featureId =
+        activeZone === 'lgd'
+          ? (lgdNameToId.get(id) || id)
+          : id;
+
+      previewMap.setFeatureState(
+        {
+          source,
+          sourceLayer,
+          id: featureId
+        },
+        {
+          hovered: true
+        }
+      );
+
+      } catch {}
+      previewSelectedIds.add(id);
+    }
+  });
+
+  // Nothing selected -> default NI view
+  if (sel.size === 0) {
+    previewMap.easeTo({
+      center: [-6.8, 54.65],
+      zoom: 7.5,
+      duration: 0
+    });
+    return;
+  }
+
+  // Query the features for the current geography
+  let features = [];
+
+  try {
+    features = map.querySourceFeatures(source, {
+      sourceLayer
+    });
+  } catch {
+    return;
+  }
+ 
+  const selectedFeatures = features.filter(f =>
+    sel.has(String(f.id))
+  );
+
+  // Build bounding box
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  selectedFeatures.forEach(f => {
+    try {
+      const bb = turf.bbox({
+        type: 'Feature',
+        geometry: f.geometry,
+        properties: {}
+      });
+
+      minX = Math.min(minX, bb[0]);
+      minY = Math.min(minY, bb[1]);
+      maxX = Math.max(maxX, bb[2]);
+      maxY = Math.max(maxY, bb[3]);
+    } catch {}
+  });
+
+  
+  if (
+    isFinite(minX) &&
+    isFinite(minY) &&
+    isFinite(maxX) &&
+    isFinite(maxY)
+  ) {
+    previewMap.fitBounds(
+      [
+        [minX, minY],
+        [maxX, maxY]
+      ],
+      {
+        padding: {
+          top: 30,
+          bottom: 30,
+          left: 30,
+          right: 30
+        },
+          maxZoom: activeZone === 'sdz' ? 10 :
+                  activeZone === 'dz'  ? 11 :
+                  5,
+          duration: 0
+      }
+    );
+  }
+  if (activeZone === 'dea') {
+    previewMap.easeTo({
+      center: [-6.8, 54.6],
+      zoom: activeZone === 'dea' ? 7 : 6.5,
+      duration: 0
+    });
+    return;
+  }
+  
+  if (activeZone === 'lgd') {
+    previewMap.easeTo({
+      center: [-6.85, 54.6],
+      zoom: activeZone === 'lgd' ? 6.7 : 6.7,
+      duration: 0
+    });
+    return;
+  }
+}
 
   // Build a lightweight search index
 
@@ -2453,7 +2783,8 @@ if (radiusInput) {
     // wire once (no nesting)
     buildBtn?.addEventListener("click", () => {
       showProfileView();
-
+      previewMap.resize();
+      updateSummaryPreview();
       // Add history entry
       history.pushState({ view: "profile" }, "", "#profile");
     });
@@ -2633,7 +2964,7 @@ map.on('load', () => {
 
   async function updateSourceLink() {
     const zoneType = window.selectedZoneType || 'sdz';
-    const selectedLabels = window.chosenCategories || ['Age (4 Categories)', 'Sex Label'];
+    const selectedLabels = window.chosenCategories || ['Age (4 Categories)', 'Sex'];
     const response = await fetch('category_lookup.json');
     const lookup = await response.json();
 
@@ -2661,6 +2992,8 @@ map.on('load', () => {
       window.urllabel = label;
       window.urlsource = source;
 
+      console.log("categoryCode", categoryCode)
+      
       if (source === "Flexible Table Builder" && categoryCode) {
         if (zoneType === "dz" || zoneType === "sdz") {
                 fullUrl = `https://build.nisra.gov.uk/en/custom/data?d=PEOPLE&v=${zoneType}21&v=${categoryCode}`;
@@ -2672,15 +3005,48 @@ map.on('load', () => {
           fullUrl = "https://data.nisra.gov.uk/table/BSDZ";
         } else if (label === "Benefits Statistics" && zoneType === "sdz") {
           fullUrl = "https://data.nisra.gov.uk/table/BSSDZ";
+        } else if (label === "Benefits Statistics" && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/BSDEA";
+        } else if (label === "Benefits Statistics" && zoneType === "lgd") {
+          fullUrl = "https://data.nisra.gov.uk/table/BSLGD";
         } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "sdz") {
           fullUrl = "https://data.nisra.gov.uk/table/MYE01T012";
+        } else if (label === "All crimes recorded by the police" && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/PRCDEA";
+        } else if (label === "All crimes recorded by the police" && zoneType === "lgd") {
+            fullUrl = "https://data.nisra.gov.uk/table/PRCLGD";
+        } else if (label === "Number of businesses" && zoneType === "dea") {
+            fullUrl = "https://data.nisra.gov.uk/table/BUSINESSBIGDEA";
+        } else if (label === "Number of businesses" && zoneType === "lgd") {
+            fullUrl = "https://data.nisra.gov.uk/table/BUSINESSBIGLGD";
+        } else if (label === "Employee Jobs" && zoneType === "dea") {
+            fullUrl = "https://data.nisra.gov.uk/table/EJOBSDEA";
+        } else if (label === "Employee Jobs" && zoneType === "lgd") {
+            fullUrl = "https://data.nisra.gov.uk/table/EJOBSLGD";
+        } else if (label === "School census - post-primary" && zoneType === "lgd") {
+            fullUrl = "https://data.nisra.gov.uk/table/DESCPPLGD";
+        } else if (label === "School census - post-primary" && zoneType === "dea") {
+            fullUrl = "https://data.nisra.gov.uk/table/DESCPPDEA";
+        } else if (label === "School census - primary" && zoneType === "dea") {
+            fullUrl = "https://data.nisra.gov.uk/table/DESCPDEA";
+        } else if (label === "School census - primary" && zoneType === "lgd") {
+            fullUrl = "https://data.nisra.gov.uk/table/DESCPLGD";
+        } else if (label === "School census - special schools" && zoneType === "dea") {
+            fullUrl = "https://data.nisra.gov.uk/table/DESCSDEA";
+        } else if (label === "School census - special schools" && zoneType === "lgd") {
+            fullUrl = "https://data.nisra.gov.uk/table/DESCSLGD";
+        } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/MYE01T010";
+        } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "lgd") {
+          if (categoryCode) fullUrl = `https://data.nisra.gov.uk/table/${categoryCode}`;
         }
       }
       
       if (fullUrl) {
         const wrapper = document.createElement('div');
         const zoneTypeText = zoneType === 'sdz' ? 'Super Data Zone' : 'Data Zone';
-        const labelText = document.createTextNode(`${label} by ${zoneTypeText}: `);
+        const displayLabel = label === 'Sex Label' ? 'Sex' : label;
+        const labelText = document.createTextNode(`${displayLabel} by ${zoneTypeText}: `);
         const link = document.createElement('a');
         link.href = fullUrl;
         link.textContent = fullUrl;
@@ -2832,6 +3198,7 @@ map.on('load', () => {
     ensureSummaryHero();
 
     updateTables([]);
+    
   });
 
   // Function to hide categories not present in the data
@@ -2848,6 +3215,8 @@ map.on('load', () => {
         checkbox.checked = window.chosenCategories?.includes(checkbox.value);
       }
     });
+
+    markEmptyCategoryGroups();
   }
 
   /**
@@ -2935,19 +3304,19 @@ map.on('load', () => {
             feature.properties?.LGD2014NAME ||
             feature.properties?.lgd_name;
 
-          // ✅ Store NAME for data (this fixes your population issue)
+          // ✅ Store NAME for data 
           if (lgdName) {
             selectedIds.add(lgdName);
           } else {
             console.warn('⚠️ LGD name not found on feature');
-            // selectedIds.add(lookupCode); // fallback (optional)
+            // selectedIds.add(lookupCode); 
             selectedIds.add(feature.properties.LGDNAME);
           }
 
-          // ✅ Keep mapping (optional but useful)
+          // Keep mapping 
           lgdNameToId.set(lgdName, featureId);
 
-          // ✅ Highlight using feature ID (this fixes your map issue)
+          // Highlight using feature ID 
           map.setFeatureState(
             { source, sourceLayer, id: featureId },
             { hovered: true }
@@ -3043,18 +3412,19 @@ map.on('load', () => {
     });
 
     latestAggregatedData = aggregatedData;
-
+console.log("latestAggregatedData", latestAggregatedData)
     window.latestAggregatedData = aggregatedData;
     window.chosenCategories = selectedCategories;
 
     document.querySelectorAll(".total-population").forEach(elem => {
       elem.textContent = totalPopulation.toLocaleString();
     });
+    togglePopulationInfoButtons();
     renderZoneBreakdownTable(selectedIdsArray);
 
     const availableKeys = Object.keys(aggregatedData);
     const validCategories = selectedCategories.filter(cat => availableKeys.includes(cat));
-
+console.log("availableKeys", availableKeys);
     updateCategorySelector(availableKeys);
     updateSourceLink();
 
@@ -3469,11 +3839,44 @@ map.on('load', () => {
   let labelToCode = {};
   let labelToSource = {};
   let labelToYear = {};
+  let categoryLookupCache = null;
 
+  async function fetchCategoryLookup() {
+    if (categoryLookupCache) return categoryLookupCache;
+
+    const response = await fetch('category_lookup.json');
+    if (!response.ok) {
+      throw new Error(`Failed to load category lookup: ${response.status}`);
+    }
+
+    categoryLookupCache = await response.json();
+    return categoryLookupCache;
+  }
+
+  async function getCategoryYearByName(categoryName) {
+    const lookup = await fetchCategoryLookup();
+    const match = lookup.find(item => item.nested_list_names === categoryName);
+    return match ? match.Year : null;
+  }
+
+  // Convenience helper for the Data Portal "Sex (MYE)" block in category_lookup.json
+  async function getSexMyeYear() {
+    return getCategoryYearByName('Sex (MYE)');
+  }
+
+  window.getCategoryYearByName = getCategoryYearByName;
+  window.getSexMyeYear = getSexMyeYear;
+  console.log('Category lookup functions are now available on window: getCategoryYearByName, getSexMyeYear');
+  getSexMyeYear()
+    .then((year) => {
+      console.log('getSexMyeYear() returned:', year);
+    })
+    .catch((error) => {
+      console.error('getSexMyeYear() failed:', error);
+    });
 
   async function loadLookupData() {
-    const response = await fetch('category_lookup.json');
-    const lookup = await response.json();
+    const lookup = await fetchCategoryLookup();
 
     lookup.forEach(item => {
       labelToCode[item.nested_list_names] = item.further_breakdown_df;
@@ -3487,6 +3890,7 @@ map.on('load', () => {
   }
 
   loadLookupData().then(() => {
+    applyMidYearEstimateTooltipFromLookup();
     renderAggregatedCharts(latestAggregatedData, selectedCategories);
   });
 
@@ -3508,6 +3912,34 @@ map.on('load', () => {
         return "https://data.nisra.gov.uk/table/BSSDZ";
       } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "sdz") {
         return "https://data.nisra.gov.uk/table/MYE01T012";
+      } else if (label === "All crimes recorded by the police" && zoneType === "dea") {
+          return "https://data.nisra.gov.uk/table/PRCDEA";
+      } else if (label === "All crimes recorded by the police" && zoneType === "lgd") {
+          return "https://data.nisra.gov.uk/table/PRCLGD";
+      } else if (label === "Number of businesses" && zoneType === "dea") {
+          return "https://data.nisra.gov.uk/table/BUSINESSBIGDEA";
+      } else if (label === "Number of businesses" && zoneType === "lgd") {
+          return "https://data.nisra.gov.uk/table/BUSINESSBIGLGD";
+      } else if (label === "Employee Jobs" && zoneType === "dea") {
+          return "https://data.nisra.gov.uk/table/EJOBSDEA";
+      } else if (label === "Employee Jobs" && zoneType === "lgd") {
+          return "https://data.nisra.gov.uk/table/EJOBSLGD";
+      } else if (label === "School census - post-primary" && zoneType === "lgd") {
+          return "https://data.nisra.gov.uk/table/DESCPPLGD";
+      } else if (label === "School census - post-primary" && zoneType === "dea") {
+          return "https://data.nisra.gov.uk/table/DESCPPDEA";
+      } else if (label === "School census - primary" && zoneType === "dea") {
+          return "https://data.nisra.gov.uk/table/DESCPDEA";
+      } else if (label === "School census - primary" && zoneType === "lgd") {
+          return "https://data.nisra.gov.uk/table/DESCPLGD";
+      } else if (label === "School census - special schools" && zoneType === "dea") {
+          return "https://data.nisra.gov.uk/table/DESCSDEA";
+      } else if (label === "School census - special schools" && zoneType === "lgd") {
+          return "https://data.nisra.gov.uk/table/DESCSLGD";
+      } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "dea") {
+        return "https://data.nisra.gov.uk/table/MYE01T010";
+      } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "lgd") {
+        return "https://data.nisra.gov.uk/table/MYE01T02";
       }
     }
     return null;
@@ -3935,8 +4367,42 @@ map.on('load', () => {
     }
 
     selectedIds.clear();
+
+    if (previewMap) {
+      const { source, sourceLayer } = getZoneIdsFor(currentZoneType);
+
+      previewSelectedIds.forEach(id => {
+        try {
+          const featureId =
+            currentZoneType === 'lgd'
+              ? (lgdNameToId.get(id) || id)
+              : id;
+
+          previewMap.setFeatureState(
+            {
+              source,
+              sourceLayer,
+              id: featureId
+            },
+            {
+              hovered: false
+            }
+          );
+        } catch {}
+          });
+
+        previewSelectedIds.clear();
+
+        previewMap.easeTo({
+          center: [-6.8, 54.65],
+          zoom: 7.5,
+          duration: 0
+        });
+      }
+
     lgdNameToId.clear();
     selectedLGDs.clear();
+    
     // Reset LGD checkboxes
     document.querySelectorAll('#lgd-buttons input[type="checkbox"]').forEach(cb => {
       cb.checked = false;
@@ -3966,6 +4432,7 @@ map.on('load', () => {
     document.querySelectorAll(".total-population").forEach(elem => {
       elem.textContent = "0";
     });
+    togglePopulationInfoButtons();
 
     const center = map.getCenter();
     const zoom = map.getZoom();
@@ -4795,6 +5262,7 @@ function downloadSummaryImage() {
     }
   }
   const cloneWrapper = document.createElement('div');
+  cloneWrapper.className = 'export-clone-root';
   cloneWrapper.style.background = '#fff';
   cloneWrapper.style.padding = '20px';
   cloneWrapper.style.fontFamily = 'sans-serif';
@@ -4832,6 +5300,12 @@ function downloadSummaryImage() {
   // Hide info buttons in exported image
   cloneWrapper.querySelectorAll('.expand-toggle').forEach(btn => {
     btn.style.display = 'none';
+  });
+  cloneWrapper.querySelectorAll('.population-info-btn').forEach(btn => {
+    btn.style.display = 'none';
+  });
+  cloneWrapper.querySelectorAll('.population-info-text').forEach(text => {
+    text.style.display = 'none';
   });
 
   // Fix canvases in both cloned sections
@@ -5364,7 +5838,7 @@ async function saveBlobWithPicker(blob, suggestedName) {
         suggestedName,
         types: [
           {
-            description: 'File',
+            description: 'PNG',
             accept: {
               [blob.type]: ['.' + suggestedName.split('.').pop()]
             }
@@ -5405,19 +5879,21 @@ function markEmptyCategoryGroups() {
     const content = group.querySelector('.group-content');
     if (!content) return;
 
-    // Check for indicator checkboxes
-    const hasIndicators = content.querySelectorAll(
-      'input[type="checkbox"]'
-    ).length > 0;
+    const visibleIndicators = content.querySelectorAll(
+      'label:not([style*="display: none"]) input[type="checkbox"]'
+    );
 
-    if (!hasIndicators) {
-      // Prevent duplicate messages
-      if (!content.querySelector('.no-indicators')) {
+    const existingMsg = content.querySelector('.no-indicators');
+
+    if (visibleIndicators.length === 0) {
+      if (!existingMsg) {
         const msg = document.createElement('div');
         msg.className = 'no-indicators';
         msg.textContent = 'No Indicators available for this theme';
         content.appendChild(msg);
       }
+    } else if (existingMsg) {
+      existingMsg.remove();
     }
   });
 }

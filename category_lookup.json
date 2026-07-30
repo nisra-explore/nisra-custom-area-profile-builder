@@ -154,5 +154,37 @@
     "further_breakdown_df": "MYE01T012",
     "Source": "Data Portal",
     "Year": 2024
+  },
+  {
+    "nested_list_names": "All crimes recorded by the police",
+    "further_breakdown_df": "PRC",
+    "Source": "Data Portal"
+  },
+  {
+    "nested_list_names": "Number of businesses",
+    "further_breakdown_df": "BUSINESSBIG",
+    "Source": "Data Portal",
+    "Year": 2023
+  },
+  {
+    "nested_list_names": "Employee Jobs",
+    "further_breakdown_df": "EJOBS",
+    "Source": "Data Portal",
+    "Year": 2019
+  },
+  {
+    "nested_list_names": "School census - special schools",
+    "further_breakdown_df": "DESCS",
+    "Source": "Data Portal"
+  },
+  {
+    "nested_list_names": "School census - primary",
+    "further_breakdown_df": "DESCP",
+    "Source": "Data Portal"
+  },
+  {
+    "nested_list_names": "School census - post-primary",
+    "further_breakdown_df": "DESCPP",
+    "Source": "Data Portal"
   }
 ]

@@ -64,8 +64,20 @@
             </div>
 
             <div class="col-md-6 text-center">
-              <img src="img/landing2.png" alt="Profile Builder Illustration" class="img-fluid" style="max-width: 90%;">
+
+              <!-- Desktop -->
+              <img src="img/landing2.png" alt="Profile Builder Illustration"
+                  class="img-fluid d-none d-md-inline"
+                  style="max-width: 90%;">
+
+              <!-- Mobile -->
+              <img src="img/mobileLanding.png" alt="Profile Builder Illustration"
+                  class="img-fluid d-inline d-md-none"
+                  style="max-width: 90%;">
+
             </div>
+
+
           </div>
         </div>
       </div>
@@ -107,7 +119,7 @@
                     <li><strong>Chart view</strong> - A chart for each statistic, broken down by its sub-categories</li>
                     <li><strong>Table view</strong> - A table for each statistic, broken down by its sub-categories</li>
                   </ul>
-                  <p class="card-text">All views include comparison to <strong>Northern Ireland (NI)</strong> as a default. An .xlsx <b>download</b> of the table data is available as is a snapshot image of any view of your area profile.</p>
+                  <p class="card-text">All views include comparison to <strong>Northern Ireland (NI)</strong> as a default. An .xlsx <b>download</b> of the table data is available as is a snapshot image of your area profile.</p>
                 </div>
               </div>
             </div>
@@ -169,6 +181,23 @@
                 </div>
               </div>
 
+                            <!-- LGD panel -->
+                            <div class="card">
+                              <div class="card-header" id="headingLGD">
+                                <h3 class="mb-0">
+                                  <button class="daera-btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                                    data-target="#collapseLGD" aria-expanded="false" aria-controls="collapseLGD">
+                                    Local Government District (LGD)
+                                  </button>
+                                </h3>
+                              </div>
+                              <div id="collapseLGD" class="collapse" aria-labelledby="headingLGD" data-parent="#zoneDatasetAccordion">
+                                <div class="card-body" id="dataset-lgd-container">
+                                  <p>Loading LGD datasets...</p>
+                                </div>
+                              </div>
+                            </div>
+
 
             </div>
           </div>
@@ -195,24 +224,49 @@
                     <li><strong>Individual area selector (left panel):</strong> Enables users to select individual areas for profile generation.</li>
                     <li><strong>Radius selector (left panel):</strong> Enables users to group zones within a defined radius from a selected central position. Default radius is 2 km.</li>
                     <li><strong>Postcode search (left panel):</strong> Allows users to search for specific areas by postcode. To find out more about the postcode area use <a href="https://explore.nisra.gov.uk/postcode-search/" target="_blank">postcode finder</a></li>
-                    <li><strong>Go to Area Profile button:</strong> Generates a starter profile for the selected zones and transitions to the output view.</li>
+                    <li><strong>Go to area profile button:</strong> Generates a starter profile for the selected zones and transitions to the output view.</li>
                     <li><strong>Selection by LGD</strong> Using the Local Government Districts (LGD) selector will provide an overlay of the selected district.</li>
                   </ul>
                </div>
 
                 <!-- RIGHT: IMAGE -->
                 <div class="col-md-5 text-center">
-                  <img src="img/sidebar.png" alt="Map interface sidebar controls" class="img-fluid" style="max-height: 350px;">
+
+                  <!-- Desktop -->
+                  <img src="img/sidebar2.png"
+                      alt="Map interface sidebar controls"
+                      class="img-fluid d-none d-md-inline"
+                      style="max-height: 350px;">
+
+                  <!-- Mobile -->
+                   <img src="img/mobileViewSidebar.png"
+                      alt="Map interface sidebar controls"
+                      class="img-fluid d-inline d-md-none"
+                      style="max-height: 350px;">
+
                 </div>
 
               </div>
+
+              <!-- Mobile-only burger menu guidance -->
+              <div class="d-block d-md-none mb-3 ">
+                <p>
+                  <strong>Hide the sidebar:</strong> On mobile devices, you can hide the sidebar by pressing the burger menu button shown below.
+                </p>
+
+                <img src="img/mobileViewBurger.png"
+                    alt="Burger menu button"
+                    class="img-fluid d-block mx-auto"
+                    style="max-width: 150px;">
+              </div>
+
 
               <!-- Second image -->
 
               <div class="row align-items-center mt-4">
                 
-                <!-- LEFT: TEXT -->
-                <div class="col-md-7">
+                  <!-- LEFT: TEXT -- PC VERSION -->
+                <div class="d-none d-md-block">
                   <ul>
                     <li><strong>Map controls:</strong>
                       <ul>
@@ -221,14 +275,34 @@
                         <li>Zoom in and out using the arrow keys. Zoom level is indicated by a percentage.</li>
                       </ul>
                     </li>
-                    
                   </ul>
-               </div>
-
-                <!-- RIGHT: IMAGE -->
-                <div class="col-md-5 text-center">
-                  <img src="img/mapcontrols.png" alt="Map interface sidebar controls" class="img-fluid" style="max-height: 350px;">
                 </div>
+
+                <!-- LEFT: TEXT -- MOBILE VERSION -->
+                <div class="d-block d-md-none">
+                  <ul>
+                    <li><strong>Map controls:</strong>
+                      <ul>
+                        <li>Clear all current selections.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+
+                  <!-- RIGHT: IMAGE -->
+                  <!-- Desktop -->
+                  <img src="img/mapcontrols.png"
+                      alt="Map interface sidebar controls"
+                      class="img-fluid d-none d-md-inline"
+                      style="max-height: 350px;">
+
+                  <!-- Mobile -->
+                   <img src="img/ClearSelectionsOnly.png"
+                      alt="Map interface sidebar controls"
+                      class="img-fluid d-block d-md-none mx-auto"
+                      style="max-height: 350px;">
+
+                
 
               </div>
 
@@ -237,20 +311,53 @@
                 
                 <!-- LEFT: TEXT -->
                 <div class="col-md-7">
-                  <h4 class="mt-4">2. Profile Outputs and Data Views</h4>
-                  <p>Upon generating a profile, users are presented with a range of configurable views and controls:</p>
-                  <ul>
-                        <li><strong>Dataset selector (left panel):</strong> Enables filtering by domain, including Demography, Education, Economy, and Health.</li>
-                        <li>Tick or untick the selection of datasets. <strong></strong>Reset selections</strong> to clear all ticks</li>
-                      </ul>
-                    </li>
-                    
-                  </ul>
-               </div>
+
+                  <!-- Desktop version -->
+                  <div class="d-none d-md-block">
+                    <h4 class="mt-4">2. Profile Outputs and Data Views</h4>
+                    <p>Upon generating a profile, users are presented with a range of configurable views and controls:</p>
+
+                    <ul>
+                      <li>
+                        <strong>Dataset selector (left panel):</strong>
+                        Enables filtering by domain, including Demography, Education, Economy, and Health.
+                      </li>
+                      <li>
+                        Tick or untick the selection of datasets.
+                        <strong>Reset selections</strong> to clear all ticks.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Mobile version -->
+                  <div class="d-block d-md-none">
+                    <h4 class="mt-4">2. Profile Outputs and Data Views</h4>
+                    <p>Upon generating a profile, users can configure views and controls:</p>
+
+                    <ul>
+                      <li>
+                        <strong>Dataset selector (click the burger button beside "Create your area profile"):</strong>
+                        Enables filtering by domain, including Demography, Education, Economy, and Health.
+                      </li>
+                    </ul>
+
+                    <img src="img/mobileAreaProfileMenu.png"
+                        alt="Mobile area profile menu"
+                        class="img-fluid d-block mx-auto my-3"
+                        style="max-width: 250px;">
+                    <ul>
+                        <li>
+                        Tick or untick the selection of datasets.
+                        <strong>Reset selections</strong> to clear all ticks.
+                        </li>
+                    </ul>
+                  </div>
+
+                </div>
 
                 <!-- RIGHT: IMAGE -->
                 <div class="col-md-5 text-center">
-                  <img src="img/selections.png" alt="Statistic selections" class="img-fluid" style="max-height: 400px;">
+                  <img src="img/selections2.png" alt="Statistic selections" class="img-fluid" style="max-height: 400px;">
                 </div>
 
               </div>
@@ -295,7 +402,7 @@
 
                 <!-- RIGHT: IMAGE -->
                 <div class="col-md-5 text-center">
-                  <img src="img/download.png" alt="Download options" class="img-fluid" style="max-height: 400px;">
+                  <img src="img/download2.png" alt="Download options" class="img-fluid" style="max-height: 400px;">
                 </div>
               </div>
 
@@ -400,7 +507,8 @@ async function loadDatasetButtons(containerId, zoneType) {
     const ftbGeoCodeByZoneType = {
       sdz: 'SDZ21',
       dz:  'DZ21',
-      dea: 'DEA14'
+      dea: 'DEA14',
+      lgd: 'LGD21'
     };
 
     const ftbGeo = ftbGeoCodeByZoneType[zoneType];
@@ -424,10 +532,15 @@ async function loadDatasetButtons(containerId, zoneType) {
           fullUrl = "https://data.nisra.gov.uk/table/BSSDZ";
         } else if (normLbl === "benefits statistics" && zoneType === "dea") {
           fullUrl = "https://data.nisra.gov.uk/table/BSDEA";
+        } else if (normLbl === "benefits statistics" && zoneType === "lgd") {
+          fullUrl = "https://data.nisra.gov.uk/table/BSLGD";
         } else if ((normLbl === "age (mye)" || normLbl === "sex (mye)") && zoneType === "sdz") {
           fullUrl = "https://data.nisra.gov.uk/table/MYE01T012";
         } else if ((normLbl === "age (mye)" || normLbl === "sex (mye)") && zoneType === "dea") {
           fullUrl = "https://data.nisra.gov.uk/table/MYE01T010";
+        } else if ((normLbl === "age (mye)" || normLbl === "sex (mye)") && zoneType === "lgd") {
+          // use the code from the lookup where available
+          if (code) fullUrl = `https://data.nisra.gov.uk/table/${code}`;
         }
       }
 
@@ -452,6 +565,7 @@ async function loadDatasetButtons(containerId, zoneType) {
         loadDatasetButtons('dataset-sdz-container', 'sdz');
         loadDatasetButtons('dataset-dz-container', 'dz');
         loadDatasetButtons('dataset-dea-container', 'dea');
+        loadDatasetButtons('dataset-lgd-container', 'lgd');
       });
     </script>
 
