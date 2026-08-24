@@ -23,6 +23,7 @@
     <link href="https://unpkg.com/maplibre-gl@v1.15.x/dist/maplibre-gl.css" rel="stylesheet" />
     <link rel ="stylesheet" href ="style.css">
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="icon" href="img/icon/favicon.ico" type="image/vnd.microsoft.icon" />
     <link rel="icon" type="image/png" href="img/icon/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="img/icon/favicon.svg" />
@@ -51,9 +52,9 @@
         </div>
         
         <div id="top-menu" >
-        <div class="d-flex align-items-center justify-content-between w-100 py-3 px-2">
+        <div class="d-flex align-items-center justify-content-between w-100 py-3 top-header-row">
           <!-- Logo (left) -->
-          <a class="navbar-brand ps-2 d-flex align-items-center" href="./">
+          <a class="navbar-brand d-flex align-items-center" href="https://www.nisra.gov.uk/">
             <img src="img/nisra-only-white.svg" alt="NISRA homepage" height="60" class="me-3">
           </a>
 
@@ -65,7 +66,7 @@
     </nav>
 
       <!-- <hr style="border-top: 4px solid #3878c5; margin: 0"> -->
-      <hr style="border-top: 4px solid #68a41e; margin: 0">
+      <hr style="border-top: 10px solid #68a41e; margin: 0">
 
       <div id="main">
 
@@ -124,14 +125,14 @@
                               class="postcode-input-small"
                               maxlength="8"
                             >
-
-                            <button 
-                              id="postcode-search-btn" 
+                            <button
+                              id="postcode-search-btn"
                               class="postcode-search-btn-small"
                               type="button"
+                              aria-label="Search postcode"
                             >
-                              Search
-                            </button>
+                              <i class="bi bi-search"></i>
+                            </button>  
                           </div>
                         </div>
 
@@ -160,7 +161,7 @@
                       <button id="lgd-toggle-btn" class="lgd-section-toggle" aria-expanded="false" aria-controls="lgd-buttons-container">
                         <h5 style="margin-bottom: 0; font-weight: bold; display: flex; align-items: center; gap: 8px; color: inherit;">
                           Or select by Local Government District:
-                          <span class="lgd-toggle-icon">▶</span>
+                          <span class="lgd-toggle-icon"></span>
                         </h5>
                       </button>
                       <div id="lgd-buttons-container" class="lgd-buttons-container" style="display: none;">
@@ -170,9 +171,29 @@
                   </div>
 
                   <div class="cntrl-button-wrapper rail-card">
-                    <!-- <h4>Map Controls</h4> -->
-           
-                    <button id="clear-selection-btn" class="uicon-btn with-text" data-action="clear" aria-label="Clear selections" title="Clear selections">
+
+    <label
+        for="import-selections-input"
+        id="import-selections-btn"
+        class="uicon-btn with-text"
+        title="Import selections">
+
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 21V5" />
+          <path d="M7 10L12 5L17 10" />
+          <path d="M4 21H20" />
+        </svg>
+
+        <span>Import selections</span>
+    </label>
+
+    <input
+        id="import-selections-input"
+        type="file"
+        accept="application/json"
+        style="display:none">
+
+    <button id="clear-selection-btn" class="uicon-btn with-text" data-action="clear" aria-label="Clear selections" title="Clear selections">
                       <!-- Eraser / clear icon -->
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M3.5 14.5 13.6 4.4a3 3 0 0 1 4.24 0l2.76 2.76a3 3 0 0 1 0 4.24L10.99 21H7.4a3 3 0 0 1-2.12-.88l-1.78-1.78a3 3 0 0 1 0-4.24Z"/>
@@ -180,8 +201,7 @@
                       </svg>
                       <span>Clear selections</span>
                     </button>
-
-                    <button id="resetZoomBtn" class="uicon-btn with-text" data-action="reset-zoom" aria-label="Reset map zoom" title="Reset map zoom">
+<button id="resetZoomBtn" class="uicon-btn with-text" data-action="reset-zoom" aria-label="Reset map zoom" title="Reset map zoom">
                       <!-- Font Awesome 'fa-globe' Regular-style icon -->
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <!-- Outer circle -->
@@ -197,6 +217,7 @@
                     </button>
                   </div>
 
+        
                     <div id="zoom-level">
                     Zoom: 7.5
                     </div>
@@ -254,7 +275,7 @@
                     <form id="category-form">
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">People and communities ▼</button>
+                        <button type="button" class="group-toggle expanded">People and communities</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="Age (4 Categories)" checked> Age (4 categories)</label>
                           <label><input type="checkbox" value="Age (7 Categories)"> Age (7 categories)</label>
@@ -273,7 +294,7 @@
                       </div>
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Education and skills ▼</button>
+                        <button type="button" class="group-toggle">Education and skills</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="School census - primary"> School census - primary (sex)</label> 
                           <label><input type="checkbox" value="School census - post-primary"> School census - post-primary (sex)</label> 
@@ -285,7 +306,7 @@
                       </div>
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Work, pay and benefits ▼</button>
+                        <button type="button" class="group-toggle">Work, pay and benefits</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="Economic Activity"> Economic activity</label>
                           <label><input type="checkbox" value="Place of Work Method of Travel"> Place of work (method of travel)</label> 
@@ -296,7 +317,7 @@
                       </div>
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Health and social care ▼</button>
+                        <button type="button" class="group-toggle">Health and social care</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="Health Condition Emotional or Mental Health Label"> Emotional or mental health condition</label>
                           <label><input type="checkbox" value="Health Problem or Disability Long term Label"> Health problem or disability (long-term)</label>
@@ -306,7 +327,7 @@
                       </div>
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Transport, environment and climate change ▼</button>
+                        <button type="button" class="group-toggle">Transport, environment and climate change</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="Household Car or Van Availability"> Household car or van availability</label>
                           <label><input type="checkbox" value="Household Renewable Energy Systems Label"> Household renewable energy systems</label>                          
@@ -314,14 +335,14 @@
                       </div>
 
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Business, economy and trade ▼</button>
+                        <button type="button" class="group-toggle">Business, economy and trade</button>
                         <div class="group-content"> 
                           <label><input type="checkbox" value="Number of businesses"> Number of businesses</label> 
                           <label><input type="checkbox" value="Employee Jobs"> Employee Jobs</label>                           
                         </div>
                       </div>
                       <div class="category-group">
-                        <button type="button" class="group-toggle">Crime and justice ▼</button>
+                        <button type="button" class="group-toggle">Crime and justice</button>
                         <div class="group-content">
                           <label><input type="checkbox" value="All crimes recorded by the police"> All crimes recorded by the police</label> 
                         </div>
@@ -369,10 +390,30 @@
           Download
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
-          <li><button class="dropdown-item" onclick="downloadExcel()">data (in Excel format)</button></li>
-          <li><button class="dropdown-item" onclick="downloadSummaryImage()">chart (as image)</button></li>
+          <li><button class="dropdown-item" onclick="downloadExcel()">Your profile tables (in Excel format)</button></li>
+          <li><button class="dropdown-item" onclick="downloadSummaryImage()">Your profile charts (as a PNG image)</button></li>
+          <li><button class="dropdown-item" onclick="downloadSummaryPDF()">Your profile charts (as a PDF file)</button></li>
         </ul>
       </div>
+          
+          <!-- Export / Import selections -->
+          <div class="btn-group ml-2">
+            <button id="export-selections-btn" class="nav-button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <g transform="translate(-5 0)">
+
+                    <path d="M12 3v12"></path>
+                    <path d="M7 10l5 5 5-5"></path>
+                    <path d="M4 21h16"></path>
+                                    </g>
+                </svg>
+
+                
+
+                Export selections
+            </button>
+        </div>
+        
     </div>
   </div>
 
@@ -383,13 +424,14 @@
 
 </div>
 
-  <div id="breakdown-container" class="row g-3">
+  <div id="breakdown-container">
 
-  <div id="summary-hero" class="summary-flex">
+  <div id="summary-hero">
+  <div class="summary-column">
   <div class="summary-top">
     <div class="summary-box">
       <div class="summary-content">
-          <h2 style="font-size: 18px;">Summary of areas selected:</h2>
+          <h2 id="summaryTitle" style="font-size: 18px;"></h2>
           <ul id="summaryList"></ul>
         </div>
     </div>
@@ -414,9 +456,10 @@
       </div>
     </div>
   </div>
+  </div>
 
   <div id="summary-map-panel">
-    <div id="summary-map"></div>
+    <div id="summary-map" tabindex="-1"></div>
   </div>
 
 </div>
@@ -481,8 +524,8 @@
             <h3 style="margin-top: 20px;">Further Information</h3>
             <p style="margin-bottom: 10px;">
               Different breakdowns of the selected datasets are available in most cases. Below are the links to where those currently selected were sourced:<br>
-              <div id="sourceId" class="source_name"></div>
             </p>
+            <div id="sourceId" class="source_name"></div>
 
             <h3 style="margin-top: 20px;">Note on custom area aggregations</h3>
             <p style="margin-bottom: 10px;">
@@ -589,9 +632,10 @@
     <script src="https://unpkg.com/maplibre-gl@v1.15.x/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@v1.15.x/dist/maplibre-gl.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-    <script src="custom.js"></script>
+    <script src="custom.js?v=20260731"></script>
     <script type="module" src="scripts/cookies_script.js"></script>
     
   </body>

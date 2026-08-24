@@ -15,6 +15,22 @@ body {
   font-weight: 400;
 }
 
+:root {
+  --edge-gap: 18px;
+  --rail-width: clamp(180px, 22vw, 220px);
+}
+
+/* keep map values in sync */
+#map-wrapper {
+  --rail-width: var(--rail-width);
+}
+
+/* new class on the top header row */
+.top-header-row {
+  padding-left: var(--edge-gap) !important;
+  padding-right: var(--edge-gap) !important;
+}
+
 /* ========== ACCESSIBILITY IMPROVEMENTS ========== */
 /* Ensure all interactive elements are focusable and visible when focused */
 
@@ -28,28 +44,21 @@ body {
 
 /* Keyboard navigation highlight for draw toolbar buttons */
 .icon-btn:focus-visible {
-  outline: 3px solid #3878c5;
-  outline-offset: 2px;
-}
-
-.uicon-btn:focus,
-.uicon-btn:focus-visible {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
 .nav-button:focus,
 .nav-button:focus-visible {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
 /* Ensure contenteditable elements show focus */
 [contenteditable]:focus {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
-/* ========== END ACCESSIBILITY IMPROVEMENTS ========== */
 
 button {
   padding: 10px 20px;
@@ -117,12 +126,12 @@ a:hover {
 }
 
 button:focus {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
 button:focus-visible {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
@@ -180,21 +189,21 @@ select {
 
 select:focus,
 select:focus-visible {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
 input[type="text"]:focus,
 input[type="text"]:focus-visible,
 input[type="search"]:focus-visible {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
-  border-color: #3878c5;
+  border-color: #D4351C;
 }
 
 a:focus,
 a:focus-visible {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
@@ -205,7 +214,7 @@ a:focus-visible {
 }
 
 .survey-link-wrap:focus-within {
-  outline: 3px solid #f8f8f8;
+  outline: 2px solid #D4351C;
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -254,7 +263,7 @@ input[type=text] {
 .btn:focus-visible {
   background-color: #00205B;
   color: #fff;
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
@@ -435,7 +444,7 @@ input[type=text] {
 }
 
 #category-selector h3 {
-  background-color: #0d2c6c;
+  background-color: #3878c5;
   color: white;
   padding: 0.5rem 1rem;
   margin: -1rem -1rem 1rem -1rem;
@@ -507,7 +516,7 @@ input[type=text] {
 } */
 
 .lgd-section-toggle:focus {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -552,7 +561,7 @@ input[type=text] {
 }
 
 .lgd-btn:focus-visible {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
@@ -615,14 +624,14 @@ input[type=text] {
 }
 
 .group-toggle:focus {
-  box-shadow: inset 0 0 0 3px #3878c5;
-  outline: 3px solid #3878c5;
+  box-shadow: inset 0 0 0 3px #D4351C;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
 .group-toggle:focus-visible {
-  box-shadow: inset 0 0 0 3px #3878c5;
-  outline: 3px solid #3878c5;
+  box-shadow: inset 0 0 0 3px #D4351C;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
@@ -638,12 +647,12 @@ input[type=text] {
 }
 
 .group-content input[type="checkbox"]:focus {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
 .group-content input[type="checkbox"]:focus-visible {
-  outline: 3px solid #3878c5;
+  outline: 3px solid #D4351C;
   outline-offset: 2px;
 }
 
@@ -748,16 +757,23 @@ input[type=text] {
   color: #666;
 }
 
-.population-info-btn img {
-  width: 20px;
-  height: 20px;
+.population-info-icon-svg {
+  width: 16px;
+  height: 16px;
   display: block;
 }
 
 .population-info-btn:hover,
-.population-info-btn:focus-visible,
 .population-info-btn.is-active {
   outline: none;
+  opacity: 0.9;
+}
+
+.population-info-btn:focus,
+.population-info-btn:focus-visible {
+  outline: 3px solid #D4351C;
+  outline-offset: 2px;
+  border-radius: 4px;
   opacity: 0.9;
 }
 
@@ -810,6 +826,67 @@ input[type=text] {
   background-color: #0d2c6c;
   color: #fff;
   text-decoration: none;
+}
+
+/* Landing page dataset accordion: match profile group-toggle style */
+#zoneDatasetAccordion .card {
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#zoneDatasetAccordion .card-header {
+  padding: 0;
+  background: #fff;
+  border-bottom: 0;
+}
+
+#zoneDatasetAccordion .card-header .daera-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: #fff;
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: left;
+  text-decoration: none;
+}
+
+#zoneDatasetAccordion .card-header .daera-btn:hover {
+  background: #d0d0d0;
+  color: #111;
+  text-decoration: none;
+}
+
+#zoneDatasetAccordion .card-header .daera-btn:focus,
+#zoneDatasetAccordion .card-header .daera-btn:focus-visible {
+  box-shadow: inset 0 0 0 3px #D4351C;
+  outline: 3px solid #D4351C;
+  outline-offset: 2px;
+}
+
+#zoneDatasetAccordion .card-header .daera-btn::after {
+  content: "";
+  flex: 0 0 1rem;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.5rem;
+  background-repeat: no-repeat;
+  background-size: 1rem;
+  transition: transform 0.2s ease-in-out;
+  transform: rotate(0deg);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+#zoneDatasetAccordion .card-header .daera-btn:not(.collapsed)::after {
+  transform: rotate(180deg);
 }
 
 .profile-banner {
@@ -866,15 +943,29 @@ input[type=text] {
 }
 
 #sourceId a {
-  text-decoration: none;
-  color: #4ea8cc;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  color: #0f6fb8;
   font-weight: normal;
-  display: block;
+  display: inline-block;
 }
 
 #sourceId a:hover {
   text-decoration: underline;
-  color: #006dba;
+  color: #0f6fb8;
+}
+
+#sourceId a[target="_blank"]::after {
+  content: "";
+  width: 14px;
+  height: 11px;
+  margin: 0 0 0 5px;
+  vertical-align: text-top;
+  display: inline-block;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="11" viewBox="0 0 14 11"><g fill="none" stroke="%23000" stroke-width="1"><path d="M0 3h2V0h12v8h-2v3H0zm13-2H3v6h10zM2 4H1v4h1zm-1 6h10V8H1z"/></g></svg>') no-repeat center / contain;
+          mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="11" viewBox="0 0 14 11"><g fill="none" stroke="%23000" stroke-width="1"><path d="M0 3h2V0h12v8h-2v3H0zm13-2H3v6h10zM2 4H1v4h1zm-1 6h10V8H1z"/></g></svg>') no-repeat center / contain;
+  background-color: #0f6fb8;
 }
 
 /* keep a single copy of these */
@@ -947,6 +1038,12 @@ input[type=text] {
 .map-rail .nav-button {
   width: 100%;
   box-sizing: border-box;
+}
+
+#howto-rail-btn {
+  flex: 0 0 auto;
+  width: 120px;
+  margin-left: auto;
 }
 
 .map-rail .nav-button:hover { background-color: #072048; }
@@ -1462,6 +1559,14 @@ input[type=text] {
   background-color: #f1f1f1;
 }
 
+.profile-nav-buttons .dropdown-menu {
+  padding: 6px;
+}
+
+.profile-nav-buttons .dropdown-menu li + li {
+  margin-top: 6px;
+}
+
 .dropdown:hover .dropdown-menu {
   display: block;
 }
@@ -1644,7 +1749,7 @@ main a[target="_blank"]::after {
 }
 
 .uicon-btn svg {
-  width: 60%;
+  width: 100%;
   height: 60%;
   display: block;
   fill: none;
@@ -1712,13 +1817,14 @@ main a[target="_blank"]::after {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 6px;
 }
 
 #postcode-row .postcode-input-small {
-  width: 120px;   /* ✅ from your second rule */
-  height: 25px;
+  width: calc(11ch - 6px);
+  min-width: calc(11ch - 6px);
+  height: 35px;
   padding: 2px 6px;
   font-size: 12px;
   box-sizing: border-box;
@@ -1727,9 +1833,44 @@ main a[target="_blank"]::after {
   border: 1px solid #ccc;     /* optional: subtle border */
 }
 
+#postcode-row .postcode-input-small {
+height: 35px;
+border-radius: 4px;
+margin: 0;
+}
+
 #postcode-row .postcode-search-btn-small {
-  height: 30px;
+  height: 37px;
   padding: 0 10px;
+}
+
+#postcode-row .postcode-search-btn-small {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  border-radius: 4px;
+  background-color: #0d2c6c;
+  border: none;
+  color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#postcode-row .postcode-search-btn-small:hover,
+#postcode-row #postcode-search-btn:hover {
+  background-color: #0d2c6c;
+  color: #fff;
+}
+
+#postcode-row .postcode-search-btn-small:active,
+#postcode-row #postcode-search-btn:active {
+  background-color: #0d2c6c;
+  transform: scale(0.98);
 }
 
 
@@ -1774,7 +1915,7 @@ main a[target="_blank"]::after {
 
 .postcode-input:focus {
   outline: none;
-  border-color: #3878c5;
+  border-color: #D4351C;
   box-shadow: 0 0 5px rgba(56, 120, 197, 0.3);
 }
 
@@ -1952,7 +2093,8 @@ padding-left: 100px
 #info-icon:hover i,
 #info-icon:focus i {
   transform: scale(1.2);
-  color: #0056b3;
+  outline: 3px solid #D4351C;
+  outline-offset: 2px;
 }
 
 .popover {
@@ -2036,9 +2178,8 @@ padding-left: 100px
 
 .postcode-inline {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;  /* allows wrapping on small screens */
+  align-items: stretch;
+  gap: 0;
 }
 
 #radius-input {
@@ -2322,7 +2463,7 @@ body {
 
 #charts-container,
 #tables-container {
-  max-width: 98%;
+  max-width: 100%;
   overflow-x: auto;
 }
 canvas {
@@ -2458,7 +2599,7 @@ td, th {
   /* ===== Map UI positioning ===== */
   #howto-rail-btn {
     flex: 0 0 auto;
-    width: 90px;
+    width: 60px;
     margin-left: auto;
   }
 
@@ -2508,6 +2649,11 @@ td, th {
    ≤992px (tablet & below)
 ======================== */
 @media (max-width: 992px) {
+
+  :root {
+    --rail-width: clamp(160px, 28vw, 200px);
+  }
+
 
   /* ===== Map layout ===== */
   #map-wrapper {
@@ -2622,7 +2768,7 @@ td, th {
 @media (min-width: 992px) {
 
   #profile-content {
-    padding: 20px 40px;
+    padding: 20px 0;
     width: 100%;
   }
 
@@ -2894,7 +3040,7 @@ td, th {
   }
 
   #breakdown-container {
-    margin-left: -24px;
+    margin-left: 0;
     margin-right: 0;
   }
 }
@@ -2938,12 +3084,14 @@ td, th {
     justify-content: flex-end;
   }
 
-  .postcode-search-btn-small {
-    width: 100%;
+  #postcode-row .postcode-search-btn-small {
+    width: 40px;
   }
 
-  #postcode-input {
-    flex: 1 1 auto;
+  #postcode-row #postcode-input {
+    flex: 0 0 auto;
+    width: calc(11ch - 6px);
+    min-width: calc(11ch - 6px);
   }
 }
 
@@ -2966,6 +3114,44 @@ td, th {
   .coords-line-2::before {
     content: "";
   }
+}
+
+/* Requested button color updates */
+#pointerBtn,
+#circleSelectBtn,
+#build-profile-btn,
+#clear-selection-btn,
+#resetZoomBtn,
+#postcode-row .postcode-search-btn-small,
+#postcode-row #postcode-search-btn {
+  background-color: #732777 !important;
+  border-color: #732777 !important;
+  color: #fff !important;
+}
+
+#build-profile-btn::after {
+  background: #732777 !important;
+}
+
+#pointerBtn:hover,
+#circleSelectBtn:hover,
+#build-profile-btn:hover,
+#clear-selection-btn:hover,
+#resetZoomBtn:hover,
+#postcode-row .postcode-search-btn-small:hover,
+#postcode-row #postcode-search-btn:hover {
+  background-color: #6C757D !important;
+  border-color: #6C757D !important;
+  color: #fff !important;
+}
+
+#build-profile-btn:hover::after {
+  background: #6C757D !important;
+}
+
+#postcode-row .postcode-search-btn-small .bi-search,
+#postcode-row #postcode-search-btn .bi-search {
+  color: #fff !important;
 }
 
 @media (max-width: 380px) {
@@ -3141,3 +3327,234 @@ td, th {
     height: 100%;  
   }
 }
+
+
+.uicon-btn:focus,
+.uicon-btn:focus-visible {
+  outline: 3px solid #D4351C;
+  outline-offset: 2px;
+}
+
+#summary-map:focus,
+#summary-map:focus-visible {
+  outline: 3px solid #D4351C;
+  outline-offset: 2px;
+}
+
+#summary-map .maplibregl-canvas:focus,
+#summary-map .maplibregl-canvas:focus-visible {
+  outline: 3px solid #D4351C;
+  outline-offset: 2px;
+}
+
+.maplibregl-ctrl-group button:focus,
+.maplibregl-ctrl-group button:focus-visible {
+  outline: 3px solid #D4351C !important;
+  outline-offset: 2px;
+  box-shadow: none !important;
+}
+
+.group-toggle::after {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  margin-left: auto;
+  background-repeat: no-repeat;
+  background-size: 1rem;
+  transition: transform 0.2s ease-in-out;
+
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.group-toggle::after {
+  transform: rotate(0deg);
+}
+
+.group-toggle.expanded::after {
+  transform: rotate(180deg);
+}
+
+.group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  border-bottom: 1px solid #ccc;
+}
+
+.group-toggle::after {
+  content: "";
+  flex: 0 0 1rem;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.5rem;
+}
+
+.lgd-toggle-icon {
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+  flex-shrink: 0;
+
+  background-repeat: no-repeat;
+  background-size: contain;
+
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+
+  transition: transform 0.2s ease;
+  transform: rotate(0deg); /* collapsed */
+}
+
+.lgd-section-toggle[aria-expanded="true"] .lgd-toggle-icon {
+  transform: rotate(180deg); /* up */
+}
+
+.lgd-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgb(204, 204, 204);
+  background: rgb(255, 255, 255);
+  padding: 8px 12px;
+}
+
+
+#postcode-search-btn {
+  background-color: var(--nisra_green);
+  border: 1px solid var(--nisra_green);
+  color: #000;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#postcode-search-btn:hover {
+  background-color: #4d7d17;
+  border-color: #4d7d17;
+}
+
+.postcode-inline {
+  display: flex;
+  gap: 0;
+}
+
+#postcode-input,
+#postcode-search-btn {
+  height: 8px; /* same height */
+}
+
+#postcode-input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+#postcode-search-btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#import-selections-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0 0.75em;
+  min-height: 36px;
+  cursor: pointer;
+  text-decoration: none;
+  background: #732777;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+#import-selections-btn:hover{
+  background-color: #0d2c6c;
+}
+
+#import-selections-btn:hover {
+  background-color: #6C757D !important;
+  border-color: #6C757D !important;
+  color: #fff !important;
+}
+
+#import-selections-btn svg {
+  width: 1.5em;
+  height: 1.5em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+#export-selections-btn svg {
+  width: 1.5em;
+  height: 1.5em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+@media (max-width: 768px) {
+  .profile-nav-buttons .btn-group.ml-2 {
+    flex-basis: 100%;
+    margin-left: 0 !important;
+  }
+
+  #export-selections-btn {
+    width: 100%;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .cntrl-button-wrapper {
+    flex-direction: column;
+    align-items: flex-end;
+    right: 10px;
+    gap: 6px;
+  }
+
+  #clear-selection-btn {
+    order: 1;
+    width: 100px;
+    height: 55px;
+    font-size: 12px
+  }
+
+  #import-selections-btn {
+    order: 2;
+    width: 100px;
+    height: 55px;
+    font-size: 12px
+  }
+
+  .uicon-btn.with-text {
+    display: inline-flex;
+    gap: 0.4em;
+    padding: 0 0.75em;
+    min-height: 36px;
+  }
+
+  /* Adjust icon size when text is present */
+  .uicon-btn.with-text svg {
+    width: 3.5em;
+    height: 3.5em;
+  }
+
+  #clear-selection-btn svg,
+    #import-selections-btn svg {
+    width: 34px;
+    height: 24px;
+    }
+  }

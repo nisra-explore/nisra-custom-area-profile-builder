@@ -9,6 +9,8 @@ Data source: CPD_LIGHT_JULY_2024.csv (hosted on GitHub)
 
 // Global variable to cache the postcode data (populated on first search)
 let postcodeDataCache = null;
+let activeColumnIndexCache = null;
+let xColumnIndexCache = null;
     let radiusKm = 2;   // ✅ shared
     let simplifyTolMeters = 10;
     let bufferMeters = 0;
@@ -82,6 +84,30 @@ function getPopulationInfoText(btn) {
 
 let midYearEstimateTooltipText = 'Mid-year estimate 2024';
 
+function createInfoCircleIcon(classNames = 'bi bi-info-circle', size = 16) {
+  const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  icon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  icon.setAttribute('width', String(size));
+  icon.setAttribute('height', String(size));
+  icon.setAttribute('fill', 'currentColor');
+  icon.setAttribute('viewBox', '0 0 16 16');
+
+  classNames
+    .split(' ')
+    .filter(Boolean)
+    .forEach((name) => icon.classList.add(name));
+
+  const outerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  outerPath.setAttribute('d', 'M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16');
+
+  const innerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  innerPath.setAttribute('d', 'm8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0');
+
+  icon.appendChild(outerPath);
+  icon.appendChild(innerPath);
+  return icon;
+}
+
 function setupPopulationInfoButtons() {
   document.querySelectorAll('.population-info-btn').forEach(btn => {
     if (btn.closest('.export-clone-root')) return;
@@ -89,11 +115,9 @@ function setupPopulationInfoButtons() {
     if (btn.dataset.populationInfoSetup === 'true') return;
     btn.dataset.populationInfoSetup = 'true';
 
-    if (!btn.querySelector('img')) {
+    if (!btn.querySelector('.population-info-icon-svg')) {
       btn.innerHTML = '';
-      const icon = document.createElement('img');
-      icon.src = 'img/i-button.svg';
-      icon.alt = '';
+      const icon = createInfoCircleIcon('bi bi-info-circle population-info-icon-svg', 16);
       icon.setAttribute('aria-hidden', 'true');
       btn.appendChild(icon);
     }
@@ -200,20 +224,78 @@ function fetchPostcodeData() {
     return Promise.resolve(postcodeDataCache);
   }
 
-  const csvUrl = 'create-js\\inputs\\CPD_LIGHT.csv';
+  // Use the remote CSV URL first, fallback to local copy if unavailable
+  // const csvUrl = 'create-js\\inputs\\CPD_LIGHT.csv';
+  const csvUrl = 'https://raw.githubusercontent.com/nisra-explore/postcode-search/main/CPD_LIGHT.csv';
+  const localCsvUrl = 'create-js/inputs/CPD_LIGHT.csv';
+
   
   return fetch(csvUrl)
-    .then(response => response.text())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Postcode database unavailable (${response.status})`);
+      }
+      return response.text();
+    })
+    .catch(remoteError => {
+      console.warn('Remote postcode database unavailable; trying local copy:', remoteError);
+      return fetch(localCsvUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Local postcode database unavailable (${response.status})`);
+          }
+          return response.text();
+        });
+    })
     .then(data => {
       // Parse CSV into rows
       const rows = data.split('\n');
       postcodeDataCache = rows;
+      activeColumnIndexCache = null;
+      xColumnIndexCache = null;
       return rows;
     })
     .catch(error => {
       console.error('Error fetching postcode data:', error);
       throw new Error('Failed to load postcode database');
     });
+}
+
+function getActiveColumnIndex() {
+  if (activeColumnIndexCache !== null) {
+    return activeColumnIndexCache;
+  }
+
+  if (!postcodeDataCache || !postcodeDataCache.length) {
+    activeColumnIndexCache = -1;
+    return activeColumnIndexCache;
+  }
+
+  // Read header row once and cache ACTIVE column position.
+  const headerCols = parseCSVLine(postcodeDataCache[0]);
+  activeColumnIndexCache = headerCols.findIndex(
+    (col) => String(col || '').trim().toUpperCase() === 'ACTIVE'
+  );
+
+  return activeColumnIndexCache;
+}
+
+function getXColumnIndex() {
+  if (xColumnIndexCache !== null) {
+    return xColumnIndexCache;
+  }
+
+  if (!postcodeDataCache || !postcodeDataCache.length) {
+    xColumnIndexCache = -1;
+    return xColumnIndexCache;
+  }
+
+  const headerCols = parseCSVLine(postcodeDataCache[0]);
+  xColumnIndexCache = headerCols.findIndex(
+    (col) => String(col || '').trim().toUpperCase() === 'X'
+  );
+
+  return xColumnIndexCache;
 }
 
 
@@ -252,6 +334,8 @@ function parseCSVLine(line) {
 
 function lookupPostcode(postcode, zoneType) {
   const normalised = normalisePostcode(postcode);
+  const activeColumnIndex = getActiveColumnIndex();
+  const xColumnIndex = getXColumnIndex();
 
   const columnMap = {
     lgd: { code: 4, name: 5 },          // Local Government District
@@ -270,6 +354,18 @@ function lookupPostcode(postcode, zoneType) {
 
   for (let row of postcodeDataCache) {
     const cols = parseCSVLine(row);  // ✅ FIXED
+    if (!cols.length || !cols[0]) continue;
+
+    if (activeColumnIndex !== -1) {
+      const activeValue = String(cols[activeColumnIndex] ?? '').trim();
+      if (activeValue !== '1') continue;
+    }
+
+    if (xColumnIndex !== -1) {
+      const xValue = String(cols[xColumnIndex] ?? '').trim();
+      if (xValue === '666666') continue;
+    }
+
     const csvPostcode = normalisePostcode(cols[0]);
 
     if (csvPostcode === normalised) {
@@ -559,13 +655,15 @@ function zoomToResult(result, zoneType, searchId, attempts = 0) {
 // Global variables for map and data (needed by postcode functions)
 let map = null;
 let selectedIds = new Set();
+// Track selected LGDs at module scope so import/export can access them
+let selectedLGDs = new Set();
 let lgdData = {};
 let deaData = {};
 let sdzData = {};
 let dzData = {};
 let lgdNameToId = new Map();
 let lgdCodeToId = new Map();
-
+let lgdNameToCode = new Map();
 
 // Helper functions moved to global scope so postcode functions can access them (MG)
 function getDataSourceFor(zone) {
@@ -691,7 +789,8 @@ document.addEventListener('DOMContentLoaded', function () {
     activeZone = selected;
     currentZoneType = selected;
     window.selectedZoneType = selected;
-    
+    window.currentZoneType = selected; 
+9
     updateSourceLink();
 
     vis('sdz-fill', selected === 'sdz'); vis('dz-fill', selected === 'dz'); vis('dea-fill', selected === 'dea'); vis('lgd-fill', selected === 'lgd');
@@ -727,7 +826,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let niTotals = {};
   const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-  const selectedLGDs = new Set();
 
   fetch('./data.json')
 
@@ -760,6 +858,19 @@ const updatedLGD = Object.fromEntries(
   Object.entries(data["Local Government District"])
     .map(([code, value]) => [lookup[code] || code, value])
 );
+
+  // Populate mapping from LGD name -> LGD id/code and reverse map so exports/imports can translate
+  try {
+    // lgdNameToCode: name -> code
+    // lgdCodeToName: code -> name
+    window.lgdCodeToName = window.lgdCodeToName || new Map();
+    Object.entries(lookup).forEach(([code, name]) => {
+      if (name) {
+        lgdNameToCode.set(name, code);
+        window.lgdCodeToName.set(code, name);
+      }
+    });
+  } catch (e) { console.warn('Could not populate lgdNameToCode/lgdCodeToName', e); }
 
    // BUILD LGD DATA FROM SDZ
 lgdData = {};
@@ -877,8 +988,23 @@ function initSummaryPreviewMap() {
   center: [-6.8, 54.65],
   zoom: 7.5,
   preserveDrawingBuffer: true,
-  interactive: false
+  interactive: false,
+  attributionControl: false
 });
+
+  // Remove preview map elements from tab order on the profile page (canvas gets its tabindex re-added by MapLibre, so keep re-applying)
+  function disablePreviewMapTabStops() {
+    container.setAttribute('tabindex', '-1');
+    previewMap.getCanvas().setAttribute('tabindex', '-1');
+    container.querySelectorAll('.maplibregl-canvas, .maplibregl-canvas-container, .maplibregl-ctrl, .maplibregl-ctrl-attrib-button, .maplibregl-ctrl-attrib a')
+      .forEach(el => el.setAttribute('tabindex', '-1'));
+  }
+  disablePreviewMapTabStops();
+  previewMap.on('load', disablePreviewMapTabStops);
+
+  if (typeof MutationObserver !== 'undefined') {
+    new MutationObserver(disablePreviewMapTabStops).observe(container, { childList: true, subtree: true });
+  }
 
   previewMap.on('load', () => {
 
@@ -1051,32 +1177,33 @@ function updateSummaryPreview() {
   const z = activeZone;
   const { source, sourceLayer } = getZoneIdsFor(z);
 
+  
   // Handle zone switching
   if (previewActiveZone !== z) {
     const { source: oldSrc, sourceLayer: oldSL } =
       getZoneIdsFor(previewActiveZone || z);
 
-    Array.from(previewSelectedIds).forEach(id => {
-  try {
+    previewSelectedIds.forEach(id => {
 
-    const featureId =
-      previewActiveZone === 'lgd'
-        ? (lgdNameToId.get(id) || id)
-        : id;
+      const featureId =
+        previewActiveZone === "lgd"
+          ? (lgdNameToId.get(id) || id)
+          : id;
 
-    previewMap.setFeatureState(
-      {
-        source: oldSrc,
-        sourceLayer: oldSL,
-        id: featureId
-      },
-      {
-        hovered: false
-      }
-    );
+      try {
+        previewMap.setFeatureState(
+          {
+            source: oldSrc,
+            sourceLayer: oldSL,
+            id: featureId
+          },
+          {
+            hovered: false
+          }
+        );
+      } catch {}
 
-  } catch {}
-});
+    });
 
     previewSelectedIds.clear();
     previewActiveZone = z;
@@ -1088,27 +1215,39 @@ function updateSummaryPreview() {
   // Sync selection highlighting
   const sel = new Set(Array.from(selectedIds).map(String));
 
-  Array.from(previewSelectedIds).forEach(id => {
-    if (!sel.has(String(id))) {
-      try {
-        previewMap.setFeatureState(
-          { source, sourceLayer, id },
-          { hovered: false }
-        );
-      } catch {}
-      previewSelectedIds.delete(id);
-    }
+  // Clear previous preview highlights
+  previewSelectedIds.forEach(id => {
+    const featureId =
+      activeZone === "lgd"
+        ? (lgdNameToId.get(id) || id)
+        : id;
+
+    try {
+      previewMap.setFeatureState(
+        {
+          source,
+          sourceLayer,
+          id: featureId
+        },
+        {
+          hovered: false
+        }
+      );
+    } catch {}
+
   });
 
-  sel.forEach(id => {
-    if (!previewSelectedIds.has(id)) {
-      try {
-        
-      const featureId =
-        activeZone === 'lgd'
-          ? (lgdNameToId.get(id) || id)
-          : id;
+  previewSelectedIds.clear();
 
+  // Add current highlights
+  sel.forEach(id => {
+
+    const featureId =
+      activeZone === "lgd"
+        ? (lgdNameToId.get(id) || id)
+        : id;
+
+    try {
       previewMap.setFeatureState(
         {
           source,
@@ -1119,10 +1258,9 @@ function updateSummaryPreview() {
           hovered: true
         }
       );
+    } catch {}
 
-      } catch {}
-      previewSelectedIds.add(id);
-    }
+    previewSelectedIds.add(featureId);
   });
 
   // Nothing selected -> default NI view
@@ -1146,9 +1284,15 @@ function updateSummaryPreview() {
     return;
   }
  
-  const selectedFeatures = features.filter(f =>
-    sel.has(String(f.id))
-  );
+  const selectedFeatures = features.filter(f => { 
+    if (sel.has(String(f.id))) return true;
+    if (activeZone !== 'lgd') return false;
+    const lgdName = f.properties?.LGDNAME ||
+      f.properties?.LGD2014NAME ||
+      f.properties?.lgd_name ||
+      f.properties?.LGD;
+    return lgdName && sel.has(String(lgdName));
+  });
 
   // Build bounding box
   let minX = Infinity;
@@ -1178,6 +1322,11 @@ function updateSummaryPreview() {
     isFinite(maxX) &&
     isFinite(maxY)
   ) {
+    // Cap nudged up slightly from the original 10/11/5: those were being hit on larger
+    // map-panel containers (which need a bit more zoom to fit the same bbox tightly),
+    // leaving extra margin/showing more of the country vs smaller screens. Kept modest
+    // (rather than a big jump) since a much higher zoom pulls in far more tiles per pan
+    // and can trip the 429 rate limiting on the raw.githubusercontent.com tile host.
     previewMap.fitBounds(
       [
         [minX, minY],
@@ -1190,9 +1339,9 @@ function updateSummaryPreview() {
           left: 30,
           right: 30
         },
-          maxZoom: activeZone === 'sdz' ? 10 :
-                  activeZone === 'dz'  ? 11 :
-                  5,
+          maxZoom: activeZone === 'sdz' ? 12 :
+                  activeZone === 'dz'  ? 13 :
+                  8,
           duration: 0
       }
     );
@@ -1200,7 +1349,7 @@ function updateSummaryPreview() {
   if (activeZone === 'dea') {
     previewMap.easeTo({
       center: [-6.8, 54.6],
-      zoom: activeZone === 'dea' ? 7 : 6.5,
+      zoom: activeZone === 'dea' ? 6.5 : 6.5,
       duration: 0
     });
     return;
@@ -1209,7 +1358,7 @@ function updateSummaryPreview() {
   if (activeZone === 'lgd') {
     previewMap.easeTo({
       center: [-6.85, 54.6],
-      zoom: activeZone === 'lgd' ? 6.7 : 6.7,
+      zoom: activeZone === 'lgd' ? 6.5 : 6.5,
       duration: 0
     });
     return;
@@ -1331,6 +1480,8 @@ function updateSummaryPreview() {
     ensureSummaryHero(); // <-- Add this here
 
   }
+  // Make available globally so import routines can trigger UI updates
+  try { window.refreshOutputs = refreshOutputs; } catch (e) { /* ignore */ }
 
 
   map.on('load', () => {
@@ -1953,7 +2104,14 @@ function updateSummaryPreview() {
       const feature = e.features[0];
       const id = feature.id;
       const lgdName = feature.properties.LGDNAME || feature.properties.lgd_name || feature.properties.LGD;
-      const selectionKey = lgdName || id;
+      const selectionKey = lgdName || id; 
+      // const lgdCode =
+      //     feature.properties.LGD_CODE ||
+      //     feature.properties.lgd_code ||
+      //     feature.properties.LGD2014 ||
+      //     id;
+
+      // const selectionKey = lgdCode;
 
       const isSelected = selectedIds.has(selectionKey);
 
@@ -1967,6 +2125,8 @@ function updateSummaryPreview() {
       } else {
         selectedIds.add(selectionKey);
         lgdNameToId.set(lgdName, id);
+        // lgdNameToCode.set(lgdName, lgdCode);
+
         map.setFeatureState(
           { source: 'lgd2014', sourceLayer: 'LGD2014_clipped', id },
           { hovered: true }
@@ -2834,12 +2994,24 @@ if (radiusInput) {
     });
   });
 
+  let isResettingZoomDisplay = false;
+
   // map reset zoom button
   document.getElementById('resetZoomBtn').addEventListener('click', () => {
+    const resetZoom = getResponsiveZoom();
+    isResettingZoomDisplay = true;
+    DEFAULT_ZOOM = resetZoom;
+    setZoomDisplayText(100);
+
     map.easeTo({
       center: [-6.8, 54.65],
-      zoom: getResponsiveZoom(),
+      zoom: resetZoom,
       duration: 2000
+    });
+
+    map.once('moveend', () => {
+      isResettingZoomDisplay = false;
+      updateZoomDisplay();
     });
   });
 
@@ -2847,22 +3019,22 @@ if (radiusInput) {
   document.getElementById('lgd-toggle-btn')?.addEventListener('click', () => {
     const toggleBtn = document.getElementById('lgd-toggle-btn');
     const container = document.getElementById('lgd-buttons-container');
-    const icon = toggleBtn.querySelector('.lgd-toggle-icon');
-    
+
     const isExpanded = container.style.display === 'flex';
+
     container.style.display = isExpanded ? 'none' : 'flex';
     container.style.flexWrap = 'wrap';
     container.style.gap = '8px';
     container.style.paddingTop = '12px';
-    const newExpanded = !isExpanded;
-    toggleBtn.setAttribute('aria-expanded', newExpanded);
-    icon.textContent = newExpanded ? '▼' : '▶';
+
+    toggleBtn.setAttribute('aria-expanded', !isExpanded);
   });
 
   let DEFAULT_ZOOM = null;
 
 map.on('load', () => {
-    DEFAULT_ZOOM = getResponsiveZoom();
+    DEFAULT_ZOOM = map.getZoom();
+    setZoomDisplayText(100);
     updateZoomDisplay();
     
     const nav = new maplibregl.NavigationControl({
@@ -2875,19 +3047,50 @@ map.on('load', () => {
   }); 
 
 
+  function setZoomDisplayText(percent) {
+    document.getElementById("zoom-level").innerText = `Zoom: ${percent}%`;
+  }
+
+  function getActiveFillLayerId() {
+    if (currentZoneType === 'dz') return 'dz-fill';
+    if (currentZoneType === 'dea') return 'dea-fill';
+    if (currentZoneType === 'lgd') return 'lgd-fill';
+    return 'sdz-fill';
+  }
+
   function updateZoomDisplay() {
     if (!DEFAULT_ZOOM) return;
+    if (isResettingZoomDisplay) return;
 
     const zoom = map.getZoom();
 
     // Use actual starting zoom as baseline
     const percent = Math.round(100 + (zoom - DEFAULT_ZOOM) * 100);
-
-    document.getElementById("zoom-level").innerText = `Zoom: ${percent}%`;
+    setZoomDisplayText(percent);
   }
 
   map.on('zoom', updateZoomDisplay);
   map.on('load', updateZoomDisplay);
+
+  // Keep the zoom readout anchored at 100% when users click outside selectable areas.
+  map.on('click', (e) => {
+    if (drawToolActive || isResettingZoomDisplay) return;
+
+    const activeLayer = getActiveFillLayerId();
+    if (!activeLayer || !map.getLayer(activeLayer)) return;
+
+    const hits = map.queryRenderedFeatures(e.point, { layers: [activeLayer] });
+    if (hits.length === 0) {
+      const currentZoom = map.getZoom();
+      const defaultZoom = getResponsiveZoom();
+
+      // Keep 100% only when the map is effectively at its default zoom.
+      if (Math.abs(currentZoom - defaultZoom) <= 0.01) {
+        // Do not mutate DEFAULT_ZOOM here; just keep the readout at 100%.
+        setZoomDisplayText(100);
+      }
+    }
+  });
 
   class PercentZoomControl {
     onAdd(map) {
@@ -2991,8 +3194,6 @@ map.on('load', () => {
       window.urlcategoryCode = categoryCode;
       window.urllabel = label;
       window.urlsource = source;
-
-      console.log("categoryCode", categoryCode)
       
       if (source === "Flexible Table Builder" && categoryCode) {
         if (zoneType === "dz" || zoneType === "sdz") {
@@ -3008,7 +3209,7 @@ map.on('load', () => {
         } else if (label === "Benefits Statistics" && zoneType === "dea") {
           fullUrl = "https://data.nisra.gov.uk/table/BSDEA";
         } else if (label === "Benefits Statistics" && zoneType === "lgd") {
-          fullUrl = "https://data.nisra.gov.uk/table/BSLGD";
+          fullUrl = "https://data.nisra.gov.uk/table/BSLGDUR";
         } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "sdz") {
           fullUrl = "https://data.nisra.gov.uk/table/MYE01T012";
         } else if (label === "All crimes recorded by the police" && zoneType === "dea") {
@@ -3044,17 +3245,21 @@ map.on('load', () => {
       
       if (fullUrl) {
         const wrapper = document.createElement('div');
-        const zoneTypeText = zoneType === 'sdz' ? 'Super Data Zone' : 'Data Zone';
+        const zoneTypeText = zoneType === 'sdz'
+          ? 'Super Data Zone'
+          : zoneType === 'dz'
+            ? 'Data Zone'
+            : zoneType === 'dea'
+              ? 'District Electoral Area'
+              : 'Local Government District';
         const displayLabel = label === 'Sex Label' ? 'Sex' : label;
-        const labelText = document.createTextNode(`${displayLabel} by ${zoneTypeText}: `);
         const link = document.createElement('a');
         link.href = fullUrl;
-        link.textContent = fullUrl;
+        link.textContent = `${displayLabel} by ${zoneTypeText}`;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
-        link.className = "new-tab-btn";
-        link.setAttribute("aria-label", `${label} (opens in a new tab)`);
-        wrapper.appendChild(labelText);
+        link.className = "source-link";
+        link.setAttribute("aria-label", `${displayLabel} by ${zoneTypeText} (opens in a new tab)`);
         wrapper.appendChild(link);
         sourceLinkContainer.appendChild(wrapper);
       } else {
@@ -3298,9 +3503,16 @@ map.on('load', () => {
           // const featureId = feature.id;
           const featureId = feature.properties.LGD_CODE || feature.properties.lgd_code;
 
-          // ✅ Extract the LGD NAME from the feature
-          const lgdName =
-            feature.properties?.LGDNAME ||
+              sidSet.add(lgd);
+              lgdNameToId.set(lgd, featureId);
+              // Also mark LGD as selected so checkboxes and exports stay in sync
+              try { selectedLGDs.add(lgd); } catch (e) {}
+              try {
+                const checkboxId = `lgd-${String(lgd).replace(/\s+/g, '-').toLowerCase()}`;
+                const cb = document.getElementById(checkboxId);
+                if (cb) { cb.checked = true; const lbl = document.querySelector(`label[for="${checkboxId}"]`); if (lbl) { lbl.classList.add('selected'); lbl.setAttribute('aria-checked', 'true'); } }
+              } catch (e) {}
+              try { if (map && source && sourceLayer && typeof map.setFeatureState === 'function') map.setFeatureState({ source, sourceLayer, id: featureId }, { hovered: true }); } catch {}
             feature.properties?.LGD2014NAME ||
             feature.properties?.lgd_name;
 
@@ -3356,6 +3568,30 @@ map.on('load', () => {
     }, delayMs);
   }
 
+  function getDataFor(zone, id) {
+    const ds =
+      zone === 'dz' ? dzData :
+        zone === 'dea' ? deaData :
+          zone === 'lgd' ? lgdData :
+            sdzData;
+
+    if (!ds) return undefined;
+
+    if (ds[id]) return ds[id];
+
+    const idx = AREA_INDEX[zone];
+    try {
+      const key = String(id).toLowerCase();
+      const item = idx?.byKey?.get(key);
+      if (item && (item.id !== undefined) && ds[item.id]) return ds[item.id];
+
+      const found = idx?.items?.find(it => String(it.id) === String(id));
+      if (found && ds[found.id]) return ds[found.id];
+    } catch (e) { /* ignore */ }
+
+    return undefined;
+  }
+
   function updateTables(selectedIdsArray) {
     const tablesContainer = document.getElementById("tables-container");
     const comparisonTableDiv = document.getElementById("urban-rural-comparison");
@@ -3392,7 +3628,7 @@ map.on('load', () => {
             sdzData;
 
     selectedIdsArray.forEach(id => {
-      const mapData = dataSource[id];
+      const mapData = getDataFor(currentZoneType, id);
       if (!mapData) return;
 
       totalPopulation += mapData.population || 0;
@@ -3498,7 +3734,7 @@ console.log("availableKeys", availableKeys);
     }
 
     selectedIdsArray.forEach(id => {
-      const mapData = dataSource[id];
+      const mapData = getDataFor(currentZoneType, id);
       if (!mapData) return;
       const lgd = mapData["LGD"];
       const status = mapData["Urban_mixed_rural_status"];
@@ -3604,6 +3840,12 @@ console.log("availableKeys", availableKeys);
       a.localeCompare(b, undefined, { sensitivity: 'base' })
     );
 
+    const ti = document.createElement("ti");
+    ti.innerHTML = currentZoneType === 'lgd'
+      ? `Summary of Local Government Districts selected:`
+      : `Summary of areas selected:`;
+    summaryList.appendChild(ti);
+    
     let totalZonesSelected = 0;
     sortedLGDs.forEach(lgd => {
       const stats = lgdStats[lgd];
@@ -3617,11 +3859,13 @@ console.log("availableKeys", availableKeys);
           : currentZoneType === 'dea'
             ? 'district electoral areas selected'
             : currentZoneType === 'lgd'
-              ? 'local government districts selected'
+              ? ''
               : 'zones selected';
 
       const li = document.createElement("li");
-      li.innerHTML = `${lgd}: <strong>${stats.total} of ${totalInLGD}</strong> ${unitLabel}`;
+      li.innerHTML = currentZoneType === 'lgd'
+        ? `${lgd}`
+        : `${lgd}: <strong>${stats.total} of ${totalInLGD}</strong> ${unitLabel}`;
       summaryList.appendChild(li);
     });
 
@@ -3910,6 +4154,10 @@ console.log("availableKeys", availableKeys);
         return "https://data.nisra.gov.uk/table/BSDZ";
       } else if (label === "Benefits Statistics" && zoneType === "sdz") {
         return "https://data.nisra.gov.uk/table/BSSDZ";
+      } else if (label === "Benefits Statistics" && zoneType === "dea") {
+        return "https://data.nisra.gov.uk/table/BSDEA";
+      } else if (label === "Benefits Statistics" && zoneType === "lgd") {
+        return "https://data.nisra.gov.uk/table/BSLGDUR";
       } else if ((label === "Age (MYE)" || label === "Sex (MYE)") && zoneType === "sdz") {
         return "https://data.nisra.gov.uk/table/MYE01T012";
       } else if (label === "All crimes recorded by the police" && zoneType === "dea") {
@@ -4022,6 +4270,7 @@ console.log("availableKeys", availableKeys);
 
       const expandBtn = document.createElement("button");
       expandBtn.className = "expand-toggle";
+      expandBtn.setAttribute("aria-label", "Show more information");
       expandBtn.setAttribute("aria-expanded", "false");
       expandBtn.style.border = "none";
       expandBtn.style.background = "none";
@@ -4029,14 +4278,12 @@ console.log("availableKeys", availableKeys);
       expandBtn.style.marginLeft = "8px";
       expandBtn.style.cursor = "pointer";
       expandBtn.style.boxShadow = "none";
+      expandBtn.style.color = "#3878c5";
 
-      const infoImg = document.createElement("img");
-      infoImg.src = "img/i-button.svg";
-      infoImg.alt = "Show more information";
-      infoImg.style.width = "20px";
-      infoImg.style.height = "20px";
-      infoImg.style.display = "block";
-      expandBtn.appendChild(infoImg);
+      const infoIcon = createInfoCircleIcon('bi bi-info-circle info-icon-svg', 16);
+      infoIcon.setAttribute('aria-hidden', 'true');
+      infoIcon.style.display = 'block';
+      expandBtn.appendChild(infoIcon);
 
       const expandableContent = document.createElement("div");
       expandableContent.className = "expandable-content";
@@ -4090,9 +4337,19 @@ console.log("availableKeys", availableKeys);
       if (src === "Flexible Table Builder") {
         subheading.textContent = `Census ${year}`;
       } else if (category === "Benefits Statistics") {
-        subheading.textContent = `placeholder`;
+        subheading.textContent = `Claimants at February ${year}`;
+      } else if (category === "Age (MYE)" || category === "Sex (MYE)") {
+        subheading.textContent = `Mid year population estimates ${year}`;  
+      } else if (category === "School census - special schools" || category === "School census - primary" || category === "School census - post-primary") {
+        subheading.textContent = `Academic year ${year}`; 
+      } else if (category === "All crimes recorded by the police") {
+        subheading.textContent = `Financial year ${year}`;  
+      } else if (category === "Number of businesses") {
+        subheading.textContent = `Inter-Departmental Business Register ${year}`;  
+      } else if (category === "Employee Jobs") {
+        subheading.textContent = `Business Register and Employment Survey ${year}`;  
       } else {
-        subheading.textContent = `Mid year population estimates ${year}`;
+        subheading.textContent = `placeholder`;
       }
 
       wrapper.appendChild(subheading);
@@ -4619,6 +4876,7 @@ console.log("availableKeys", availableKeys);
                 const featureId = feature.id;
 
                 selectedIds.add(lgdCode); // ✅ keep name for data
+                lgdNameToId.set(lgdCode, featureId);
 
                 map.setFeatureState(
                   { source, sourceLayer, id: featureId },
@@ -4646,7 +4904,11 @@ console.log("availableKeys", availableKeys);
           selectedLGDs.delete(lgdCode);
           label?.classList.remove('selected');
 
-          const toRemove = Array.from(selectedIds).filter(id => dataSource[id]?.LGD === lgdCode);
+          const toRemove = Array.from(selectedIds).filter(id => {
+            try { const md = getDataFor(zone, id); return md?.LGD === lgdCode; } catch { return false; }
+          });
+          lgdNameToId.delete(lgdCode);
+
           toRemove.forEach(id => {
             selectedIds.delete(id);
             map.setFeatureState({ source, sourceLayer, id }, { hovered: false });
@@ -4687,8 +4949,7 @@ console.log("availableKeys", availableKeys);
     const groups = { Urban: {}, Rural: {}, Mixed: {} };
 
     selectedIdsArray.forEach(id => {
-      const dataSource = currentZoneType === 'dz' ? dzData : sdzData;
-      const data = dataSource[id];
+      const data = getDataFor(currentZoneType, id);
       if (!data || !["Urban", "Rural", "Mixed"].includes(data.Urban_mixed_rural_status)) return;
 
       const group = data.Urban_mixed_rural_status;
@@ -5122,13 +5383,13 @@ console.log("availableKeys", availableKeys);
     }
 
     // Toggle behavior
-    button.addEventListener("click", () => {
+     button.addEventListener("click", () => {
       const isVisible = content.style.display !== "none";
-      content.style.display = isVisible ? "none" : "block";
-      button.innerHTML = label.replace(isVisible ? "▲" : "▼", isVisible ? "▼" : "▲");
-      button.setAttribute("aria-expanded", !isVisible);  // tab through group-content
 
-      // If expanding, focus the first checkbox in group-content
+      content.style.display = isVisible ? "none" : "block";
+
+      button.classList.toggle("expanded", !isVisible);
+
       if (!isVisible) {
         const firstCheckbox = content.querySelector("input[type='checkbox']");
         if (firstCheckbox) {
@@ -5226,9 +5487,11 @@ function waitForImagesToLoad(container) {
   return Promise.all(promises);
 }
 
-function downloadSummaryImage() {
+function downloadSummaryImage(outputFormat = 'png') {
+  
   const selectedTab = document.querySelector('.view-tab.selected');
   const view = selectedTab ? selectedTab.getAttribute('data-view') : 'charts';
+  const isMobileExport = window.innerWidth <= 768;
 
   const breakdownContainer = document.getElementById('breakdown-container');
   const contentSource = {
@@ -5266,8 +5529,13 @@ function downloadSummaryImage() {
   cloneWrapper.style.background = '#fff';
   cloneWrapper.style.padding = '20px';
   cloneWrapper.style.fontFamily = 'sans-serif';
+  cloneWrapper.style.width = '1200px';
   cloneWrapper.style.maxWidth = '1200px';
-  cloneWrapper.style.margin = '0 auto';
+  cloneWrapper.style.margin = '0';
+  cloneWrapper.style.position = 'absolute';
+  cloneWrapper.style.left = '-10000px';
+  cloneWrapper.style.top = '0';
+  cloneWrapper.style.zIndex = '-9999';
 
   const headerRow = document.querySelector('.header-row')
     || document.querySelector('.profile-header-bar');
@@ -5282,31 +5550,88 @@ function downloadSummaryImage() {
     if (clonedButtons) {
       clonedButtons.remove();
     }
+    headerClone.querySelector('#open-profile')?.remove();
+    headerClone.querySelector('#apply-area-name')?.remove();
     cloneWrapper.appendChild(headerClone);
   }
 
   const breakdownClone = breakdownContainer.cloneNode(true);
   const contentClone = contentSource.cloneNode(true);
 
+  breakdownClone.style.width = '100%';
+  breakdownClone.style.maxWidth = '100%';
+  breakdownClone.style.minWidth = '0';
+  breakdownClone.style.boxSizing = 'border-box';
+  breakdownClone.style.margin = '0';
+  breakdownClone.style.padding = '0';
+
+  contentClone.style.width = '100%';
+  contentClone.style.maxWidth = '100%';
+  contentClone.style.boxSizing = 'border-box';
+
+
+  
+  // Force the same 2-column map layout in the export regardless of the device the
+  // download was triggered from, so mobile/laptop/desktop all produce the same image.
+  if (view === 'charts' || view === 'chartComparison') {
+    const summaryHeroClone = breakdownClone.querySelector('#summary-hero');
+
+    if (summaryHeroClone) {
+      summaryHeroClone.style.display = 'grid';
+      summaryHeroClone.style.gridTemplateColumns = '1fr 1fr';
+      summaryHeroClone.style.gap = '20px';
+      summaryHeroClone.style.alignItems = 'stretch';
+
+      // Force hero to stay within export container
+      summaryHeroClone.style.width = '100%';
+      summaryHeroClone.style.maxWidth = '100%';
+      summaryHeroClone.style.minWidth = '0';
+      summaryHeroClone.style.boxSizing = 'border-box';
+      summaryHeroClone.style.margin = '0';
+      summaryHeroClone.style.padding = '0';
+    }
+
+    const summaryColumnClone = breakdownClone.querySelector('.summary-column');
+    if (summaryColumnClone) {
+      summaryColumnClone.style.width = '100%';
+      summaryColumnClone.style.minWidth = '0';
+      summaryColumnClone.style.boxSizing = 'border-box';
+      summaryColumnClone.style.wordBreak = 'break-word';
+      summaryColumnClone.style.overflowWrap = 'break-word';
+    }
+
+    const summaryMapPanelClone = breakdownClone.querySelector('#summary-map-panel');
+    if (summaryMapPanelClone) {
+      summaryMapPanelClone.style.padding = '0';
+      summaryMapPanelClone.style.minHeight = '420px';
+      summaryMapPanelClone.style.boxSizing = 'border-box';
+      summaryMapPanelClone.style.margin = '0';
+      summaryMapPanelClone.style.width = '100%';
+      summaryMapPanelClone.style.maxWidth = '100%';
+      summaryMapPanelClone.style.overflow = 'hidden';
+    }
+
+    const summaryMapClone = breakdownClone.querySelector('#summary-map');
+    if (summaryMapClone) {
+      summaryMapClone.style.width = '100%';
+      summaryMapClone.style.height = '100%';
+      summaryMapClone.style.minHeight = '420px';
+      summaryMapClone.style.maxWidth = '100%';
+      summaryMapClone.style.margin = '0';
+      summaryMapClone.style.boxSizing = 'border-box';
+    }
+  }
+
   // Put the breakdown and content into the wrapper
-  cloneWrapper.appendChild(breakdownClone);
-  cloneWrapper.appendChild(contentClone);
+  // cloneWrapper.appendChild(breakdownClone);
+  // cloneWrapper.appendChild(contentClone);
 
   // Hide any download hover menu in the clone so the exported image is clean.
   cloneWrapper.querySelectorAll('.dropdown-menu').forEach(menu => {
     menu.style.display = 'none';
   });
 
-  // Hide info buttons in exported image
-  cloneWrapper.querySelectorAll('.expand-toggle').forEach(btn => {
-    btn.style.display = 'none';
-  });
-  cloneWrapper.querySelectorAll('.population-info-btn').forEach(btn => {
-    btn.style.display = 'none';
-  });
-  cloneWrapper.querySelectorAll('.population-info-text').forEach(text => {
-    text.style.display = 'none';
-  });
+
 
   // Fix canvases in both cloned sections
   replaceCloneCanvasesWithImages(breakdownContainer, breakdownClone);
@@ -5507,12 +5832,111 @@ function downloadSummaryImage() {
   document.body.appendChild(cloneWrapper);
 
   cloneWrapper.offsetHeight;
+  let chartRowStarts = [];
+
+  // Hide info buttons in exported image
+  cloneWrapper.querySelectorAll('.expand-toggle').forEach(btn => {
+    btn.style.display = 'none';
+  });
+  cloneWrapper.querySelectorAll('.population-info-btn').forEach(btn => {
+    btn.style.display = 'none';
+  });
+  cloneWrapper.querySelectorAll('.population-info-text').forEach(text => {
+    text.style.display = 'none';
+  });
+
+  // Force an explicit fixed-pixel 50/50 split for the summary hero, measured from the
+  // actual rendered clone width. The map panel is pinned with position:absolute/right:0
+  // so it anchors to the right edge regardless of any residual left-side box-model
+  // quirks (margins/padding leaking from the live page) that were pushing it off-center.
+  if (view === 'charts' || view === 'chartComparison') {
+    const summaryHeroClone = breakdownClone.querySelector('#summary-hero');
+
+    const mapPanel = breakdownClone.querySelector('#summary-map-panel');
+
+    const summaryColumn = breakdownClone.querySelector('.summary-column');
+
+    const summaryColumnClone =
+    breakdownClone.querySelector('.summary-column');
+
+    const summaryMapPanelClone =
+      breakdownClone.querySelector('#summary-map-panel');
+
+    if (summaryHeroClone && summaryColumnClone && summaryMapPanelClone) {
+
+      // Force true 50/50 layout
+      summaryHeroClone.style.display = 'grid';
+      summaryHeroClone.style.gridTemplateColumns = '50% 50%';
+      summaryHeroClone.style.gap = '0';
+      summaryHeroClone.style.alignItems = 'stretch';
+      summaryHeroClone.style.width = '100%';
+
+      // Left side
+      summaryColumnClone.style.width = '100%';
+      summaryColumnClone.style.maxWidth = '100%';
+      summaryColumnClone.style.minWidth = '0';
+      summaryColumnClone.style.boxSizing = 'border-box';
+
+      // Ensure text wraps
+      summaryColumnClone.style.whiteSpace = 'normal';
+      summaryColumnClone.style.wordBreak = 'break-word';
+      summaryColumnClone.style.overflowWrap = 'anywhere';
+
+      // Also wrap all descendants
+      summaryColumnClone.querySelectorAll('*').forEach(el => {
+        el.style.maxWidth = '100%';
+        el.style.whiteSpace = 'normal';
+        el.style.wordBreak = 'break-word';
+        el.style.overflowWrap = 'anywhere';
+      });
+
+      // Right side map
+      summaryMapPanelClone.style.position = 'relative';
+      summaryMapPanelClone.style.width = '100%';
+      summaryMapPanelClone.style.maxWidth = '100%';
+      summaryMapPanelClone.style.margin = '0';
+      summaryMapPanelClone.style.padding = '0';
+      summaryMapPanelClone.style.overflow = 'hidden';
+
+      const summaryMapClone = breakdownClone.querySelector('#summary-map');
+      if (summaryMapClone) {
+        summaryMapClone.style.width = '100%';
+        summaryMapClone.style.height = '100%';
+        summaryMapClone.style.objectFit = 'cover';
+
+        // The map canvas was already swapped for a static <img>; that image keeps its
+        // original captured pixel size unless we force it to fill the 50% column here.
+        const summaryMapImg = summaryMapClone.querySelector('img');
+        if (summaryMapImg) {
+          summaryMapImg.style.width = '100%';
+          summaryMapImg.style.height = '100%';
+          summaryMapImg.style.maxWidth = '100%';
+          summaryMapImg.style.objectFit = 'cover';
+          summaryMapImg.style.display = 'block';
+        }
+      }
+    }
+    
+  }
+
 
   // Wait until images are ready
   (waitForImagesToLoad ? waitForImagesToLoad(cloneWrapper) : Promise.resolve()).then(() => {
     return new Promise(resolve => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          const chartGrid = contentClone.querySelector('.charts-grid');
+          if (chartGrid) {
+            const wrapperTop = cloneWrapper.getBoundingClientRect().top;
+            const rowTops = new Set();
+
+            Array.from(chartGrid.children).forEach(chart => {
+              rowTops.add(Math.round(chart.getBoundingClientRect().top - wrapperTop));
+            });
+
+            chartRowStarts = Array.from(rowTops);
+          }
+
           html2canvas(cloneWrapper, {
             useCORS: true,
             scale: 2,
@@ -5547,14 +5971,82 @@ function downloadSummaryImage() {
       const y = canvas.height + (padding / 2);
       ctx.drawImage(logo, x, y, scaledLogoWidth, scaledLogoHeight);
 
-      // Trigger download using native save picker where available
-      const dataUrl = finalCanvas.toDataURL('image/png');
-      const blob = await fetch(dataUrl).then(r => r.blob());
-      await saveBlobWithPicker(blob, 'area-summary.png');
+      if (outputFormat === 'pdf') {
+        const PdfDocument = window.jspdf?.jsPDF;
+        if (!PdfDocument) {
+          throw new Error('The PDF export library could not be loaded.');
+        }
+
+        const pdf = new PdfDocument({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+        const margin = 10;
+        const pageWidth = 297 - (margin * 2);
+        const pageHeight = 210 - (margin * 2);
+        const sourcePageHeight = Math.floor(finalCanvas.width * (pageHeight / pageWidth));
+        const canvasScale = canvas.height / cloneWrapper.offsetHeight;
+        const pageStarts = chartRowStarts
+          .map(rowTop => Math.round(rowTop * canvasScale))
+          .filter(rowTop => rowTop > 0 && rowTop < canvas.height)
+          .sort((first, second) => first - second);
+        const sectionStarts = [0, ...pageStarts, finalCanvas.height];
+        let pageCount = 0;
+
+        const addCanvasSlice = (sourceY, sliceHeight) => {
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = finalCanvas.width;
+          pageCanvas.height = sliceHeight;
+          pageCanvas.getContext('2d').drawImage(
+            finalCanvas,
+            0,
+            sourceY,
+            finalCanvas.width,
+            sliceHeight,
+            0,
+            0,
+            finalCanvas.width,
+            sliceHeight
+          );
+
+          if (pageCount > 0) pdf.addPage();
+          pdf.addImage(
+            pageCanvas.toDataURL('image/jpeg', 0.92),
+            'JPEG',
+            margin,
+            margin,
+            pageWidth,
+            sliceHeight * (pageWidth / finalCanvas.width)
+          );
+          pageCount += 1;
+        };
+
+        for (let sectionIndex = 0; sectionIndex < sectionStarts.length - 1; sectionIndex++) {
+          let sourceY = sectionStarts[sectionIndex];
+          const sectionEnd = sectionStarts[sectionIndex + 1];
+
+          while (sourceY < sectionEnd) {
+            const sliceHeight = Math.min(sourcePageHeight, sectionEnd - sourceY);
+            addCanvasSlice(sourceY, sliceHeight);
+            sourceY += sliceHeight;
+          }
+        }
+
+        await saveBlobWithPicker(pdf.output('blob'), 'area-summary.pdf');
+      } else {
+        const dataUrl = finalCanvas.toDataURL('image/png');
+        const blob = await fetch(dataUrl).then(r => r.blob());
+        await saveBlobWithPicker(blob, 'area-summary.png');
+      }
 
       document.body.removeChild(cloneWrapper);
     };
   });
+}
+
+function downloadSummaryPDF() {
+  downloadSummaryImage('pdf');
 }
 
 
@@ -5722,10 +6214,11 @@ async function downloadExcel() {
       'Total',
       totalCount,
       totalCount > 0 ? 1 : 0,
-      '-'
+      totalCount > 0 ? 1 : 0
     ]);
     totalRow.getCell(2).numFmt = '#,##0';
     totalRow.getCell(3).numFmt = '0.0%';
+    totalRow.getCell(4).numFmt = '0.0%';
     totalRow.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
     totalRow.getCell(3).alignment = { horizontal: 'right', vertical: 'middle' };
     totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
@@ -5770,10 +6263,11 @@ async function downloadExcel() {
           'Total',
           total,
           total > 0 ? 1 : 0,
-          '-'
+          total > 0 ? 1 : 0
         ]);
         groupTotalRow.getCell(2).numFmt = '#,##0';
         groupTotalRow.getCell(3).numFmt = '0.0%';
+        groupTotalRow.getCell(4).numFmt = '0.0%';
         groupTotalRow.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
         groupTotalRow.getCell(3).alignment = { horizontal: 'right', vertical: 'middle' };
         groupTotalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle' };
@@ -6011,6 +6505,438 @@ function showMapView() {
   document.getElementById("profile-sidebar")?.classList.remove("open");
   document.getElementById("profile-backdrop")?.classList.remove("active");
 }
+
+
+// Export / Import selections: save current selected IDs, zone, drawn geometry and LGDs
+function exportSelections() {
+  try {
+    const inferredZone =
+      document.getElementById('zone-selector')?.value ||
+      currentZoneType ||
+      activeZone ||
+      'sdz';
+
+    const lgdExportList = (() => {
+      const exportSet = new Set(
+        inferredZone === 'lgd'
+          ? Array.from(selectedIds || [])
+          : (
+              typeof selectedLGDs !== 'undefined' &&
+              selectedLGDs.size
+            )
+              ? Array.from(selectedLGDs)
+              : []
+      );
+
+      return Array.from(exportSet).map(lgdName => {
+        const cleanName = typeof lgdName === 'string' ? lgdName.trim() : '';
+        const lookupCode = lgdNameToCode.get(cleanName)
+          || Object.entries(window.LGD_LOOKUP || {}).find(([, name]) => name === cleanName)?.[0]
+          || null;
+
+        return {
+          name: cleanName || lgdName,
+          code: lookupCode || null
+        };
+      });
+    })();
+
+    const payload = {
+      zone: inferredZone,
+      ids: Array.from(selectedIds || []),
+      lgds: lgdExportList,
+      lastDrawnFeature:
+        (typeof lastDrawnFeature !== 'undefined')
+          ? lastDrawnFeature
+          : (window.lastDrawnFeature || null),
+      title:
+        document.getElementById('areaProfileTitle')?.textContent || ''
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(payload, null, 2)],
+      { type: 'application/json' }
+    );
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `map-selections-${Date.now()}.json`;
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(a.href);
+  } catch (err) {
+    console.error('Export failed', err);
+    alert('Could not export selections');
+  }
+}
+
+function applySelectionsObject(obj) {
+  const apply = () => {
+    try {
+      const effectiveZone = obj.zone || ((typeof window.currentZoneType !== 'undefined' && window.currentZoneType) ? window.currentZoneType : (document.getElementById('zone-selector')?.value || 'sdz'));
+      try { console.debug('applySelectionsObject: effectiveZone=', effectiveZone, 'obj.zone=', obj.zone); } catch (e) {}
+
+      // Try to clear using existing function; if not available, perform a safe manual clear
+      if (typeof clearSelections === 'function') {
+        try { clearSelections(); } catch (e) { console.warn('clearSelections threw', e); }
+      } else {
+        try {
+          // clear feature states for selectedIds
+          if (typeof selectedIds !== 'undefined' && selectedIds.size > 0) {
+            const { source, sourceLayer } = getZoneIdsFor(effectiveZone) || {};
+            selectedIds.forEach(key => {
+              try {
+                const featureId = effectiveZone === 'lgd' ? (lgdNameToId.get(key) || key) : key;
+                if (map && source && sourceLayer && typeof map.setFeatureState === 'function') {
+                  map.setFeatureState({ source, sourceLayer, id: featureId }, { hovered: false });
+                }
+              } catch {}
+            });
+            try { selectedIds.clear(); } catch {}
+          }
+
+          // clear preview selections if present
+          if (typeof previewSelectedIds !== 'undefined' && previewSelectedIds.size > 0 && typeof previewMap !== 'undefined' && previewMap) {
+            const { source, sourceLayer } = getZoneIdsFor(effectiveZone) || {};
+            previewSelectedIds.forEach(id => {
+              try {
+                const featureId = effectiveZone === 'lgd' ? (lgdNameToId.get(id) || id) : id;
+                previewMap.setFeatureState({ source, sourceLayer, id: featureId }, { hovered: false });
+              } catch {}
+            });
+            try { previewSelectedIds.clear(); } catch {}
+          }
+        } catch (err) { console.warn('manual clear failed', err); }
+      }
+
+      if (obj.zone) {
+        const sel = document.getElementById('zone-selector');
+        if (sel) {
+          sel.value = obj.zone;
+          sel.dispatchEvent(new Event('change'));
+          try { if (typeof onZoneChange === 'function') onZoneChange({ target: sel }); } catch (e) { /* ignore */ }
+        }
+        // set globals and local active zone used across code
+        try { window.currentZoneType = obj.zone; } catch {}
+        try { window.selectedZoneType = obj.zone; } catch {}
+        try { currentZoneType = obj.zone; } catch {}
+        try { activeZone = obj.zone; } catch {}
+
+        // update UI lists and indexes for the selected zone
+        try { populateDatalist(activeZone); } catch {}
+        try { populateLGDButtons(); } catch {}
+        try { ensureIndexFor(activeZone); } catch {}
+        try { syncPreviewVisibility(); } catch {}
+      }
+
+        const LGD_LOOKUP = {
+      "N09000001": "Antrim and Newtownabbey",
+      "N09000002": "Armagh City, Banbridge and Craigavon",
+      "N09000003": "Belfast",
+      "N09000004": "Causeway Coast and Glens",
+      "N09000005": "Derry City and Strabane",
+      "N09000006": "Fermanagh and Omagh",
+      "N09000007": "Lisburn and Castlereagh",
+      "N09000008": "Mid and East Antrim",
+      "N09000009": "Mid Ulster",
+      "N09000010": "Newry, Mourne and Down",
+      "N09000011": "Ards and North Down"
+    };
+      try { window.LGD_LOOKUP = LGD_LOOKUP; } catch (e) {}
+
+      // Safely add IDs (use existing helpers when available)
+      const safeAddById = (zone, id) => {
+        if (typeof addSelectById === 'function') {
+          try { addSelectById(zone, id); return; } catch (e) { /* fallthrough */ }
+        }
+        // fallback: manipulate selectedIds and feature state directly
+        const sidSet = (typeof selectedIds !== 'undefined') ? selectedIds : (window.selectedIds = window.selectedIds || new Set());
+        const { source, sourceLayer } = getZoneIdsFor(zone) || {};
+        const featureId = zone === 'lgd' ? (lgdNameToId.get(id) || id) : id;
+        try {
+          if (!sidSet.has(id)) sidSet.add(id);
+          if (map && source && sourceLayer && typeof map.setFeatureState === 'function') {
+            map.setFeatureState({ source, sourceLayer, id: featureId }, { hovered: true });
+          }
+        } catch (e) { /* ignore */ }
+      };
+
+      const safeAddByLGD = (zone, lgd) => {
+        if (typeof addSelectByLGD === 'function') {
+          try { addSelectByLGD(zone, lgd); return; } catch (e) { /* fallthrough */ }
+        }
+        const { source, sourceLayer } = getZoneIdsFor(zone) || {};
+
+        const normalizeLGDInput = (value) => {
+          if (!value) return null;
+          if (typeof value === 'object') {
+            if (value.name) return value.name;
+            if (value.lgdName) return value.lgdName;
+            if (value.label) return value.label;
+            return String(value.code || value.id || value.value || '').trim();
+          }
+          const str = String(value).trim();
+          const mappedName = (window.LGD_LOOKUP || {})[str];
+          return mappedName || str;
+        };
+
+        // If the zone is 'lgd', find the LGD feature by name and add by name.
+        if (zone === 'lgd') {
+          try {
+            const lgdName = normalizeLGDInput(lgd);
+            try { console.debug('safeAddByLGD: looking for LGD feature', lgdName); } catch (e) {}
+            const features = map.querySourceFeatures(source, { sourceLayer }) || [];
+            
+            const feature = features.find(f =>
+              f.properties?.LGDNAME === lgdName ||
+              f.properties?.LGD2014NAME === lgdName ||
+              f.properties?.lgd_name === lgdName ||
+              (window.LGD_LOOKUP && Object.entries(window.LGD_LOOKUP).find(([, name]) => name === lgdName)?.[0] && (
+                String(f.properties?.LGD_CODE) === Object.entries(window.LGD_LOOKUP).find(([, name]) => name === lgdName)?.[0] ||
+                String(f.properties?.lgd_code) === Object.entries(window.LGD_LOOKUP).find(([, name]) => name === lgdName)?.[0]
+              ))
+            );
+
+            if (feature) {
+              const featureId = feature.id;
+              try { console.debug('safeAddByLGD: found feature for', lgdName, 'id=', featureId); } catch (e) {}
+              const sidSet = (typeof selectedIds !== 'undefined') ? selectedIds : (window.selectedIds = window.selectedIds || new Set());
+              sidSet.add(lgdName);
+              lgdNameToId.set(lgdName, featureId);
+              try { selectedLGDs.add(lgdName); } catch (e) {}
+              try {
+                const checkboxId = `lgd-${String(lgdName).replace(/\s+/g, '-').toLowerCase()}`;
+                const cb = document.getElementById(checkboxId);
+                if (cb) {
+                  cb.checked = true;
+                  const lbl = document.querySelector(`label[for="${checkboxId}"]`);
+                  if (lbl) {
+                    lbl.classList.add('selected');
+                    lbl.setAttribute('aria-checked', 'true');
+                  }
+                }
+              } catch (e) {}
+              try { if (map && source && sourceLayer && typeof map.setFeatureState === 'function') map.setFeatureState({ source, sourceLayer, id: featureId }, { hovered: true }); } catch (e) { try { console.debug('safeAddByLGD: setFeatureState failed', e); } catch (e) {} }
+              return;
+            }
+          } catch (e) { /* fallthrough */ }
+        }
+
+        // Fallback for non-lgd zones: add all constituent area ids where record.LGD matches
+        const dataSrc = getDataSourceFor(zone) || {};
+        Object.entries(dataSrc).forEach(([id, rec]) => {
+          try {
+            if (rec?.LGD === lgd || rec?.lgd === lgd || rec?.LGDNAME === lgd) {
+              const sidSet = (typeof selectedIds !== 'undefined') ? selectedIds : (window.selectedIds = window.selectedIds || new Set());
+              if (!sidSet.has(id)) sidSet.add(id);
+              try { if (map && source && sourceLayer && typeof map.setFeatureState === 'function') map.setFeatureState({ source, sourceLayer, id }, { hovered: true }); } catch {}
+            }
+          } catch (e) {}
+        });
+
+        // Also try to highlight the LGD feature itself so the LGD fill appears even when current zone is not 'lgd'
+        try {
+          const lgdName = normalizeLGDInput(lgd);
+          selectedLGDs.add(lgdName);
+          // try map feature id from cache
+          let lgdFeatureId = lgdNameToId.get(lgdName);
+          if (!lgdFeatureId && map && typeof map.querySourceFeatures === 'function') {
+            const lgdIds = getZoneIdsFor('lgd');
+            const lgdFeatures = map.querySourceFeatures(lgdIds.source, { sourceLayer: lgdIds.sourceLayer }) || [];
+            const found = lgdFeatures.find(f =>
+              f.properties?.LGDNAME === lgdName || f.properties?.LGD2014NAME === lgdName || f.properties?.lgd_name === lgdName ||
+              (window.LGD_LOOKUP && Object.entries(window.LGD_LOOKUP).find(([, name]) => name === lgdName)?.[0] && (
+                String(f.properties?.LGD_CODE) === Object.entries(window.LGD_LOOKUP).find(([, name]) => name === lgdName)?.[0] ||
+                String(f.properties?.lgd_code) === Object.entries(window.LGD_LOOKUP).find(([, name]) => name === lgdName)?.[0]
+              ))
+            );
+            if (found) lgdFeatureId = found.id;
+          }
+
+          if (lgdFeatureId && map && typeof map.setFeatureState === 'function') {
+            const lgdIds = getZoneIdsFor('lgd');
+            map.setFeatureState({ source: lgdIds.source, sourceLayer: lgdIds.sourceLayer, id: lgdFeatureId }, { hovered: true });
+          }
+        } catch (e) { /* ignore */ }
+      };
+
+      const performAdds = () => {
+        try { console.debug('performAdds: effectiveZone=', effectiveZone); } catch (e) {}
+        if (Array.isArray(obj.ids)) {
+          obj.ids.forEach(id => safeAddById(effectiveZone, id));
+        }
+
+        if (Array.isArray(obj.lgds)) {
+          obj.lgds.forEach(lgd => safeAddByLGD(effectiveZone, lgd));
+        }
+      };
+
+      // If we're switching the UI to 'lgd', delay adding selections briefly
+      // so the zone change handlers can update layer visibility first.
+      const shouldDelayForZoneSwitch = obj.zone === 'lgd' && (typeof currentZoneType === 'undefined' || currentZoneType !== 'lgd');
+      if (shouldDelayForZoneSwitch) {
+  setTimeout(() => {
+
+    performAdds();
+
+    setTimeout(() => {
+      tryHighlightLGDs();
+    }, 1000);
+
+  }, 1000);
+} else {
+  performAdds();
+}
+
+setTimeout(() => {
+
+  const lgdIds = getZoneIdsFor('lgd');
+
+  if (!lgdIds) return;
+
+  const features = map.querySourceFeatures(
+    lgdIds.source,
+    { sourceLayer: lgdIds.sourceLayer }
+  ) || [];
+
+  features.forEach(f => {
+
+    if (f.properties?.lgd_name) {
+
+      lgdNameToId.set(
+        f.properties.lgd_name,
+        f.id
+      );
+
+    }
+
+  });
+
+  selectedLGDs.forEach(name => {
+
+    const featureId =
+      lgdNameToId.get(name);
+
+    if (featureId) {
+
+      map.setFeatureState(
+        {
+          source: lgdIds.source,
+          sourceLayer: lgdIds.sourceLayer,
+          id: featureId
+        },
+        {
+          hovered: true
+        }
+      );
+
+    }
+
+  });
+
+}, 1000);
+      if (obj.lastDrawnFeature) {
+        try {
+          if (typeof lastDrawnFeature !== 'undefined') {
+            lastDrawnFeature = obj.lastDrawnFeature;
+          }
+          try { window.lastDrawnFeature = obj.lastDrawnFeature; } catch {}
+          const src = map.getSource && map.getSource('draw-geom');
+          if (src && typeof src.setData === 'function') src.setData(obj.lastDrawnFeature);
+        } catch (e) { console.warn('Could not restore drawn feature', e); }
+      }
+
+      if (obj.title) {
+        const t = document.getElementById('areaProfileTitle'); if (t) t.textContent = obj.title;
+      }
+
+      // update UI - attempt after data/map settle if needed
+      const tryRefreshOutputs = (attempt = 0) => {
+        try {
+          const ds = getDataSourceFor(effectiveZone) || {};
+          const hasData = Object.keys(ds).length > 0;
+          if (hasData || attempt > 8) {
+            if (typeof refreshOutputs === 'function') refreshOutputs();
+            return;
+          }
+        } catch (e) { /* ignore */ }
+        setTimeout(() => tryRefreshOutputs(attempt + 1), 200);
+      };
+      tryRefreshOutputs();
+
+      // ensure LGD feature highlighting is applied after tiles/data load
+      const tryHighlightLGDs = (attempt = 0) => {
+        try {
+          if (!selectedLGDs || selectedLGDs.size === 0) return;
+          const lgdIds = getZoneIdsFor('lgd');
+          if (!map || typeof map.setFeatureState !== 'function' || !lgdIds) {
+            if (attempt > 6) return;
+            setTimeout(() => tryHighlightLGDs(attempt + 1), 300);
+            return;
+          }
+
+          selectedLGDs.forEach(name => {
+            try {
+              let fid = lgdNameToId.get(name);
+              if (!fid && typeof map.querySourceFeatures === 'function') {
+                const features = map.querySourceFeatures(lgdIds.source, { sourceLayer: lgdIds.sourceLayer }) || [];
+                const found = features.find(f =>
+                  f.properties?.LGDNAME === name || f.properties?.LGD2014NAME === name || f.properties?.lgd_name === name
+                );
+                if (found) fid = found.id;
+              }
+              if (fid) {
+                try { map.setFeatureState({ source: lgdIds.source, sourceLayer: lgdIds.sourceLayer, id: fid }, { hovered: true }); try { console.debug('tryHighlightLGDs: setFeatureState', { name, fid }); } catch (e) {} } catch (e) { try { console.debug('tryHighlightLGDs: setFeatureState failed', e); } catch (e) {} }
+              }
+            } catch (e) {}
+          });
+        } catch (e) {}
+      };
+      tryHighlightLGDs();
+
+      // Auto-zoom on import intentionally disabled.
+    } catch (e) {
+      console.error('applySelectionsObject error', e);
+    }
+  };
+
+  if (map && typeof map.once === 'function' && !map.loaded()) {
+    map.once('load', apply);
+  } else {
+    apply();
+  }
+}
+
+function handleImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const obj = JSON.parse(reader.result);
+      applySelectionsObject(obj);
+    } catch (e) {
+      console.error('Invalid selections file', e);
+      alert('Invalid selections file');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Wire up UI if present
+document.addEventListener('DOMContentLoaded', () => {
+  
+  const exp = document.getElementById('export-selections-btn');
+  if (exp) exp.addEventListener('click', (e) => { e.preventDefault(); exportSelections(); });
+
+  const imp = document.getElementById('import-selections-input');
+  if (imp) imp.addEventListener('change', (ev) => {
+    const f = ev.target.files && ev.target.files[0];
+    if (f) handleImportFile(f);
+    ev.target.value = '';
+  });
+});
 
 (() => {
   const toggleBtn = document.getElementById('sidebar-toggle');

@@ -36,19 +36,24 @@
           
       <div class="content-wrapper">
 
-      <nav class="navbar py-3" style="background-color:#00205b;">
-        <div class="container-fluid d-flex align-items-center">
+      <nav class="navbar p-0" style="background-color:#00205b;">
+        <div class="container-fluid d-flex flex-column align-items-stretch p-0">
+          <!-- Top strip (full width, no survey text on landing) -->
+          <div class="w-100" style="background-color:#3878c5; min-height: 31px; margin: 0 2px;"></div>
 
-          <!-- Logo (left) -->
-          <a class="navbar-brand ps-2 d-flex align-items-center me-auto" href="#">
-            <img src="img/nisra-logo-unstacked-white.svg" alt="NISRA logo" height="60" class="me-3">
-          </a>
+          <div class="d-flex align-items-center justify-content-between w-100 py-3 top-header-row">
+            <!-- Logo (left) -->
+            <a class="navbar-brand d-flex align-items-center" href="https://www.nisra.gov.uk/">
+              <img src="img/nisra-only-white.svg" alt="NISRA homepage" height="60" class="me-3">
+            </a>
 
-          <!-- Heading (right) -->
-          <h1 class="mb-0 pe-2 text-white fs-2 app-title ms-2">Custom Area Profiles</h1>
-
+            <!-- Heading (right) -->
+            <h1 class="mb-0 text-white fs-2 app-title">Custom Area Profiles</h1>
+          </div>
         </div>
       </nav>
+
+      <hr style="border-top: 10px solid #68a41e; margin: 0">
 
       <div class="profile-banner">
         <div class="container" style="max-width: 1270px;">
@@ -66,12 +71,12 @@
             <div class="col-md-6 text-center">
 
               <!-- Desktop -->
-              <img src="img/landing2.png" alt="Profile Builder Illustration"
+              <img src="img/landing3.png" alt="Profile Builder Illustration"
                   class="img-fluid d-none d-md-inline"
                   style="max-width: 90%;">
 
               <!-- Mobile -->
-              <img src="img/mobileLanding.png" alt="Profile Builder Illustration"
+              <img src="img/mobileLanding2.png" alt="Profile Builder Illustration"
                   class="img-fluid d-inline d-md-none"
                   style="max-width: 90%;">
 
@@ -84,7 +89,7 @@
 
       <div id="main-container">
 
-        <div class="container my-5">
+        <div class="container my-5" style="max-width: 1270px;">
           <h2 class="mb-4">How to use Custom Area Profiles</h2>
 
           <div class="row">
@@ -125,10 +130,44 @@
             </div>
           </div>
 
-          <div class="container my-5">
+          <div class="my-5">
             <h2 class="mb-4">Which datasets are available?</h2>
 
             <div class="accordion" id="zoneDatasetAccordion">
+
+            <!-- LGD panel -->
+              <div class="card">
+                  <div class="card-header" id="headingLGD">
+                    <h3 class="mb-0">
+                        <button class="daera-btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                        data-target="#collapseLGD" aria-expanded="false" aria-controls="collapseLGD">
+                        Local Government District (LGD)
+                      </button>
+                    </h3>
+                  </div>
+                  <div id="collapseLGD" class="collapse" aria-labelledby="headingLGD" data-parent="#zoneDatasetAccordion">
+                   <div class="card-body" id="dataset-lgd-container">
+                    <p>Loading LGD datasets...</p>
+                   </div>
+                 </div>
+              </div> 
+
+              <!-- DEA panel -->
+              <div class="card">
+                <div class="card-header" id="headingDEA">
+                  <h3 class="mb-0">
+                    <button class="daera-btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
+                      data-target="#collapseDEA" aria-expanded="false" aria-controls="collapseDEA">
+                      District Electoral Area (DEA)
+                    </button>
+                  </h3>
+                </div>
+                <div id="collapseDEA" class="collapse" aria-labelledby="headingDEA" data-parent="#zoneDatasetAccordion">
+                  <div class="card-body" id="dataset-dea-container">
+                    <p>Loading DEA datasets...</p>
+                  </div>
+                </div>
+              </div>
 
               <!-- SDZ panel -->
               <div class="card">
@@ -164,45 +203,10 @@
                 </div>
               </div>
 
-                            <!-- DEA panel -->
-              <div class="card">
-                <div class="card-header" id="headingDEA">
-                  <h3 class="mb-0">
-                    <button class="daera-btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
-                      data-target="#collapseDEA" aria-expanded="false" aria-controls="collapseDEA">
-                      District Electoral Area (DEA)
-                    </button>
-                  </h3>
-                </div>
-                <div id="collapseDEA" class="collapse" aria-labelledby="headingDEA" data-parent="#zoneDatasetAccordion">
-                  <div class="card-body" id="dataset-dea-container">
-                    <p>Loading DEA datasets...</p>
-                  </div>
-                </div>
-              </div>
-
-                            <!-- LGD panel -->
-                            <div class="card">
-                              <div class="card-header" id="headingLGD">
-                                <h3 class="mb-0">
-                                  <button class="daera-btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse"
-                                    data-target="#collapseLGD" aria-expanded="false" aria-controls="collapseLGD">
-                                    Local Government District (LGD)
-                                  </button>
-                                </h3>
-                              </div>
-                              <div id="collapseLGD" class="collapse" aria-labelledby="headingLGD" data-parent="#zoneDatasetAccordion">
-                                <div class="card-body" id="dataset-lgd-container">
-                                  <p>Loading LGD datasets...</p>
-                                </div>
-                              </div>
-                            </div>
-
-
             </div>
           </div>
 
-          <div class="container my-5">
+          <div class="my-5">
             <h2 class="mb-4">Functionality Overview</h2>
             <div class="card shadow-sm">
               <div class="card-body">
@@ -233,13 +237,13 @@
                 <div class="col-md-5 text-center">
 
                   <!-- Desktop -->
-                  <img src="img/sidebar2.png"
+                  <img src="img/sidebar3.png"
                       alt="Map interface sidebar controls"
                       class="img-fluid d-none d-md-inline"
                       style="max-height: 350px;">
 
                   <!-- Mobile -->
-                   <img src="img/mobileViewSidebar.png"
+                   <img src="img/mobileViewSidebar2.png"
                       alt="Map interface sidebar controls"
                       class="img-fluid d-inline d-md-none"
                       style="max-height: 350px;">
@@ -291,13 +295,13 @@
 
                   <!-- RIGHT: IMAGE -->
                   <!-- Desktop -->
-                  <img src="img/mapcontrols.png"
+                  <img src="img/mapcontrols2.png"
                       alt="Map interface sidebar controls"
                       class="img-fluid d-none d-md-inline"
                       style="max-height: 350px;">
 
                   <!-- Mobile -->
-                   <img src="img/ClearSelectionsOnly.png"
+                   <img src="img/ClearSelectionsOnly2.png"
                       alt="Map interface sidebar controls"
                       class="img-fluid d-block d-md-none mx-auto"
                       style="max-height: 350px;">
@@ -402,7 +406,7 @@
 
                 <!-- RIGHT: IMAGE -->
                 <div class="col-md-5 text-center">
-                  <img src="img/download2.png" alt="Download options" class="img-fluid" style="max-height: 400px;">
+                  <img src="img/download3.png" alt="Download options" class="img-fluid" style="max-height: 400px;">
                 </div>
               </div>
 
@@ -508,7 +512,7 @@ async function loadDatasetButtons(containerId, zoneType) {
       sdz: 'SDZ21',
       dz:  'DZ21',
       dea: 'DEA14',
-      lgd: 'LGD21'
+      lgd: 'LGD14'
     };
 
     const ftbGeo = ftbGeoCodeByZoneType[zoneType];
@@ -541,6 +545,26 @@ async function loadDatasetButtons(containerId, zoneType) {
         } else if ((normLbl === "age (mye)" || normLbl === "sex (mye)") && zoneType === "lgd") {
           // use the code from the lookup where available
           if (code) fullUrl = `https://data.nisra.gov.uk/table/${code}`;
+        } else if (normLbl === "all crimes recorded by the police" && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/PRCDEA";
+        } else if (normLbl === "all crimes recorded by the police" && zoneType === "lgd") {
+          fullUrl = "https://data.nisra.gov.uk/table/PRCLGD";
+        } else if (normLbl === "number of businesses" && zoneType === "lgd") {
+          fullUrl = "https://data.nisra.gov.uk/table/BUSINESSBIGLGD";
+        } else if (normLbl === "employee jobs" && zoneType === "lgd") {
+          fullUrl = "https://data.nisra.gov.uk/table/EJOBSLGD";
+        } else if (normLbl === "school census - primary" && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/DESCPDEA";
+        } else if (normLbl === "school census - primary" && zoneType === "lgd") {
+          fullUrl = "https://data.nisra.gov.uk/table/DESCPLGD";
+        } else if (normLbl === "school census - post-primary" && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/DESCPPDEA";
+        } else if (normLbl === "school census - post-primary" && zoneType === "lgd") {
+          fullUrl = "https://data.nisra.gov.uk/table/DESCPPLGD";
+        } else if (normLbl === "school census - special schools" && zoneType === "dea") {
+          fullUrl = "https://data.nisra.gov.uk/table/DESCSDEA";
+        } else if (normLbl === "school census - special schools" && zoneType === "lgd") {
+          fullUrl = "https://data.nisra.gov.uk/table/DESCSLGD";
         }
       }
 
