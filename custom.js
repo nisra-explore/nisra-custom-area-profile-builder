@@ -1479,6 +1479,7 @@ function updateSummaryPreview() {
     updateSummaryPreview();
     ensureSummaryHero(); // <-- Add this here
 
+    
   }
   // Make available globally so import routines can trigger UI updates
   try { window.refreshOutputs = refreshOutputs; } catch (e) { /* ignore */ }
@@ -3660,7 +3661,7 @@ console.log("latestAggregatedData", latestAggregatedData)
 
     const availableKeys = Object.keys(aggregatedData);
     const validCategories = selectedCategories.filter(cat => availableKeys.includes(cat));
-console.log("availableKeys", availableKeys);
+
     updateCategorySelector(availableKeys);
     updateSourceLink();
 
@@ -3721,7 +3722,7 @@ console.log("availableKeys", availableKeys);
     const isSameSelection = currentSelectionHash === window.lastSelectionHash;
     window.lastSelectionHash = currentSelectionHash;
 
-    if (!isSameSelection) {
+    if (!isSameSelection && !window.isImportingSelections) {
       window.areaProfileTitle = undefined;
     }
 
@@ -6849,9 +6850,16 @@ setTimeout(() => {
         } catch (e) { console.warn('Could not restore drawn feature', e); }
       }
 
-      if (obj.title) {
-        const t = document.getElementById('areaProfileTitle'); if (t) t.textContent = obj.title;
-      }
+if (obj.title) {
+  window.areaProfileTitle = obj.title;
+window.isImportingSelections = true;
+  const t = document.getElementById('areaProfileTitle');
+  if (t) {
+    t.textContent = obj.title;
+  }
+  console.log("Imported title:", obj.title);
+
+}
 
       // update UI - attempt after data/map settle if needed
       const tryRefreshOutputs = (attempt = 0) => {
