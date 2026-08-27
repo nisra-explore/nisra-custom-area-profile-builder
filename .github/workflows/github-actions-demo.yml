@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add -f data/"Exchange Rates for NIPS.xlsx"
+          git add -f "data.json"
           git commit -m "Update exchange rates $(date +'%Y-%m')" || echo "No changes"
           git push
 
