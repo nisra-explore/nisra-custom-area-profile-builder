@@ -1,10 +1,12 @@
 name: Update Exchange Rates
 
+permissions:
+  contents: write
+
 on:
   schedule:
     - cron: "0 6 1 * *"
-      timezone: "Europe/London"
-  workflow_dispatch:       
+  workflow_dispatch:
 
 jobs:
   update-rates:
@@ -13,6 +15,19 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Initial diagnostics
+        run: |
+          echo "Current directory:"
+          pwd
+
+          echo ""
+          echo "Repository contents:"
+          ls -la
+
+          echo ""
+          echo "Git status:"
+          git status
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
@@ -25,21 +40,73 @@ jobs:
             libssl-dev \
             libxml2-dev
 
-
       - name: Install R packages
         run: |
-          Rscript -e "install.packages(c('dplyr', 'openxlsx', 'readxl','rjson','jsonlite','janitor','gtools','httr','stringr','readr','tidyr','tibble','purrr'))"
+          Rscript -e "install.packages(c(
+            'dplyr',
+            'openxlsx',
+            'readxl',
+            'rjson',
+            'jsonlite',
+            'janitor',
+            'gtools',
+            'httr',
+            'stringr',
+            'readr',
+            'tidyr',
+            'tibble',
+            'purrr'
+          ))"
 
+      - name: Verify scripts exist
+        run: |
+          echo "Checking scripts..."
+          ls -la create-js/
 
       - name: Run script
-        run: Rscript create-js/create_data.R
+        run: |
+          Rscript create-js/create_data.R
 
-      - name: Commit updated Excel file
+      - name: Verify output files
+        run: |
+          echo "JSON files:"
+          find . -name "*.json"
+
+          echo ""
+          echo "Excel files:"
+          find . -name "*.xlsx"
+
+          echo ""
+          echo "Git status after script:"
+          git status
+
+      - name: Show Excel file details
+        run: |
+          if [ -f "data/Exchange Rates for NIPS.xlsx" ]; then
+            echo "Excel file exists"
+            ls -lh "data.json"
+
+            echo ""
+            echo "Git diff for file:"
+            git diff --stat
+          else
+            echo "ERROR: Excel file not found"
+          fi
+
+      - name: Commit updated files
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add -f "data.json"
-          git commit -m "Update exchange rates $(date +'%Y-%m')" || echo "No changes"
+
+          echo "Status before commit:"
+          git status
+
+          git add -A
+
+          git status
+
+          git commit -m "Update exchange rates $(date +'%Y-%m')" || echo "No changes to commit"
+
           git push
 
       - name: Notify on failure
@@ -47,4 +114,3 @@ jobs:
         run: |
           echo "❌ Exchange rate update FAILED"
           echo "Check logs in GitHub Actions"
- 
