@@ -82,7 +82,7 @@ jobs:
 
       - name: Show Excel file details
         run: |
-          if [ -f "data/Exchange Rates for NIPS.xlsx" ]; then
+          if [ -f "data.json" ]; then
             echo "Excel file exists"
             ls -lh "data.json"
 
