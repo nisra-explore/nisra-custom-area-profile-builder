@@ -5,7 +5,7 @@ permissions:
 
 on:
   schedule:
-    - cron: "0 6 * * 5"
+    - cron: "0 12 * * 4"
   workflow_dispatch:
 
 jobs:
@@ -83,14 +83,14 @@ jobs:
       - name: Show Excel file details
         run: |
           if [ -f "data.json" ]; then
-            echo "Excel file exists"
+            echo "json file exists"
             ls -lh "data.json"
 
             echo ""
             echo "Git diff for file:"
             git diff --stat
           else
-            echo "ERROR: Excel file not found"
+            echo "ERROR: json file not found"
           fi
 
       - name: Commit updated files
@@ -105,13 +105,13 @@ jobs:
 
           git status
 
-          git commit -m "Update exchange rates $(date +'%Y-%m')" || echo "No changes to commit"
+          git commit -m "Update data $(date +'%Y-%m')" || echo "No changes to commit"
 
           git push
 
       - name: Notify on failure
         if: failure()
         run: |
-          echo "❌ Exchange rate update FAILED"
+          echo "❌ Data update FAILED"
           echo "Check logs in GitHub Actions"
  
